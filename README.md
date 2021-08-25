@@ -23,7 +23,7 @@ lbrack1.github.io/img/client_logo3.png
 
 **Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
+[Link](lbrack1.github.io/img/works/8.jpg) and ![Image](src)
 ```
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
