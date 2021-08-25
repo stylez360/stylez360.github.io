@@ -1,4 +1,5 @@
-## Welcome to stylez360
+## Welcome to Stylez360
+
 
 You can use the [editor on GitHub](https://github.com/stylez360/stylez360.github.io/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
 
