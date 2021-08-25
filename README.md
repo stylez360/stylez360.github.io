@@ -1,5 +1,9 @@
 ## Welcome to Stylez360
 
+git add .
+git commit -m "Adding basic website template"
+git push
+
 @@ -0,0 +1,85 @@
 /*
    Animation example, for spinners
