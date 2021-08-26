@@ -1,4 +1,23 @@
 <html lang="en">
+  <!DOCTYPE html>
+<html>
+  <head>
+    <title>Title of the document</title>
+    <style>
+      div {
+        height:2000px;
+        width:1000px;
+        background: red;
+        background-image: url("/build/images/emojin-01.svg");/* fallback */
+        background-image: url("/build/images/emojin-01.svg"), linear-gradient(lightgreen, lightblue);
+        background-size: 500%;
+      }
+    </style>
+  </head>
+  <body>
+    <div></div>
+  </body>
+</html>
 <!DOCTYPE html>
 <html>
   <head>
