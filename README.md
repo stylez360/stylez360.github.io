@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<HTML>
-<HEAD>
-<TITLE>HTML8</TITLE>
-</HEAD>
-<BODY>
-<P ALIGN="center"><"</P>
+
 </BODY>
 </HTML>
 If you want to embed images, this is how you do it:
