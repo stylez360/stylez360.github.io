@@ -1,6 +1,6 @@
 
 
-</head>
+
 ##                   Welcome To Stylez360 ##
 
  <meta charset="utf-8">
