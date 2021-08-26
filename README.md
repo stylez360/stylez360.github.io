@@ -1,6 +1,6 @@
 
-</BODY>
-</HTML>
+![GitHub Logo](/images/logo.png)
+Format: ![Alt Text](url)
 If you want to embed images, this is how you do it:
 
 ![Image](https://github.com/stylez360/stylez360.github.io/blob/main/https://raw.githubusercontent.com/stylez360/stylez360.github.io/main/ballet-one-page-free-web-template/img/portfolio_pic3.jpg)
