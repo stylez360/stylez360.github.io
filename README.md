@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <HTML>
 <HEAD>
-<TITLE>CSSimplified.com HTML8</TITLE>
+<TITLE>client_logo1.png HTML8</TITLE>
 </HEAD>
 <BODY>
 <P ALIGN="center"><IMG BORDER="0" WIDTH="600" HEIGHT="200" SRC="logo.jpg"</P>
