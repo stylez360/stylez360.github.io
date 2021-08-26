@@ -1,5 +1,5 @@
 <html lang="en">
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Title of the document</title>
@@ -17,18 +17,6 @@
   <body>
     <div></div>
   </body>
-</html>
-
-<html>
-  <head>
-    <title>Title of the document </title>
-    <style>
-      body {
-        background-color: #1c87c9;
-      }
-    </style>
-  </head>
-  <body></body>
 </html>
 </html>
 </html>
