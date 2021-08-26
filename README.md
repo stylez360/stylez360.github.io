@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <HTML>
 <HEAD>
-<TITLE>https://raw.githubusercontent.com/stylez360/stylez360.github.io/main/ballet-one-page-free-web-template/img/portfolio_pic3.jpg HTML8</TITLE>
+<TITLE>HTML8</TITLE>
 </HEAD>
 <BODY>
-<P ALIGN="center"><IMG BORDER="0" WIDTH="600" HEIGHT="200" SRC="https://raw.githubusercontent.com/stylez360/stylez360.github.io/main/ballet-one-page-free-web-template/img/portfolio_pic3.jpg"</P>
+<P ALIGN="center"><"</P>
 </BODY>
 </HTML>
+If you want to embed images, this is how you do it:
 
+![Image](https://github.com/stylez360/stylez360.github.io/blob/main/ballet-one-page-free-web-template/img/portfolio_pic3.jpg/portfolio_pic3.jpg)
 #                     Welcome To Stylez360
 
 
