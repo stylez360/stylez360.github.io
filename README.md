@@ -1,9 +1,14 @@
+<head>
 
-![GitHub Logo](/images/logo.png)
-Format: ![Alt Text](url)
-If you want to embed images, this is how you do it:
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-![Image](https://github.com/stylez360/stylez360.github.io/blob/main/https://raw.githubusercontent.com/stylez360/stylez360.github.io/main/ballet-one-page-free-web-template/img/portfolio_pic3.jpg)
+  <title>Creative - Start Bootstrap Theme</title>
+
+  <! – Theme CSS - Includes Bootstrap – >
+  <link href="https://github.com/stylez360/stylez360.github.io/blob/main/ballet-one-page-free-web-template/css/animate.css" rel="stylesheet">
+
+</head>
 #                     Welcome To Stylez360
 
 
