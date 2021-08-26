@@ -3,4 +3,4 @@
 
 <h1>
   Welcome to Stylez360
-  git image (https://github.com/stylez360/stylez360.github.io/blob/3f57e76f9f22131239929587894ba8881fe19cb8/ballet-one-page-free-web-template/img/portfolio_pic7.jpg/images/portfolio_pic7.jpg)
+   (stylez360.github.io/ballet-one-page-free-web-template/img/portfolio_pic7.jpg)
