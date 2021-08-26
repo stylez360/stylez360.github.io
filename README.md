@@ -10,6 +10,26 @@
     </style>
   </head>
   <body></body>
+  <html>
+  <head>
+    <title>Title of the document</title>
+    <style>
+      body {
+        background-color: #e6ebef;
+      }
+      h2 {
+        background-color: #8ebf42;
+      }
+      p {
+        background-color: #1c87c9;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Some heading with green background.</h2>
+    <p>Some paragraph with blue background.</p>
+  </body>
+</html>
 </html>
     <head>
         <meta charset="utf-8" />
