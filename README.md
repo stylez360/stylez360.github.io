@@ -5,7 +5,7 @@
 
   <title>Creative - Start Bootstrap Theme</title>
 
-  <! – Theme CSS - Includes Bootstrap – >
+  
   <link href="https://github.com/stylez360/stylez360.github.io/blob/main/ballet-one-page-free-web-template/css/animate.css" rel="stylesheet">
 
 </head>
