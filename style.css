@@ -313,11 +313,11 @@ nav .profile-details img{
 
 /* Right box */
 .home-content .sales-boxes .top-sales{
-  width: 35%;
+  width: 25%;
   background: #fff;
-  padding: 20px 30px;
-  margin: 0 20px 0 0;
-  border-radius: 12px;
+  padding: 15px 14px;
+  margin: 50px 10px;
+  border-radius: 15px;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 .sales-boxes .top-sales li{
