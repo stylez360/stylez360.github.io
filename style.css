@@ -158,7 +158,7 @@ nav .search-box .bx-search{
 nav .profile-details img{
   height: 40px;
   width: 40px;
-  border-radius: 12px;
+  border-radius: 32px;
   object-fit: cover;
 }
 nav .profile-details .admin_name{
@@ -168,7 +168,7 @@ nav .profile-details .admin_name{
   margin: 0 10px;
   white-space: nowrap;
 }
-nav .profile-details i{
+nav .profile-details img{
   font-size: 25px;
   color: #333;
 }
