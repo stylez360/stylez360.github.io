@@ -413,3 +413,17 @@ nav .profile-details img{
     display: none;
   }
 }
+.container .con{
+   background-color: lightgrey;
+  width: 150px;
+  height: 225px;
+  border: 15px solid green;
+  padding: 60px;
+  margin: 20px;
+}
+</style>
+</head>
+<body>
+
+</html>
+
