@@ -1,3 +1,7 @@
+/* Body of form */
+body (
+ left-margin: 25px;
+
 /* Bordered form */
 form {
   border: 56px solid #f1f1f1;
