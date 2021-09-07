@@ -1,6 +1,7 @@
 /* Bordered form */
 form {
   border: 56px solid #f1f1f1;
+  margin-left: 15px;
 }
 
 /* Full-width inputs */
