@@ -1,6 +1,6 @@
-  =>  Template Name    : WATCH - Product Landing Page
+  =>  Template Name    : NEWS - Bootstrap News Template
 
-  =>  Template Link    : https://htmlcodex.com/product-landing-page
+  =>  Template Link    : https://htmlcodex.com/bootstrap-news-template
 
   =>  Template License : https://htmlcodex.com/license (or read the LICENSE.txt file)
 
