@@ -68,7 +68,7 @@
   white-space: nowrap;
 }
 .sidebar .nav-links .log_out{
-  position: absolute;
+  position: relative;
   bottom: 0;
   width: 100%;
 }
