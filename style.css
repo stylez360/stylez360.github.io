@@ -69,7 +69,7 @@
 }
 .sidebar .nav-links .log_out{
   position: relative;
-  bottom: relative;
+  bottom: 0;
   width: 100%;
 }
 .home-section{
