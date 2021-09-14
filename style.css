@@ -7,7 +7,7 @@
   font-family: 'Poppins', sans-serif;
 }
 .sidebar{
-  position: flex;
+  position: fixed;
   height: 20%;
   width: 240px;
   background: #0A2558;
