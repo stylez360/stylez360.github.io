@@ -424,7 +424,7 @@ nav .profile-details img{
 <style>
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  max-width: 300px;
+  max-width: 25px;
   margin: auto;
   text-align: center;
   font-family: arial;
@@ -443,7 +443,7 @@ nav .profile-details img{
   background-color: #000;
   text-align: center;
   cursor: pointer;
-  width: 100%;
+  width: 25%;
   font-size: 18px;
 }
 
