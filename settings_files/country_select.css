@@ -1,0 +1,72 @@
+﻿
+#country_select_container{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.country_select_section_main{
+    overflow: hidden;
+    padding: 2px;
+    margin-bottom: 10px;
+}
+
+.country_select_main_toggle{
+    float: left;
+    margin-right: 5px;
+    border-radius: 2px;
+    border: 1px solid #bbb;
+    background-color: #F5f5f7;
+    width: 15px;
+    text-align: center;
+    height: 15px;
+    line-height: 15px;
+    font-size: 0.7rem;
+    margin-top: -1px;
+    cursor: pointer;
+}
+
+.input_container_country_select_main{
+    margin-bottom: 0;
+    float: left;
+    min-width: 150px;
+}
+
+.country_select_section_inner{
+    margin-left: 20px;
+    margin-top: 10px;
+    display: none;
+}
+
+.country_select_section_inner .checkbox_container{
+    margin-bottom: 10px;
+}
+
+.country_select_section_inner .checkbox_container label:after{
+    top: 0;
+    left: 0;
+}
+
+.country_select_section_inner label{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.country_select_textbox{
+
+}
+
+.country_select_textbox{
+    display: inline-block;
+    margin-right: 20px;
+    width: 150px;
+    float: left;
+}
+
+.country_select_textbox .input_container input{
+    width: 100%;
+    max-width: 100px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0px 10px;
+}
