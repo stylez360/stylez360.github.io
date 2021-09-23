@@ -1,0 +1,67 @@
+﻿
+#modal_questionnaire_container2, #modal_questionnaire_container3{
+    display: none;
+}
+
+#modal_questionnaire_inner{
+    border: 1px solid #ddd;
+    padding: 20px;
+    background-color: #f5f5f7;
+}
+
+.modal_questionnaire_question{
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.modal_questionnaire_question:last-child{
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.modal_questionnaire_question .input_container label{
+    font-weight: normal;
+}
+
+.modal_questionnaire_question .inline_checkboxes  .checkbox_container{
+    min-width: 100px;
+}
+
+.modal_questionnaire_title{
+    font-weight: bold;
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: -2px;
+}
+
+.modal_questionnaire_title_number{
+    margin-right: 5px;
+    height: 17px;
+    line-height: 15px;
+    text-align: center;
+    width: 17px;
+    border-radius: 4px;
+    background-color: #212121;
+}
+
+.modal_questionnaire_title_text{
+    width: calc(100% - 30px);
+    line-height: 17px;
+    position: relative;
+}
+
+.modal_questionnaire_title_required{
+    position: absolute;
+    font-size: 1rem;
+}
+
+.modal_questionnaire_question_textarea_container{
+    display: none;
+    margin-top: 20px;
+}
+
+.input_container.modal_questionnaire_question_textarea_container label{
+    font-weight: bold !important;
+}
