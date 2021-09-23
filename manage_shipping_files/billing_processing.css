@@ -1,0 +1,54 @@
+﻿
+.busy_wait_billingv2_processing, .busy_wait_billingv2_processing_registration_form{
+    display: block;
+}
+
+
+#modal_billingv2_processing_case1a_complete, #modal_billingv2_processing_case1a_error, #modal_billingv2_processing_case1a_error_card, #modal_billingv2_processing_case1a_error_invoice,
+#modal_billingv2_processing_case1a_error_card_message,
+#modal_billingv2_processing_case2_success, #modal_billingv2_processing_case2_error, #modal_billingv2_processing_case2_error_message,
+#modal_billingv2_processing_case3_success, #modal_billingv2_processing_case3_error, #modal_billingv2_processing_case3_error_message, #modal_billingv2_processing_case3_success_step2,
+#modal_billingv2_processing_case3_success_step2_error, #modal_billingv2_processing_case3_success_step2_error_message, #modal_billingv2_processing_case3_success_step3,
+#modal_billingv2_processing_case3_success_step3_pending, #modal_billingv2_processing_case3_success_step2_help, #modal_billingv2_processing_case3_success_step2_help_sent,
+#modal_billingv2_processing_case4a_success, #modal_billingv2_processing_case4a_error, #modal_billingv2_processing_case4a_error_message, #modal_billingv2_processing_case4a_success_gotoapp_button,
+#modal_billingv2_processing_case5_complete, #modal_billingv2_processing_case5_error,
+#modal_billingv2_processing_case6_complete, #modal_billingv2_processing_case6_error, #modal_billingv2_processing_case6_error_message,
+#modal_billingv2_processing_case7_success, #modal_billingv2_processing_case7_error, #modal_billingv2_processing_case7_error_message,
+#modal_billingv2_processing_case8_success, #modal_billingv2_processing_case8_error, #modal_billingv2_processing_case8_error_message,
+#modal_billingv2_processing_case9_success, #modal_billingv2_processing_case9_error, #modal_billingv2_processing_case9_error_message {
+    display: none;
+}
+
+.modal_billingv2_processing_error_general_info{
+    border: 1px dashed #ddd;
+    background-color: #f5f5f7;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+#modal_billingv2_processing_case3_success_step1{
+    border-bottom: 1px dashed #ddd;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+}
+
+#modal_billingv2_processing_case3_success_step2_warning{
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+#modal_billingv2_processing_case3_success_step2_form{
+    margin-top: 40px;
+    text-align: left;
+}
+
+#modal_billingv2_processing_footer{
+    display: none;
+}
+
+.modal_buyDomainAddress_telephone_example{
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 1rem;
+    color: #EA1686;
+}
