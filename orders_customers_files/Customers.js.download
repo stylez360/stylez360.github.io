@@ -1,0 +1,562 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "ORDERS-CUSTOMERS", uuid: beaverGuid });
+$(document).ready(function () {
+    $("input[name='customer_list_type_item']").click(function () {
+
+        var checkboxWhat = $(this).attr("id");
+
+        if ($(this).is(":checked")) {
+
+            if (checkboxWhat === "customer_list_type_item1") {
+                $(".table_header_titles_image, .list_table_image").removeClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_image_' + storeId + '', true);
+            } else if (checkboxWhat === "customer_list_type_item2") {
+                $(".table_header_titles_type, .list_table_type").removeClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_type_' + storeId + '', true);
+            } else if (checkboxWhat === "customer_list_type_item5") {
+                $(".table_header_titles_created, .list_table_created").removeClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_created_' + storeId + '', true);
+            } else if (checkboxWhat === "customer_list_type_item6") {
+                $(".table_header_titles_orders, .list_table_orders").removeClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_orders_' + storeId + '', true);
+            }  else {
+                $(".table_header_titles_revenue, .list_table_revenue").removeClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_revenue_' + storeId + '', true);
+            }
+
+        } else {
+
+            if (checkboxWhat === "customer_list_type_item1") {
+                $(".table_header_titles_image, .list_table_image").addClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_image_' + storeId + '', false);
+            } else if (checkboxWhat === "customer_list_type_item2") {
+                $(".table_header_titles_type, .list_table_type").addClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_type_' + storeId + '', false);
+            } else if (checkboxWhat === "customer_list_type_item5") {
+                $(".table_header_titles_created, .list_table_created").addClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_created_' + storeId + '', false);
+            } else if (checkboxWhat === "customer_list_type_item6") {
+                $(".table_header_titles_orders, .list_table_orders").addClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_orders_' + storeId + '', false);
+            } else {
+                $(".table_header_titles_revenue, .list_table_revenue").addClass("list_table_hidden");
+                Cookies.set('fwsCustomersFilter_revenue_' + storeId + '', false);
+            }
+
+        }
+
+    });   
+    
+    $("#dlSort").change(function () {
+        var cookieSort = $(this).val();
+        Cookies.set('fwsCustomersSort_'+storeId+'', cookieSort);
+        startpg = 0;
+        Cookies.set('fwsCustomersPageNum_' + storeId + '', startpg);
+        getCustomers();
+    });
+
+    $("#dlSize").change(function () {
+        var cookieSize = $(this).val();
+        Cookies.set('fwsCustomersSize_' + storeId + '', cookieSize);
+        startpg = 0;
+        Cookies.set('fwsCustomersPageNum_' + storeId + '', startpg);
+        getCustomers();
+    });
+
+    // Cookie Page Num
+    var cookieGetCustomersPageNum = Cookies.get('fwsCustomersPageNum_' + storeId);
+    if (cookieGetCustomersPageNum != null) { startpg = cookieGetCustomersPageNum }
+
+    // Cookie Sort
+    var cookieGetCustomersSort = Cookies.get('fwsCustomersSort_'+storeId);
+    if (cookieGetCustomersSort != null) { $("#dlSort").val(cookieGetCustomersSort); }
+
+    // Cookie Size
+    var cookieGetCustomersSize = Cookies.get('fwsCustomersSize_' + storeId);
+    if (cookieGetCustomersSize != null) { $("#dlSize").val(cookieGetCustomersSize); }
+
+    // Cookie Filters
+    // Filter - Image
+    var cookieGetCustomersFiltersImage = Cookies.get('fwsCustomersFilter_image_' + storeId);
+    if (cookieGetCustomersFiltersImage != null) {
+        if (cookieGetCustomersFiltersImage == "true") {
+            $(".table_header_titles_image, .list_table_image").removeClass("list_table_hidden");
+            $("#customer_list_type_item1").prop("checked", true);
+        } else {
+            $(".table_header_titles_image, .list_table_image").addClass("list_table_hidden");
+            $("#customer_list_type_item1").prop("checked", false);
+        }
+    }
+    // Filter - type
+    var cookieGetCustomersFiltersType = Cookies.get('fwsCustomersFilter_type_' + storeId);
+    if (cookieGetCustomersFiltersType != null) {
+        if (cookieGetCustomersFiltersType == "true") {
+            $(".table_header_titles_type, .list_table_type").removeClass("list_table_hidden");
+            $("#customer_list_type_item2").prop("checked", true);
+        } else {
+            $(".table_header_titles_type, .list_table_type").addClass("list_table_hidden");
+            $("#customer_list_type_item2").prop("checked", false);
+        }
+    }
+
+
+    // Filter - created
+    var cookieGetCustomersFiltersCreated = Cookies.get('fwsCustomersFilter_created_' + storeId);
+    if (cookieGetCustomersFiltersCreated != null) {
+        if (cookieGetCustomersFiltersCreated == "true") {
+            $(".table_header_titles_created, .list_table_created").removeClass("list_table_hidden");
+            $("#customer_list_type_item5").prop("checked", true);
+        } else {
+            $(".table_header_titles_created, .list_table_created").addClass("list_table_hidden");
+            $("#customer_list_type_item5").prop("checked", false);
+        }
+    }
+    // Filter - orders
+    var cookieGetCustomersFiltersOrders = Cookies.get('fwsCustomersFilter_orders_' + storeId);
+    if (cookieGetCustomersFiltersOrders != null) {
+        if (cookieGetCustomersFiltersOrders == "true") {
+            $(".table_header_titles_orders, .list_table_orders").removeClass("list_table_hidden");
+            $("#customer_list_type_item6").prop("checked", true);
+        } else {
+            $(".table_header_titles_orders, .list_table_orders").addClass("list_table_hidden");
+            $("#customer_list_type_item6").prop("checked", false);
+        }
+    }
+    // Filter - revenue
+    var cookieGetCustomersFiltersRevenue = Cookies.get('fwsCustomersFilter_revenue_' + storeId);
+    if (cookieGetCustomersFiltersRevenue != null) {
+        if (cookieGetCustomersFiltersRevenue == "true") {
+            $(".table_header_titles_revenue, .list_table_revenue").removeClass("list_table_hidden");
+            $("#customer_list_type_item7").prop("checked", true);
+        } else {
+            $(".table_header_titles_revenue, .list_table_revenue").addClass("list_table_hidden");
+            $("#customer_list_type_item7").prop("checked", false);
+        }
+    }
+
+    getCustomers();        
+});
+
+var customers;
+var paginationTotalItems;
+var paginationPageItems;
+var paginationPageStart;
+var paginationShowAll;
+var store = 0;
+var tableRowDeleteArray = new Array();
+
+function getCustomers() {
+
+    //console.log('getCustomers. Get: ' + $('#dlSize').val()+' records starting at:' + startpg);
+    tableRowDeleteArray = new Array();
+    $(".busy_wait_customers").show();
+    $("#customers_table").hide();
+
+    hideById("customers_top_search_bar", "customers_filters_outer_panel");
+
+    axiosGet("/services/Customers.svc/getCustomers?storeId=" + storeId + "&sort=" + $('#dlSort').val() + "&limit=" + $('#dlSize').val() + "&offset=" + startpg).then(function (data) {
+        var customerList = data.d || data;
+        customers = customerList.customers;
+        paginationTotalItems = customerList.count;
+        paginationDataFound = customerList.count;
+
+        if (customers.length > 0) {
+            buildCustomers(customers, startpg);
+            $("#customers_table").show();
+            showById("customers_top_search_bar");
+            showById("customers_filters_outer_panel");
+        } else {
+            $("#customers_filters_outer_panel, #customers_search_panel, .manage_customers_list_top, #customers_table, .quicksearch_results_container").hide();
+            $(".zero_customers_found").show();
+            hideByClass("pagination");
+        }
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        $(".busy_wait_customers, .busy_wait_customers_filters").hide();
+        $("#customers_filters_panel").show();
+    });
+}
+
+function buildCustomers(customers, startpg) {
+    console.log(customers);
+    $("#customers_table tbody tr").remove();
+    if (customers.length > 0) {
+        $.each(customers, function (i) {
+            if (this.account_type === 1) {
+                var accountType = "Account";
+            } else {
+                var accountType = "Guest";
+            }
+            var accountName = this.forename + " " + this.surname;
+            if (this.forename === "" || this.surname === "") {
+                accountName = this.email;
+            }
+            
+
+            if ($("#customer_list_type_item2").is(":checked")) {
+                var account_container = '<td class="list_table_type">' + accountType + '</td>'
+            } else {
+                var account_container = '<td class="list_table_type list_table_hidden">' + accountType + '</td>'
+            }
+
+            if ($("#customer_list_type_item5").is(":checked")) {
+                var created_container = '<td class="list_table_created">' + GetDateString(this.timestamp) + '</td>'
+            } else {
+                var created_container = '<td class="list_table_created list_table_hidden">' + GetDateString(this.timestamp) + '</td>'
+            }
+
+            var totalOrderCount = this.total_order_count;
+            if (totalOrderCount == null) {
+                totalOrderCount = 0;
+            }
+
+            if ($("#customer_list_type_item6").is(":checked")) {
+                var orders_container = '<td class="list_table_orders">' + totalOrderCount + '</td>'
+            } else {
+                var orders_container = '<td class="list_table_orders list_table_hidden">' + totalOrderCount + '</td>'
+            }
+
+            if ($("#customer_list_type_item7").is(":checked")) {
+                var revenue_container = '<td class="list_table_revenue" data-currency="true">' + this.total_order_value + '</td>'
+            } else {
+                var revenue_container = '<td class="list_table_revenue list_table_hidden" data-currency="true">' + this.total_order_value + '</td>'
+            }
+
+            var id = this.id;
+            var dataDelete = false;
+            var iconDelete = "fa-times";
+            var titleDelete = "Delete";
+
+            if (tableRowDeleteArray.length > 0) {
+                $.each(tableRowDeleteArray, function () {
+                    if (this == id) {
+                        dataDelete = true;
+                        iconDelete = "fa-undo";
+                        titleDelete = "Undo Delete";
+                    }
+                });
+            }
+
+            var pendingDeleteText = '';
+
+            if (pendingDeleteArray.length > 0) {
+                $.each(pendingDeleteArray, function () {
+                    if (this == id) {
+                        dataDelete = true;
+                        iconDelete = "fa-spinner fa-spin";
+                        titleDelete = "Pending Delete";
+                        pendingDeleteText = '<div class="table_pending_delete_text">Delete In Progress</div>';
+                    }
+                });
+            }
+
+            var companyDiv = '';
+            if (this.companyname != null && this.companyname.length > 0) {
+                companyDiv = '<div title="Company Name">- <strong>' + this.companyname + '</strong></div>';
+            }
+
+            var nameDiv = '';
+            if ((this.forename != null && this.forename.length > 0) || (this.surename != null && this.surname.length > 0)) {
+                nameDiv = '<div title="Customer Name">- ' + this.forename + ' ' + this.surname + '</div>';
+            }
+
+            var emailDiv = '';
+            if (this.email != null && this.email.length > 0) {
+                emailDiv = '<div title="Email Address">- ' + this.email + '</div>';
+            }
+
+
+            $("#customers_table tbody").append('<tr class="customer_list_item" data-id="' + id + '" data-delete="' + dataDelete + '">' +
+                                                    '<td><a class="button button_primary" href="orders_customers_view?cid=' + id + '">View</a></td>' +
+                                                    account_container +
+                                                    '<td class="customer_list_item_customer">' +
+                                                        companyDiv +
+                                                        nameDiv +
+                                                        emailDiv +
+                                                    '</td>' +
+                                                    created_container +
+                                                    orders_container +
+                                                    revenue_container +
+                                                    '<td class="align_center"><i class="fa ' + iconDelete + ' table_row_delete_icon customer_list_icon_delete" aria-hidden="true" title="' + titleDelete + '" onclick="tableRowDelete(\'customer_list_item\', \'' + id + '\')"></i>'+pendingDeleteText+'</td>' +
+                                               '</tr>');
+        });
+
+        paginationDataType = "customer";
+        //paginationTotalItems = customers.length;
+        paginationPageItems = parseInt($('#dlSize').val());
+        paginationPageStart = startpg / parseInt($('#dlSize').val());
+        paginationPageStart = Math.ceil(paginationPageStart);
+
+        console.log("paginationPageStart:"+paginationPageStart);
+
+        paginationShowAll = false;
+
+        $(".pagination_number_results, .pagination_text_results").remove();
+        pagination(paginationTotalItems, paginationPageItems, paginationPageStart, paginationShowAll);
+
+        UpdatePriceStrings();
+
+    }
+    else {
+        var html = '<div class="panel_red">' +
+            '<h2>No Customers Found</h2>' +
+            '<p>Go Upload Some Products and gain some customers.</p>' +
+            '<a href="manage_products_list.aspx" class="button button_primary">Upload Products</a>' +
+            '</div>';
+        $('#mainpanel').html(html);
+    }
+
+}
+
+function rebuildPaginationcustomer(paginationRebuildNumber) {
+    var newpgIdx = parseInt($(paginationRebuildNumber).attr("data-pagnum"));        
+
+    console.log('Page Index [' + newpgIdx + '] selected');
+    //Figure out the new startpg
+    startpg = newpgIdx * parseInt($('#dlSize').val());
+
+    Cookies.set('fwsCustomersPageNum_' + storeId + '', startpg);
+    console.log('New Record Start Calculated to:' + startpg);
+
+    getCustomers();
+}
+
+function tableRowDelete(className, id) {
+
+    var deleteStatus = $("." + className + "[data-id='" + id + "']").attr("data-delete");
+
+    if (deleteStatus == "false") {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "true");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").removeClass("fa-times").addClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Undo Delete");
+
+        tableRowDeleteArray.push(id);
+
+        $(".customers_information[data-customerid='" + id + "']").hide();
+        $(".customers_information[data-customerid='" + id + "']").attr("data-opened", "false");
+
+    } else {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "false");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").addClass("fa-times").removeClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Delete");
+
+        var tableRowDeleteArrayIndex = tableRowDeleteArray.indexOf(id);
+        if (tableRowDeleteArrayIndex > -1) {
+            tableRowDeleteArray.splice(tableRowDeleteArrayIndex, 1);
+        }
+   
+    }
+
+    save_changes_detected = true;
+    saveChangesDetected();
+    
+
+}
+
+function UpdatePriceStrings() {
+    var elements = jQuery('*').filter(function () { return jQuery(this).data('currency') !== undefined; });
+
+    jQuery(elements).each(function (index) {
+
+        if (jQuery(this).is("input"))
+            jQuery(this).val(accounting.formatMoney(jQuery(this).val(), currency_options));
+        else
+            jQuery(this).html(accounting.formatMoney(jQuery(this).html(), currency_options));
+    });
+
+}
+
+$(document).ready(function () {
+    getCustomerSettings();
+});
+
+function getCustomerSettings() {
+
+    axiosGet('/services/settingsv2/settings_basket.svc/getCustomer?storeId=' + storeId).then(function (data) {
+
+        var customerSettings = data.d;
+        console.log(customerSettings);
+
+        if (customerSettings != null) {
+
+            console.log("EnableCustomerAccs: " + customerSettings.EnableCustomerAccs);
+            console.log("allowGuests: " + customerSettings.allowGuests);
+
+            if (customerSettings.EnableCustomerAccs === false) {
+                $("#settings_basket_accDisable").prop("checked", true);
+                $(".guest_checkout").hide();
+            } else {
+                /*if (isRidgePackageTypeId == 'True' || packageTypeId == 12 || packageTypeId == 13 || packageTypeId == -1 || controlPanelVersion == 2) {*/
+                    $("#settings_basket_accEnable").prop("checked", true);
+                    $(".guest_checkout").show();
+                /*} else {
+                    customerSettings.EnableCustomerAccs = false
+                    $("#settings_basket_accDisable").prop("checked", true);
+                    $(".guest_checkout").hide();
+                }*/
+            }
+
+            if (customerSettings.allowGuests === false && customerSettings.EnableCustomerAccs === true) {
+                // Mandatory Customer Accounts Only
+                $("#settings_basket_guestDisable").prop("checked", true);
+            } else {
+                $("#settings_basket_guestEnable").prop("checked", true);
+            }
+
+            if (customerSettings.wishlist == true) {
+                $("#settings_basket_wishlist_enable").prop("checked", true);
+            }
+
+            var wishlistAllowed = true;
+            switch (customerSettings.designTemplate.toLowerCase()) {
+                case "magnum":
+                case "storebuilder/309223/echo":
+                case "storebuilder/480334/testsite":
+                case "storebuilder/309223/glide":
+                case "storebuilder/309223/sonos":
+                case "storebuilder/309223/eclipse":
+                case "eratosthenes":
+                case "storebuilder/89137/boundless":
+                case "foundation":
+                case "brimstone":
+                case "changeling":
+                case "stack":
+                case "minimal":
+                case "canvas":
+                case "block":
+                case "float":
+                case "liquid":
+                case "flip":
+                case "tech":
+                case "chameleon":
+                case "fold":
+                case "fresh":
+                case "gloss":
+                case "grunge":
+                    wishlistAllowed = false;
+                    break;
+            }
+
+            if (wishlistAllowed == false) {
+                if (document.getElementById("wishlist_not_available") != null) {
+                    showById("wishlist_not_available");
+                }
+            }
+            $("#settings_customer_container").show();
+
+        } else {
+
+        }
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_settings_customer");
+    });
+
+
+}
+
+function customerAccountChange() {
+
+    var customerAccount = document.querySelector("input[name='settings_basket_customer']:checked").getAttribute("id");
+    if (customerAccount == "settings_basket_accEnable") {
+        showByClass("guest_checkout");
+    } else {
+        hideByClass("guest_checkout");
+        $("#settings_basket_guestEnable").prop("checked", true);
+    }
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+function wishlistChange() {
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+
+var pendingDeleteArray = new Array();
+function runSavePageLocal() {
+
+    pendingDeleteArray = tableRowDeleteArray;
+    var saveCustomers = new Array();
+
+    $.each(tableRowDeleteArray, function (i) {
+        saveCustomers.push({ id: this });
+    });
+
+    var data = JSON.stringify(saveCustomers);
+
+    var returningPageName = "Orders";
+    var returningPageLink = "/orders.aspx";
+    var currentPageLink = "/orders_customers.aspx";
+    var saveType = "get";
+    var saveUrl = '/services/Customers.svc/deleteCustomer?storeId=' + storeId + '&customerID=' + data;
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, 1, "getCustomers", 2);
+
+
+    var enableCustomerAccount = $('#settings_basket_accEnable').is(":checked");
+    var enableGuestAccount = $('#settings_basket_guestEnable').is(":checked");
+    var enableWishlists = false;
+    if ($('#settings_basket_wishlist_enable').is(":checked")) {
+        enableWishlists = true;
+    }
+
+    /*if (isRidgePackageTypeId != 'True' && packageTypeId != 12 && packageTypeId != 13 && packageTypeId != -1 && controlPanelVersion != 2) {
+        enableCustomerAccount = false;
+        enableGuestAccount = true;
+    }*/
+
+    customerSettings = {
+        EnableCustomerAccs: enableCustomerAccount,
+        allowGuests: enableGuestAccount,
+        wishlist: enableWishlists
+    };
+
+    console.log(customerSettings);
+
+    var saveType2 = "get";
+    var saveUrl2 = '/services/settingsv2/settings_basket.svc/saveCustomers?storeId=' + storeId + '&settings=' + JSON.stringify(customerSettings);
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType2, saveUrl2, null, null, 2);
+}
+
+
+function SearchCustomer(input) {
+    axiosGet('services/Customers.svc/searchCustomer?storeId=' + storeId + '&input=' + input).then(function (data) {
+        var dats = data.d || data;
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});

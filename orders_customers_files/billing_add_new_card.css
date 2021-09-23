@@ -1,0 +1,68 @@
+﻿
+.busy_wait_billingv2_add_new_card{
+    display: block;
+}
+
+#modal_billingv2_add_new_card_container, #modal_billingv2_add_new_card_error, #modal_billingv2_add_new_card_yours{
+    display: none;
+}
+
+#modal_billingv2_add_new_card_cardnumber, #modal_billingv2_add_new_card_cvv, #modal_billingv2_add_new_card_expiration, #modal_billingv2_add_new_card_postal{
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    border: 1px solid #cfd7d9;
+    border-radius: 4px;
+    width: 100%;
+    padding: 0px 20px;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    margin-bottom: 10px;
+}
+
+#modal_billingv2_add_new_card_cardnumber.braintree-hosted-fields-focused,
+#modal_billingv2_add_new_card_expiration.braintree-hosted-fields-focused,
+#modal_billingv2_add_new_card_cvv.braintree-hosted-fields-focused,
+#modal_billingv2_add_new_card_postal.braintree-hosted-fields-focused{
+    border-color: #ea1686;
+}
+
+#modal_billingv2_add_new_card_cardnumber.braintree-hosted-fields-invalid,
+#modal_billingv2_add_new_card_expiration.braintree-hosted-fields-invalid,
+#modal_billingv2_add_new_card_cvv.braintree-hosted-fields-invalid,
+#modal_billingv2_add_new_card_postal.braintree-hosted-fields-invalid{
+    border-color: #ea1636;
+}
+
+#modal_billingv2_add_new_card_cardnumber.braintree-hosted-fields-valid,
+#modal_billingv2_add_new_card_expiration.braintree-hosted-fields-valid,
+#modal_billingv2_add_new_card_cvv.braintree-hosted-fields-valid,
+#modal_billingv2_add_new_card_postal.braintree-hosted-fields-valid{
+    border-color: #5DC548;
+}
+
+label[for='modal_billingv2_add_new_card_cardnumber'], 
+label[for='modal_billingv2_add_new_card_cvv'], 
+label[for='modal_billingv2_add_new_card_expiration'], 
+label[for='modal_billingv2_add_new_card_postal']{
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+
+.modal_billingv2_add_new_card_required{
+    color: #ea1636;
+    font-size: 1rem;
+}
+
+#modal_billingv2_add_new_card_yours{
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #ddd;
+}
+
+#modal_billingv2_add_new_card_zip_container{
+    display: none;
+}
