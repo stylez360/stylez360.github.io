@@ -1,0 +1,465 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "APPSTORE", uuid: beaverGuid });
+var appId;
+var appInstructions;
+var openBilling;
+var appInfo;
+var myApps;
+var appFree = false;
+
+var appPriceCurrency;
+var appPriceSubscription;
+var appPricePackageType;
+
+function loadAppItem() {
+
+    $(".busy_wait_appstore_item").show();
+    $("#appstore_item_info1, #appstore_item_info2, #appstore_item_info3, #appstore_item_desc_container").hide();
+
+    // Create Breadcrumb
+    var url_string = window.location.href
+    var url = new URL(url_string);
+    appId = url.searchParams.get("appid");
+    instructions = url.searchParams.get("instructions");
+    openBilling = url.searchParams.get("openBilling");
+
+    $("#breadcrumb_app_item").attr("href", window.location.href);
+    axiosGet('/services/appstore/apps.svc/GetAppInfo?appId=' + appId).then(function (data) {
+        appInfo = data.d || data;
+        appInfo = JSON.parse(appInfo);
+        console.log(appInfo);
+
+        if (appInfo.isLive == false && storeId != "6301") {
+            hideById("appstore_item_is_live");
+            showById("appstore_item_is_live_false");
+        } else {
+            buildAppItem();
+        }
+    }).catch(function (e) {
+        typeof e == "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+var imageLength;
+function buildAppItem() {
+
+    // Header
+    $("#appstore_item_header_icon").attr("src", "//d11fdyfhxcs9cr.cloudfront.net/design_media/freewebstore/appstore/"+appInfo.developerId+"/"+appInfo.appId+"/icon.jpg?v=5").attr("alt", appInfo.name);
+    $("#appstore_item_header_name, #breadcrumb_app_item").text(appInfo.name);
+    $("#appstore_item_header_developed").text(appInfo.developerId);
+    
+    // Features
+    if (appInfo.features != null) {
+
+        var allFeaturesHtml = "";
+
+        for (var i = 0; i < appInfo.features.length; i++) {
+            var feature = '<div class="appstore_item_features_item">';
+                feature += '<i class="fa fa-star color_primary" aria-hidden="true"></i>';
+                feature += '<span>';
+                feature += appInfo.features[i];
+                feature += '</span>';
+                feature += '</div>';
+
+            allFeaturesHtml += feature;
+        }
+        document.getElementById("appstore_item_features").innerHTML = allFeaturesHtml;
+    }
+
+    // Desc
+    
+    if (appInfo.html != null) {
+        $("#appstore_item_desc").html(appInfo.html);
+    } else {
+        $("#appstore_item_desc_container").hide();
+    }
+
+    // Videos
+    if (appInfo.videoId != null) {
+
+        var video = '<div class="panel_section_large">';
+        video += '<h3>Video</h3>';
+        video += '<iframe width="100%" height="315" src="https://www.youtube.com/embed/' + appInfo.videoId + '" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>';
+        video += '</div>';
+
+        $("#appstore_item_video_container").append(video);
+    } else {
+        $("#appstore_item_video_container").hide();
+        $("#appstore_item_desc_container").addClass("appstore_item_desc_container_noborder");
+    }
+
+    if (appInfo.images != null) {
+        imageLength = appInfo.images.length;
+        $.each(appInfo.images, function (i) {
+            var image = '<div class="appstore_item_image_item" data-num="' + (i + 1) + '" data-image="//d11fdyfhxcs9cr.cloudfront.net/design_media/freewebstore/appstore/' + appInfo.developerId + '/' + appInfo.appId + '/' + this +'" onclick="appstoreItemImage(this);">';
+            image += '<img src="//d11fdyfhxcs9cr.cloudfront.net/design_media/freewebstore/appstore/'+appInfo.developerId+'/'+appInfo.appId+'/'+this+'" alt="' + appInfo.name + ' Gallery Image '+(i+1)+'" />';
+            image += '</div>';
+
+            $("#appstore_item_info3").append(image);
+        });
+    }
+
+    // Instructions 
+    if (appInfo.postInstallHtml != null) {
+        $(".tab_nav_item[data-tab='2']").show();
+        $("#app_setup_instructions_container").html(appInfo.postInstallHtml);
+        if (instructions == "true") {
+            $(".tab_nav_item[data-tab='2']").click();
+        }
+    }
+
+
+    // Pricing
+
+    getCorrectCurrency().then(function (res) {
+        appPriceCurrency = res.currency;
+        appPriceSubscription = res.subscription;
+        appPricePackageType = res.packageType;
+        addPriceAppInfo();
+    });
+   
+}
+
+function addPriceAppInfo() {
+
+    var price = 0;
+    var appGratis = false;
+
+    if (appInfo.gratis != null) {
+
+        if (appInfo.gratis.indexOf(appPricePackageType) != -1) {
+            price = 0;
+            appGratis = true;
+        } else {
+            switch (appPriceCurrency) {
+                case "USD":
+                    price = appInfo.priceUSD;
+                    break;
+                case "GBP":
+                    price = appInfo.priceGBP;
+                    break;
+                case "EUR":
+                    price = appInfo.priceEUR;
+                    break;
+                default:
+                    price = appInfo.priceUSD;
+                    break;
+            }
+        }
+
+    } else {
+
+        switch (appPriceCurrency) {
+            case "USD":
+                price = appInfo.priceUSD;
+                break;
+            case "GBP":
+                price = appInfo.priceGBP;
+                break;
+            case "EUR":
+                price = appInfo.priceEUR;
+                break;
+            default:
+                price = appInfo.priceUSD;
+                break;
+        }
+
+    }
+
+
+
+    var currencySymbol = "&dollar;";
+    if (appPriceCurrency == "GBP") {
+        currencySymbol = "&pound;";
+    } else if (appPriceCurrency == "EUR") {
+        currencySymbol = "&euro;";
+    }
+
+    if (price != 0) {
+        price = currencySymbol + price;
+    } else {
+        price = "Free";
+        hideById("appstore_item_pricing3");
+    }
+
+    document.querySelector("#appstore_item_pricing1").innerHTML = price;
+
+    if (appInfo.pricePrompt != null) {
+        $("#appstore_item_pricing2").html(appInfo.pricePrompt);
+    } else {
+        $("#appstore_item_pricing2").addClass("appstore_item_pricing2_empty");
+    }
+
+    if (appInfo.recurring === true) {
+
+        var recurringPeriod = "Month";
+        if (appInfo.recurringPeriod == 12) {
+            recurringPeriod = "Annually";
+        }
+
+        $("#appstore_item_pricing3").text(" /" + recurringPeriod);
+    }
+
+    axiosGet('/services/appstore/apps.svc/ListStoreApps?storeId=' + storeId).then(function (data) {
+        myApps = data.d || data;
+        console.log(myApps);
+    }).catch(function (e) {
+        typeof e == "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        buildEnableAppButton();
+    });
+
+    $(".busy_wait_appstore_item").hide();
+    $("#appstore_item_info1, #appstore_item_info2, #appstore_item_info3, #appstore_item_desc_container").show();
+
+
+    if (typeof runAppDescriptionScript === 'function') {
+        runAppDescriptionScript();
+    }
+
+}
+
+function buildEnableAppButton() {
+
+    if (myApps.length > 0) {
+        var isEnabled = 0;
+        var appStarterIsEnabled = 0;
+        $.each(myApps, function () {
+            if (appInfo.appId == "unlimited-pages" || appInfo.appId == "coupons-vouchers" || appInfo.appId == "banner-removal" || appInfo.appId == "checkout-paypal") {
+                if (this.appId == "startup-pack") {
+                    if (this.status == "ACTIVE") {
+                        appStarterIsEnabled = 1;
+                    }
+                }
+            }
+            if (this.appId == appInfo.appId) {
+                if (this.status == "ACTIVE") {
+                    isEnabled = 1;
+                    return;
+                }
+            }
+            if (this.appId == appInfo.appId) {
+                if (this.status == "SUSPENDED") {
+                    isEnabled = 2;
+                    return;
+                }
+            }
+        });
+        if (isEnabled == 1) {
+            $("#appstore_item_info_button").html('<a class="button button_red" onclick="disableApp(\'' + appInfo.appId + '\');">Disable App</a>');
+            if (appInfo.postInstallLink != null) {
+                $("#appstore_item_manage_app").css("display", "inline-block").attr("href", appInfo.postInstallLink);
+            }
+            $("#ridge_upgrade_panel_appstore2").hide();
+        } else if (isEnabled == 2) {
+            if (appFree == false) {
+                $("#appstore_item_suspended").show();
+            } else {
+                $("#appstore_item_info_button").html('<a class="button button_green" onclick="purchaseApp();">Enable App</a>');
+                if (openBilling == "true") {
+                    $("#appstore_item_info_button a").click();
+                }
+            }
+        } else {
+            $("#appstore_item_info_button").html('<a class="button button_green" onclick="purchaseApp();">Enable App</a>');
+            if (openBilling == "true") {
+                $("#appstore_item_info_button a").click();
+            }
+        }
+
+        // If app is unlimited pages or coupons or banner removal
+        // and they have the starter pack enabled then show the Go to app button
+        if (appStarterIsEnabled == 1) {
+            if (appInfo.postInstallLink != null) {
+                $("#appstore_item_manage_app").css("display", "inline-block").attr("href", appInfo.postInstallLink);
+            }
+            $("#appstore_item_info_button").remove();
+            $("#startup_pack_notice a").attr("href", "/appstore/appstore_item.aspx?appid=startup-pack").text("Manage Startup App");
+
+            $("#appstore_item_pricing_inner").html("<strong>Free - Startup Pack</strong>");
+            hideById("appstore_item_pricing2");
+        }
+
+    } else {
+        $("#appstore_item_info_button").html('<a class="button button_green" onclick="purchaseApp();">Enable App</a>');
+        if (openBilling == "true") {
+            $("#appstore_item_info_button a").click();
+        }
+    }
+}
+
+function purchaseApp() {
+
+    var info = {
+        "case": "4a",
+        "appId": appId
+    }
+
+    billingV2Instructions(info);
+
+}
+
+// Image Modal
+function appstoreItemImage(el) {
+
+    if (imageLength == 1) {
+        $("#modal_appstore_item_image_prev, #modal_appstore_item_image_next").remove();
+    }
+
+    $(".modal_doverlay, .modal_x_button, .modal_appstore_item_image").fadeIn();
+
+    var image = $(el).attr("data-image");
+    var num = $(el).attr("data-num");
+
+    console.log(image);
+    console.log(num);
+
+    $("#appstore_item_image_modal").attr("src", image).attr("data-num", num);
+}
+
+function nextAppstoreImage() {
+    var currentImage = $("#appstore_item_image_modal").attr("data-num");
+
+    if (currentImage == imageLength.toString()) {
+        var newNum = 1;
+        var newImage = $(".appstore_item_image_item[data-num='1']").attr("data-image");
+    } else {
+        var newNum = Number(currentImage) + 1;
+        var newImage = $(".appstore_item_image_item[data-num='"+newNum+"']").attr("data-image");
+    }
+
+    $("#appstore_item_image_modal").attr("src", newImage).attr("data-num", newNum);
+
+}
+
+function prevAppstoreImage() {
+    var currentImage = $("#appstore_item_image_modal").attr("data-num");
+
+    if (Number(currentImage) == 1) {
+        var newNum = imageLength;
+        var newImage = $(".appstore_item_image_item[data-num='" + newNum +"']").attr("data-image");
+    } else {
+        var newNum = Number(currentImage) - 1;
+        var newImage = $(".appstore_item_image_item[data-num='" + newNum + "']").attr("data-image");
+    }
+
+    $("#appstore_item_image_modal").attr("src", newImage).attr("data-num", newNum);
+
+}
+
+function disableApp() {
+
+    $(".modal_delete_input_error").hide();
+
+    $(".modal_overlay, .modal_delete").fadeIn();
+    $(".modal_delete .modal_title").text("Disable App");
+    $("body").addClass("body_modal_is_open");
+    $(".modal_doverlay, .modal_x_button, .edit_image_modal").fadeOut();
+    $("#delete_input").val("");
+    $(".delete_item_name").text(appInfo.name);
+    var delete_item_word = delete_item_words[Math.floor(Math.random() * delete_item_words.length)];
+    $(".delete_item_word").text(delete_item_word);
+
+    $(".delete_modal_button").click(function () {
+        var delete_item_word_val = $("#delete_input").val().toLowerCase();;
+
+        if (delete_item_word == delete_item_word_val) {
+            disableAppProcess();
+        } else {
+            $(".modal_delete_input_error").show();
+        }
+    });
+
+}
+
+function disableAppProcess() {
+
+    $(".modal_delete, #modal_appstore_disabling2, .modal_overlay, #modal_appstore_disabling3").hide();
+    $(".modal_appstore_disabling, #modal_appstore_disabling1, .busy_wait_disabling_app, .overlay_forced").show();
+    $("#modal_appstore_disabling_button").addClass("button_disabled");
+
+    // Disable App Ajax
+    axiosGet('/services/appstore/AppV2.svc/RemoveApp?storeId=' + storeId + '&appId=' + appInfo.appId).then(function (data) {
+        var appDeleted = data.d;
+
+        if (appDeleted) {
+            $("#modal_appstore_disabling1").hide();
+            $("#modal_appstore_disabling2").show();
+            $("#modal_appstore_disabling_button").removeClass("button_disabled");
+            $("#modal_appstore_disabling_submit_feedback").show();
+        } else {
+            $("#modal_appstore_disabling3").show();
+            $("#modal_appstore_disabling1").hide();
+            $("#modal_appstore_disabling_button").removeClass("button_disabled");
+        }
+    }).catch(function (e) {
+        typeof e == "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function disabledAppComplete() {
+    location.reload();
+}
+
+function disabledAppSubmitFeedback() {
+
+    hideByClass("alert_app_disabled_feedback_input");
+    var feedback = stripHTML(document.getElementById("app_disabled_feedback_input").value.trim());
+
+    if (!feedback.length) {
+        showByClass("alert_app_disabled_feedback_input");
+    } else {
+        document.getElementById("modal_appstore_disabling_submit_feedback").innerHTML = "<i class='fa fa-spinner fa-spin'></i> Submitting";
+        document.getElementById("modal_appstore_disabling_submit_feedback").classList.add("button_disabled");
+        document.getElementById("modal_appstore_disabling_button").classList.add("button_disabled");
+
+
+        var ticket = {
+            storeId: storeId,
+            subject: "App Feedback",
+            message: feedback,
+            type: appInfo.name
+        };
+
+        //Save to the server
+        var url = "/services/support/Support.svc/CreateTicket";
+        var data = JSON.stringify({ 'shopkeeper': storeId, 'session': '<%= session %>', 'ticket': ticket });
+
+        axiosPost(url, data).then(function (res) {
+            console.log(res);
+
+        }).catch(function (e) {
+            typeof e == "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+            document.getElementById("modal_appstore_disabling_submit_feedback").innerHTML = "<i class='fa fa-check color_green'></i> Submitted";
+            document.getElementById("modal_appstore_disabling_button").classList.remove("button_disabled");
+            showById("modal_appstore_disabling2_feedback2");
+            hideById("modal_appstore_disabling2_feedback1");
+        });
+    }
+}
+
+function paymentRecievedFinalLocal() {
+    location.href = "/appstore/appstore_item.aspx?appid=" + appId + "&instructions=true";
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
