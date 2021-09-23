@@ -1,0 +1,292 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "ORDERS-DISPATCH", uuid: beaverGuid });
+
+
+loadOrderDispatch();
+function loadOrderDispatch() {
+
+    hideById("customize_autoresponder_container");
+    showByClass("busy_wait_autoreponder");
+
+    axiosGet("/services/Orders.svc/getOrderDispatchPlaceholder?storeId=" + storeId).then(function (data) {
+        trace('orderDispatchEmails:success');
+        orderDispatchEmails = data.d || data;
+        console.log(orderDispatchEmails);
+
+        if (orderDispatchEmails.length > 0) {
+
+            document.getElementById("autoresponder_email_subject").value = orderDispatchEmails[0].subject;
+            document.getElementById("autoresponder_email_content").value = orderDispatchEmails[0].contents;
+            checkWordCount();
+
+            if (orderDispatchEmails[0].cc_email.length > 0) {
+                var cc_email = orderDispatchEmails[0].cc_email.split(",");
+
+                for (var i = 0; i < cc_email.length; i++) {
+                    var email = cc_email[i].trim();
+
+
+                    if ((email == null) || (email == undefined) || (email == "") || (email.length == 0)) {
+
+                    } else {
+
+                        var recipientItem = '<div class="list_with_button_item" data-email="' + email + '">' + 
+                                                '<i class="fa fa-minus" onclick="removeBcc(\'' + email + '\')" aria-hidden="true"></i>' + 
+                                                '<strong>' + email + '</strong>' + 
+                                            '</div>';
+
+                        document.getElementById("additional_recipients").innerHTML += recipientItem;
+                    }
+                }
+            }
+
+        } else {
+            prefillDispatch();
+        }
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_autoreponder");
+        showById("customize_autoresponder_container");
+    });
+}
+
+function prefillDispatch() {
+
+    axiosGet("orders_dispatch_default_text.txt").then(function (data) {
+        var defaultOrderDispatchContent = data.d || data;
+        document.getElementById("autoresponder_email_subject").value = "Your order has been dispatched";
+        document.getElementById("autoresponder_email_content").value = defaultOrderDispatchContent;
+        checkWordCount();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        
+    }); 
+
+}
+
+function checkWordCount() {
+    var content = getId('autoresponder_email_content');
+    getId('wordCount').innerText = content.value.length;
+    content.value.length >= 5000 ? getId('wordCount').parentNode.classList.add('color_red') : getId('wordCount').parentNode.classList.remove('color_red');
+}
+
+function insertTag(el) {
+    var cursorPos = $('#autoresponder_email_content').prop('selectionStart');
+    var v = document.getElementById("autoresponder_email_content").value;
+    var textBefore = v.substring(0, cursorPos);
+    var textAfter = v.substring(cursorPos, v.length);
+    document.getElementById("autoresponder_email_content").value = textBefore + el + textAfter;
+    document.getElementById("autoresponder_email_content").focus();
+    checkWordCount();
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+function removeBcc(el) {
+    document.querySelector(".list_with_button_item[data-email='" + el + "']").remove();
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+function validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+$("#autoresponder_additional_recipients").keyup(function () {
+    var newEmail = document.getElementById("autoresponder_additional_recipients").value;
+
+    if (validateEmail(newEmail)) {
+        document.getElementById("autoresponder_additional_recipients_button").classList.remove("button_disabled", "has_tool_tip");
+    } else {
+        document.getElementById("autoresponder_additional_recipients_button").classList.add("button_disabled", "has_tool_tip");
+    }
+    return false;
+
+});
+
+$("#autoresponder_additional_recipients").keydown(function (e) {
+    var newEmail = document.getElementById("autoresponder_additional_recipients").value;
+
+    if ((e.keyCode || e.which) === 13) {
+        e.preventDefault();
+        if (validateEmail(newEmail)) {
+            addNewRecipient();
+        }
+        return false;
+    }
+});
+
+function addNewRecipient() {
+
+    hideByClass("alert_email_exists");
+    var newEmail = document.getElementById("autoresponder_additional_recipients").value;
+    var emailExists = 0;
+
+    var existingEmails = document.querySelectorAll(".list_with_button_item");
+    for (var i = 0; i < existingEmails.length; i++) {
+        var existingEmailsAddress = existingEmails[i].getAttribute("data-email");
+        if (existingEmailsAddress == newEmail) {
+            emailExists++;
+        }
+    }
+
+    if (emailExists == 1) {
+        showByClass("alert_email_exists");
+    } else if ((newEmail.length > 0) && (!$("#autoresponder_additional_recipients_button").hasClass("button_disabled"))) {
+
+        var newRecipientItem = '<div class="list_with_button_item" data-email="' + newEmail + '">' +
+            '<i class="fa fa-minus" onclick="removeBcc(\'' + newEmail + '\')" aria-hidden="true"></i>' +
+            '<strong>' + newEmail + '</strong>' +
+            '</div>';
+
+        document.getElementById("additional_recipients").innerHTML += newRecipientItem;
+
+        document.getElementById("autoresponder_additional_recipients").value = "";
+        document.getElementById("autoresponder_additional_recipients").focus();
+        document.getElementById("autoresponder_additional_recipients_button").classList.add("button_disabled");
+
+        setTimeout(function () {
+            document.getElementById("autoresponder_additional_recipients_button").classList.add("has_tool_tip");
+        }, 1500);
+
+        save_changes_detected = true;
+        saveChangesDetected();
+    }
+
+}
+
+$("#autoresponder_email_subject, #autoresponder_email_content").on('input', function () {
+    checkWordCount();
+    save_changes_detected = true;
+    saveChangesDetected();
+});
+
+function resetAutoresponderText() {
+    divFadeIn(".modal_overlay, .modal_autoresponder_confirmation");
+}
+
+function resetAutoresponderConfirmed() {
+    hideByClass("modal_overlay", "modal_autoresponder_confirmation");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+
+    prefillDispatch();
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+function runSavePageLocal() {
+
+    var saveOrderDispatch = new Array();
+
+    subject = parseTextAndStripPost(document.getElementById("autoresponder_email_subject").value.trim());
+    subject = subject.replace(/'/g, "\\'");
+    contents = parseTextAndStripPost(document.getElementById("autoresponder_email_content").value.trim());
+    contents = contents.replace(/'/g, "\\'");
+
+    var cc_email = "";
+
+    var existingEmails = document.querySelectorAll(".list_with_button_item");
+    for (var i = 0; i < existingEmails.length; i++) {
+        var email = existingEmails[i].getAttribute("data-email");
+        if (i == 0) {
+            cc_email = email;
+        } else {
+            cc_email = cc_email + ", " + email;
+        }
+    }
+
+    saveOrderDispatch.push({ "subject": subject, "contents": contents, "cc_email": cc_email });
+
+    var data = {
+        "storeId": storeId,
+        "data": saveOrderDispatch
+    }
+
+    var data = JSON.stringify(data);
+
+
+    var returningPageName = "Emails";
+    var returningPageLink = "/orders_emails.aspx";
+    var currentPageLink = "/orders_dispatch.aspx";
+    var saveType = "post";
+    var saveUrl = ['/services/Orders.svc/saveDispatch', data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
+
+$('body').on('contextmenu', '#autoresponder_email_content', function () {
+
+    var xPositionMinus = 0;
+
+    /*if ($(document).width() > 1230) {
+        xPositionMinus = 250;
+    } else if ($(document).width() > 770) {
+        xPositionMinus = 55;
+    }*/
+
+    document.getElementById("dispatch_email_custom_menu").className = "showcd";
+    document.getElementById("dispatch_email_custom_menu").style.top = mouseY(event) + "px";
+    document.getElementById("dispatch_email_custom_menu").style.left = (mouseX(event) - xPositionMinus) + "px";
+
+
+    window.event.returnValue = false;
+});
+
+$(document).bind("click", function (event) {
+    document.getElementById("dispatch_email_custom_menu").className = "hidecd";
+});
+
+
+function mouseX(evt) {
+
+    if (evt.pageX) {
+        return evt.pageX;
+    } else if (evt.clientX) {
+        return evt.clientX;
+    } else {
+        return null;
+    }
+}
+
+function mouseY(evt) {
+
+    if (evt.clientY) {
+        return evt.clientY;
+    } else if (evt.pageY) {
+        return evt.pageY;
+    } else {
+        return null;
+    }
+}
