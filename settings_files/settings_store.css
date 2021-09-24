@@ -1,0 +1,51 @@
+﻿
+.busy_wait_store_settings_name, .busy_wait_store_settings_currency{
+    display: block;
+}
+
+#store_settings_section_name, #store_settings_section_name_error,
+#store_settings_section_currency, #store_settings_section_currency_error,
+#vacation_mode_resend_email_container{
+    display: none;
+}
+
+ 
+
+#settings_store_age, #settings_store_status, #weightSet, #settings_store_age_container, #settings_store_onVacation_message_container{
+    display: none;
+}
+
+.modal_currency_change_check i.fa-exclamation-triangle{
+    color: #FFB432;
+}
+
+.modal_currency_change_check_item{
+    margin: 0 auto;
+    margin-top: 10px;
+    width: 200px;
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.modal_currency_change_check_item_inner{
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.modal_currency_change_check_item:first-child{
+    margin-top: 0;
+}
+
+.modal_currency_change_check_item img{
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.modal_currency_change_check_item strong{
+    text-transform: capitalize;
+}

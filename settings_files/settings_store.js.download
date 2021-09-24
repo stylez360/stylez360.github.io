@@ -1,0 +1,886 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "SETTINGS", uuid: beaverGuid });
+
+getStoreName();
+function getStoreName() {
+
+    showByClass("busy_wait_store_settings_name");
+    hideById("store_settings_section_name", "store_settings_section_name_error");
+
+    axiosGet('/services/settingsv2/settings_store.svc/getStoreName?storeId=' + storeId).then(function (data) {
+
+        var storeName = data.d;
+        if (storeName != null) {
+            storeName = decodeURI(storeName);
+            document.getElementById("store_settings_name").value = storeName;
+        }
+
+        showById("store_settings_section_name");
+
+    }).catch(function (e) {
+        showById("store_settings_section_name_error");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_store_settings_name");
+    });
+
+}
+
+
+function getStoreSettings() {
+
+    axiosGet('/services/settingsv2/settings_store.svc/getVacationSettings?storeId=' + storeId).then(function (data) {
+        var storeStatusData = data || data.d;
+        storeStatusData = storeStatusData.d[0];
+        console.log(storeStatusData);
+        getId('settings_store_status').innerText = storeStatusData.onVacation;
+        if (storeStatusData.onVacation === false) {
+            getId("settings_store_statusActive").checked = true;
+            hideById("settings_store_onVacation_message_container");
+        } else {
+            getId("settings_store_statusActive").checked = false;
+            getId("settings_store_statusVacation").checked = true;
+            showById("settings_store_onVacation_message_container");
+        }
+        if (storeStatusData.vacationMsg != null) {
+            getId('settings_store_onVacation_message').value = storeStatusData.vacationMsg;
+        }
+
+        if (storeStatusData.emailVerified == false) {
+            showById("vacation_mode_resend_email_container");
+            document.getElementById("settings_store_statusActive").setAttribute("disabled", true);
+        }
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+getCurrencies();
+function getCurrencies() {
+
+    showByClass("busy_wait_store_settings_currency");
+    hideById("store_settings_section_currency", "store_settings_section_currency_error");
+
+    $('#store_settings_display_currency option').remove();
+
+    axiosGet('/services/settingsv2/settings_store.svc/getCurrecyList?storeId=' + storeId).then(function (data) {
+
+        var currencies = data.d;
+        console.log(currencies);
+
+        if (currencies != null && currencies.length > 0) {
+
+            var currencies = currencies.sort(function (a, b) {
+                if (a.desc < b.desc) return -1;
+                if (a.desc > b.desc) return 1;
+                return 0;
+            });
+
+            var priorityCurrencies = "<option value='GBP' title='GBP'>British Pound</option><option value='USD' title='USD'>US Dollar</option>";
+            document.getElementById("store_settings_display_currency").innerHTML = priorityCurrencies; //Manually add USD and GBP
+
+            var currencyFound = false;
+            var currencyFoundValue = "";
+
+            for (var i = 0; i < currencies.length; i++) {
+                document.getElementById("store_settings_display_currency").innerHTML += "<option value='" + currencies[i].code + "' title='" + currencies[i].code + "'>" + currencies[i].desc + "</option>";
+                if (currencies[i].item) {
+                    currencyFound = true;
+                    currencyFoundValue = currencies[i].code;
+                }
+            }
+
+            if (currencyFound == false) {
+                if (storeCurrency !== undefined) {
+                    $("#store_settings_display_currency").val(storeCurrency);
+                } else {
+                    $("#store_settings_display_currency").val("USD");
+                }
+            } else {
+                $('#store_settings_display_currency').val(currencyFoundValue);
+            }
+
+            showById("store_settings_section_currency");
+
+        } else {
+            showById("store_settings_section_currency_error");
+        }
+
+    }).catch(function (e) {
+        showById("store_settings_section_currency_error");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_store_settings_currency");
+    });
+
+
+}
+
+getWeightSettings();
+function getWeightSettings() {
+
+    axiosGet('/services/settingsv2/settings_store.svc/getUnitSettings?storeId=' + storeId).then(function (data) {
+
+        var succ = data.d;
+        if (succ === "oz") {
+            $('#store_settings_weight_units_0').prop('checked', true);
+        } else {
+            $('#store_settings_weight_units_1').prop('checked', true);
+        }
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+
+}
+
+getCharSet();
+function getCharSet() {
+    axiosGet('/services/settingsv2/settings_store.svc/getCharSettings?storeId=' + storeId).then(function (data) {
+        var succ = data.d;
+        if (succ != null) {
+            console.log(succ.length)
+            if (succ.length > 0) {
+                $('#store_settings_character_set').val(succ);
+            }
+        }
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+$("input[name='settings_store_status']").click(function () {
+    var storeStatusShow = $(this).attr("id");
+    if (storeStatusShow === "settings_store_statusActive") {
+        $("#settings_store_status").text("false");
+        $("#settings_store_onVacation_message_container").hide();
+    } else {
+        $("#settings_store_status").text("true");
+        $("#settings_store_onVacation_message_container").show();
+    }
+});
+
+function settingsDisplayCurrencyChange() {
+    showByClass("alert_display_currency_change");
+}
+
+$("#settings_store_layout_container input, #settings_store_layout_container textarea, #settings_store_layout_container select").on('change keydown paste input', function () {
+    save_changes_detected = true;
+    saveChangesDetected();
+    var id = $(this).attr("id");
+    addSettingsChanges(id);
+});
+
+$("#settings_store_layout_container input, #settings_store_layout_container textarea, #settings_store_layout_container select").on('change keydown paste input', function () {
+    save_changes_detected = true;
+    saveChangesDetected();
+    var id = $(this).attr("id");
+    addSettingsChanges(id);
+});
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+});
+
+
+
+$('#pricing_settings_default_tax').keypress(function (e) {
+    if ($(this).val() > 100 || $(this).val() < 0) {
+        $(this).val(100);
+    }
+});
+function getPricingSettings() {
+
+    $(".busy_wait_pricing_settings").show();
+    $("#pricing_settings").hide();
+    axiosGet('/services/settingsv2/settings_pricing.svc/VATInformation?storeId=' + storeId).then(function (data) {
+        pricingSettings = data.d;
+        buildPricingSettings();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        $("#pricing_settings, #pricing_settings2").show();
+        $(".busy_wait_pricing_settings").hide();
+    });
+}
+
+function buildPricingSettings() {
+
+    $('#storeTax').text(pricingSettings.chargeTax);
+    if (pricingSettings.chargeTax == 1) {
+        $("#pricing_settings_tax_show_1").prop("checked", true);
+        getTaxRates();
+        $(".pricing_settings_tax_enabled").show();
+    } else {
+        $("#pricing_settings_tax_show_0").prop("checked", true);
+        $(".pricing_settings_tax_enabled").hide();
+    }
+
+    $("#pricing_settings_default_tax").val(pricingSettings.taxrate);
+    $('#priceTax').text(pricingSettings.taxDisplayPrice);
+    if (pricingSettings.taxDisplayPrice == 0) {
+        $("#pricing_settings_prices_store_0").prop("checked", true);
+    } else {
+        $("#pricing_settings_prices_store_1").prop("checked", true);
+    }
+
+    $("#settings_business_tax_status").text(pricingSettings.VATStatus);
+
+}
+
+function refreshPricingSettings() {
+
+
+    axiosGet('/services/settingsv2/settings_pricing.svc/VATInformation?storeId=' + storeId).then(function (data) {
+        var refreshedPricingSettings = data.d;
+        $("#settings_business_tax_status").text(refreshedPricingSettings.VATStatus);
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function pricingSettingsTaxDisplay() {
+    var whichStoreTax = $("input[name='pricing_settings_tax_show']:checked").attr("id");
+
+    if (whichStoreTax == "pricing_settings_tax_show_0") {
+        $(".pricing_settings_tax_enabled").hide();
+    } else {
+        if (taxRatesLoaded == false) {
+            getTaxRates();
+        }
+        $(".pricing_settings_tax_enabled").show();
+    }
+}
+
+function changeTaxRate() {
+    var taxRate = $("#pricing_settings_default_tax").val();
+    if (taxRate < 0) {
+        $("#pricing_settings_default_tax").val("0");
+    }
+    if (taxRate == "") {
+        $("#pricing_settings_default_tax").val("");
+    }
+    if (taxRate > 100) {
+        $("#pricing_settings_default_tax").val("100");
+    }
+}
+
+var taxRatesLoaded = false;
+
+function getTaxRates() {
+
+    axiosGet('/services/settingsv2/settings_pricing.svc/getTaxRates?storeId=' + storeId).then(function (data) {
+        taxRatesLoaded = true;
+        vatCountriesSelected = data.d;
+        if (vatCountriesSelected.length > 0) {
+            vatCountriesSelectedList(vatCountriesSelected, 1);
+        }
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function vatCountriesSelectedList(vatCountriesSelected, type) {
+    $("#settings_business_tax_regions").html("");
+    var CountriesSelectedText = "";
+    $.each(vatCountriesSelected, function () {
+        var CountriesSelectedText1 = this.name + ' ' + this.percentage + '%';
+        CountriesSelectedText1 = '<span class="settings_business_tax_regions_item">' + CountriesSelectedText1 + '</span>';
+
+        CountriesSelectedText = CountriesSelectedText + CountriesSelectedText1;
+    });
+
+    $('#settings_business_tax_regions').append(CountriesSelectedText);
+
+    if (type == 2) {
+        save_changes_detected = true;
+        saveChangesDetected();
+        addSettingsChanges("country_tax");
+    }
+}
+
+var regionFilterGetLoaded = false;
+function regionFilterGet(storeId) {
+    if (regionFilterGetLoaded === false) {
+
+        axiosGet('/services/settingsv2/settings_pricing.svc/getTaxStuff?storeId=' + storeId).then(function (data) {
+            regionFilterGetLoaded = true;
+            vatCountries = data.d;
+            console.log("VAT COUNTRIES");
+            console.log(vatCountries);
+            buildCountryVatList(vatCountries);
+        }).catch(function (e) {
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+
+        });
+    } else {
+        buildCountryVatList(vatCountries);
+    }
+}
+
+
+function openModalVAT() {
+    $('.errorvat').hide();
+    VATSettings();
+    $(".modal_vat_setup, .modal_overlay").fadeIn();
+    $("body").addClass("body_modal_is_open");
+}
+
+
+$("input[name='pricing_settings_tax_show']").click(function () {
+    var value = $(this).attr("data-val");
+    $('#storeTax').text(value);
+});
+
+$("input[name='pricing_settings_prices_store']").click(function () {
+    var value = $(this).attr('data-val');
+    $('#priceTax').text(value);
+})
+
+$("#settings_pricing_main_container input, #settings_pricing_main_container textarea, #settings_pricing_main_container select, #settings_pricing_main_container label").change(function () {
+    save_changes_detected = true;
+    saveChangesDetected();
+    var id = $(this).attr("id");
+    addSettingsChanges(id);
+});
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+});
+
+
+var TaxSettingsSaveVar = false;
+var priceSettingsSaveVar = false;
+var nameSettingsSaveVar = false;
+var ageSettingsSaveVar = false;
+var vacationSettingsSaveVar = false;
+var currencySettingsSaveVar = false;
+var unitSettingsSaveVar = false;
+var charSettingsSaveVar = false;
+
+function addSettingsChanges(el) {
+
+    switch (el) {
+        case "pricing_settings_tax_show_1":
+        case "pricing_settings_tax_show_0":
+        case "pricing_settings_default_tax":
+        case "country_tax":
+            TaxSettingsSaveVar = true;
+            break;
+    }
+    switch (el) {
+        case "pricing_settings_prices_store_0":
+        case "pricing_settings_prices_store_1":
+            priceSettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "settings_vat_StatusBusiness":
+        case "settings_vat_StatusIndivid":
+        case "settings_vat_dropdown":
+        case "settings_vat_registeredYes":
+        case "settings_vat_registeredNo":
+            VATSettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "store_settings_name":
+            nameSettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "settings_store_statusActive":
+        case "settings_store_statusVacation":
+        case "settings_store_onVacation_message":
+            vacationSettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "store_settings_display_currency":
+            currencySettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "store_settings_weight_units_1":
+        case "store_settings_weight_units_0":
+            unitSettingsSaveVar = true;
+            break;
+    }
+
+    switch (el) {
+        case "store_settings_character_set":
+            charSettingsSaveVar = true;
+            break;
+    }
+}
+
+function runSavePageLocal() {
+
+    var saveSettingsCount = 0;
+
+    if (TaxSettingsSaveVar) { saveSettingsCount++; }
+    if (priceSettingsSaveVar) { saveSettingsCount++; }
+    if (nameSettingsSaveVar) { saveSettingsCount++; }
+    if (vacationSettingsSaveVar) { saveSettingsCount++; }
+    if (currencySettingsSaveVar) { saveSettingsCount++; }
+    if (unitSettingsSaveVar) { saveSettingsCount++; }
+    if (charSettingsSaveVar) { saveSettingsCount++; }
+
+
+
+    if (nameSettingsSaveVar) { nameSettingsSave(saveSettingsCount); }
+    if (vacationSettingsSaveVar) { vacationSettingsSave(saveSettingsCount); }
+    if (currencySettingsSaveVar) { currencySettingsSave(saveSettingsCount); }
+    if (unitSettingsSaveVar) { unitSettingsSave(saveSettingsCount); }
+    if (charSettingsSaveVar) { charSettingsSave(saveSettingsCount); }
+    if (TaxSettingsSaveVar) { TaxSettingsSave(saveSettingsCount); }
+    if (priceSettingsSaveVar) { priceSettingsSave(saveSettingsCount); }
+
+}
+
+function TaxSettingsSave(saveSettingsCount) {
+
+    $.each(vatCountriesSelected, function () {
+        delete this.__type;
+    });
+
+    var taxRate = $('#pricing_settings_default_tax').val();
+    if (taxRate.length == "") {
+        taxRate = 0;
+    }
+
+    var taxSettings = {
+        chargeTax: $('#storeTax').text(),
+        taxrate: taxRate,
+        countries: vatCountriesSelected
+    };
+
+    var url = "/services/settingsv2/settings_pricing.svc/saveTax";
+    var data = JSON.stringify({ storeId: storeId, settings: taxSettings });
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "post";
+    var saveUrl = [url, data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+
+}
+
+function priceSettingsSave(saveSettingsCount) {
+
+    setTimeout(function () {
+
+        var pricingSettings = {
+            includeVAT: $('#priceTax').text()
+        };
+
+        pricingSettings = JSON.stringify(pricingSettings);
+
+        var returningPageName = "Homepage";
+        var returningPageLink = "/main.aspx";
+        var currentPageLink = "/settings.aspx";
+        var saveType = "get";
+        var saveUrl = '/services/settingsv2/settings_pricing.svc/savePricing?storeId=' + storeId + '&settings=' + pricingSettings;
+
+        runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+
+    }, 1500);
+
+}
+
+
+function nameSettingsSave(saveSettingsCount) {
+
+    var nameSettings = {
+        name: stripHTMLPost($('#store_settings_name').val().trim())
+    };
+    var arr = JSON.stringify({
+        storeId: storeId,
+        settings: nameSettings//JSON.stringify(nameSettings)
+    });
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "post";
+    var saveUrl = ['/services/settingsv2/settings_store.svc/saveName', arr];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+}
+
+function vacationSettingsSave(saveSettingsCount) {
+
+    var vacaSettings = {
+        onVacation: JSON.parse($('#settings_store_status').text()),
+		vacationMsg: stripHTMLPost($('#settings_store_onVacation_message').val().trim())
+    };
+
+    var url = "/services/settingsv2/settings_store.svc/saveVacaSettings";
+    var data = {
+        "storeId": storeId,
+        "settings": vacaSettings
+    }
+
+    data = JSON.stringify(data);
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "post";
+    var saveUrl = [url, data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+
+}
+
+function currencySettingsSave(saveSettingsCount) {
+
+    var currency = $('#store_settings_display_currency').val()
+
+    /*var currencySettings = {
+        currency: $('#store_settings_display_currency').val()
+    };*/
+
+    // Get Supported Checkouts with new currency
+    // Get Enabled Checkouts
+        // If enabled checkout is not supported show warning before saving
+
+    currencyLoadSupportedCheckouts(currency, saveSettingsCount);
+}
+
+var currencySupportedCheckouts = null;
+var currencyEnabledCheckouts = null;
+
+function currencyLoadSupportedCheckouts(currency, saveSettingsCount) {
+
+    axiosGet("/services/settingsv2/settings_store.svc/currencyLoadSupportedCheckout?storeId=" + storeId + "&currency=" + currency).then(function (data) {
+        trace('LoadSupportedCheckouts:success');
+
+        currencySupportedCheckouts = data.d || data;
+        console.log(currencySupportedCheckouts);
+
+        if (currencySupportedCheckouts != null) {
+            currencyLoadEnabledCheckouts(saveSettingsCount);
+        } else {
+            currencySettingsSaveFinal(saveSettingsCount);
+        }
+
+    }).catch(function (e) {
+        trace('LoadSupportedCheckouts:error');
+        currencySettingsSaveFinal(saveSettingsCount);
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+
+    }).then(function () {
+        trace('LoadSupportedCheckouts:complete');
+    });
+
+}
+
+function currencyLoadEnabledCheckouts(saveSettingsCount) {
+
+    axiosGet("/services/settingsv2/settings_store.svc/currencyEnabledCheckouts?storeId=" + storeId).then(function (data) {
+        currencyEnabledCheckouts = data.d || data;
+        console.log(currencyEnabledCheckouts);
+
+        if (currencyEnabledCheckouts != null) {
+            currencyCheckSupportedCheckouts(saveSettingsCount);
+        } else {
+            currencySettingsSaveFinal(saveSettingsCount);
+        }
+
+    }).catch(function (e) {
+        trace('EnabledCheckouts:error');
+        currencySettingsSaveFinal(saveSettingsCount);
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        trace('LoadSupportedCheckouts:complete');
+    });
+
+}
+
+var notSupportedCheckouts = new Array();
+var saveSettingsCountCurrency = 0;
+function currencyCheckSupportedCheckouts(saveSettingsCount) {
+
+    var id = null;
+    Object.keys(currencySupportedCheckouts).forEach(function (key, obj) {
+        var status = false;
+        $.each(currencyEnabledCheckouts, function () {
+            if (key === this.merchant) {
+                status = true;
+                id = this.merchantID;
+            }
+            if ((key === "skrill") && (this.merchant === "moneybookers")) {
+                status = true;
+                id = this.merchantID;
+            }
+            if ((key === "ingenico") && (this.merchant === "ogone")) {
+                status = true;
+                id = this.merchantID;
+            }
+            if ((key === "mygate") && (this.merchant === "mygate.co.za")) {
+                status = true;
+                id = this.merchantID;
+            }
+            if ((key === "checkout2") && (this.merchant === "2checkout")) {
+                status = true;
+                id = this.merchantID;
+            }
+            if ((key === "authorize") && (this.merchant === "authorize.net")) {
+                status = true;
+                id = this.merchantID;
+            }
+        });
+        if (key != "__type") {
+
+            if (currencySupportedCheckouts[key] == false && status == true) {
+                notSupportedCheckouts.push({ "checkout": key, "allowed": currencySupportedCheckouts[key], "enabled": status, "merchantID": id, "type": "normal" });
+            }
+        }
+    });
+
+    console.log(notSupportedCheckouts);
+    if (notSupportedCheckouts.length > 0) {
+
+        var notSupportedHtml = '';
+
+        for (var i = 0; i < notSupportedCheckouts.length; i++) {
+
+            var name = notSupportedCheckouts[i].checkout;
+            var image = notSupportedCheckouts[i].checkout;
+
+            if (name == "epdq") {
+                name = "Barclaycard EPDQ";
+            }
+            if (name == "authorize") {
+                name = "authorize.net";
+                image = "authorize";
+            }
+            if (name == "checkout2") {
+                name = "2Checkout";
+                image = "2checkout";
+            }
+            if (name == "totalwebsolutions") {
+                name = "TotalWebSolutions";
+            }
+            if (name == "paymentsense") {
+                name = "Payment Sense";
+            }
+            if (name == "ppcpcard") {
+                name = "PayPal: Advanced Card Payments";
+                image = "paypal";
+            }
+            if (name == "ppcp") {
+                name = "PayPal: Wallet & Express";
+                image = "paypal";
+            }
+
+            image = "images/checkouts/" + image + ".png";
+
+            var notSupportedHtmlItem = '<div class="modal_currency_change_check_item">';
+                    notSupportedHtmlItem += '<div class="modal_currency_change_check_item_inner">';
+                        notSupportedHtmlItem += '<img src="' + image +' " />';
+                        notSupportedHtmlItem += '<strong>' + name + '</strong>';
+                    notSupportedHtmlItem += '</div>';
+                notSupportedHtmlItem += '</div>';
+
+            notSupportedHtml += notSupportedHtmlItem;
+
+        }
+
+        document.getElementById("modal_currency_change_check_items").innerHTML = notSupportedHtml;
+
+        document.getElementById("modal_currency_change_check_buttonCancel").classList.remove("button_disabled");
+        document.getElementById("modal_currency_change_check_buttonConfirm").classList.remove("button_disabled");
+        document.getElementById("modal_currency_change_check_buttonConfirm").innerHTML = 'Confirm';
+
+        divFadeIn(".overlay_forced", ".modal_currency_change_check");
+        hideByClass("save_modal");
+
+        saveSettingsCountCurrency = saveSettingsCount;
+
+    } else {
+        currencySettingsSaveFinal(saveSettingsCount);
+    }
+    
+
+}
+
+function cancelCurrencyChange() {
+    multipleComplete++;
+    closeFinalSave("Settings", "/settings.aspx", "/settings.aspx", null, null, null, null, null);
+    hideByClass("overlay_forced", "modal_currency_change_check");
+    showByClass("save_modal");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+}
+
+function confirmCurrencyDisableCheckouts() {
+
+    document.getElementById("modal_currency_change_check_buttonCancel").classList.add("button_disabled");
+    document.getElementById("modal_currency_change_check_buttonConfirm").classList.add("button_disabled");
+    document.getElementById("modal_currency_change_check_buttonConfirm").innerHTML = '<i class="fa fa-spinner fa-spin"></i> Disabling Checkouts';
+
+    var checkoutDisabled = 0;
+
+    for (var i = 0; i < notSupportedCheckouts.length; i++) {
+
+        var merchant = notSupportedCheckouts[i].merchantID;
+
+        console.log(merchant);
+        axiosGet('/services/settingsv2/settings_store.svc/currencyDisableCheckoutX?storeId=' + storeId + "&merchant=" + merchant).then(function (data) {
+            console.log("currencyDisableCheckout:success");
+            checkoutDisabled++;
+        }).catch(function (e) {
+            console.log("currencyDisableCheckout:error");
+            checkoutDisabled++;
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+            console.log("currencyDisableCheckout:complete");
+            
+            if (checkoutDisabled === notSupportedCheckouts.length) {
+                hideByClass("overlay_forced", "modal_currency_change_check");
+                document.querySelector("body").classList.remove("body_modal_is_open");
+                currencySettingsSaveFinal(saveSettingsCountCurrency);
+            }
+
+        });
+
+    }
+
+}
+
+
+
+function currencySettingsSaveFinal(saveSettingsCount) {
+
+    var currencySettings = {
+        currency: $('#store_settings_display_currency').val()
+    };
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "get";
+    var saveUrl = '/services/settingsv2/settings_store.svc/saveCurrencySettings?storeId=' + storeId + '&settings=' + JSON.stringify(currencySettings);
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+}
+
+function unitSettingsSave(saveSettingsCount) {
+
+    console.log("--------unit");
+
+    var unit = "g";
+    if (document.querySelector("input[name='store_settings_weight_units']:checked").getAttribute("id") === "store_settings_weight_units_0") {
+        unit = "oz";
+    }
+
+    var unitSettings = {
+        unit: unit
+    };
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "get";
+    var saveUrl = '/services/settingsv2/settings_store.svc/saveUnitSettings?storeId=' + storeId + '&settings=' + JSON.stringify(unitSettings);
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+}
+
+function charSettingsSave(saveSettingsCount) {
+
+    var charSettings = {
+        charset: $("#store_settings_character_set").val()
+    };
+
+    var returningPageName = "Homepage";
+    var returningPageLink = "/main.aspx";
+    var currentPageLink = "/settings.aspx";
+    var saveType = "get";
+    var saveUrl = '/services/settingsv2/settings_store.svc/saveCharSettings?storeId=' + storeId + '&settings=' + JSON.stringify(charSettings);
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
+
+
+
+function currencyNotSupported() {
+    divFadeIn(".modal_overlay", ".modal_currency_not_supported");
+}
+
+function vacationModeResendVerificationEmail() {
+
+    document.getElementById("vacation_mode_resend_email_button").innerHTML = "<i class='fa fa-spinner fa-spin'></i> Resending Email";
+    document.getElementById("vacation_mode_resend_email_button").classList.add("button_disabled");
+
+    axiosGet("/services/User.svc/ResendActivationEmail?storeId=" + storeId).then(function (data) {
+
+        var result = data.d || data;
+        console.log(result);
+
+        if (result == true) {
+
+            document.getElementById("vacation_mode_resend_email_button").innerHTML = "<i class='fa fa-check color_green'></i> Email Sent";
+            document.getElementById("vacation_mode_resend_email_button").removeAttribute("onclick");
+
+        } else {
+            document.getElementById("vacation_mode_resend_email_button").innerHTML = "<i class='fa fa-exclamation-triangle'></i> Failed - Try Again";
+            document.getElementById("vacation_mode_resend_email_button").classList.remove("button_disabled");
+        }
+
+    }).catch(function () {
+
+        document.getElementById("vacation_mode_resend_email_button").innerHTML = "<i class='fa fa-exclamation-triangle'></i> Failed - Try Again";
+        document.getElementById("vacation_mode_resend_email_button").classList.remove("button_disabled");
+
+
+    }).then(function () {
+
+    });
+
+}
