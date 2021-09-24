@@ -1,0 +1,8 @@
+﻿
+.busy_wait_billingv2{
+    display: block;
+}
+
+#modal_billingv2_list_payment_methods_error, #modal_billingv2_check_vat_error{
+    display: none;
+}
