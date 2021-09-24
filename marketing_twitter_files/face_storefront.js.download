@@ -1,0 +1,115 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "FACEBOOK", uuid: beaverGuid });
+
+function startStoreFront() {
+    axiosGet("/services/Facebook.svc/facebookstore?storeId=" + storeId).then(function (data) {
+        startCheck();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function startCheck() {
+    axiosGet("/services/Facebook.svc/startcheck?storeId=" + storeId).then(function (data) {
+        if (data.d === 404) {
+            $(".facebook1").hide();
+        } else if (data.d === 202) {
+            $("#facebook1_button").hide();
+            $(".facebook1_process").show();
+        } else {
+            $(".facebook1").hide();
+            buildStorefrontInstructions();
+            $(".facebook2").show();
+        }
+
+        $(".busy_wait_facebook_initial").hide();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+var fbStartNum = 1;
+
+function buildStorefrontInstructions() {
+
+    var cookieGetFBstorefrontNum = Cookies.get('fwsFBstorefrontNum_' + storeId);
+    if (cookieGetFBstorefrontNum != null) { fbStartNum = cookieGetFBstorefrontNum }
+
+    buildInstructions(fbStartNum);
+
+}
+
+function buildInstructions(fbStartNum) {
+    $(".face_storefront_item").remove();
+
+    Cookies.set('fwsFBstorefrontNum_' + storeId + '', fbStartNum);
+
+    var fbContentObj = [
+        { "num": 1, "title": "Create a Page", "content": "Visit the following page and click the <strong>Create a Page</strong> button: <a href='https://www.facebook.com/business/products/pages' target='_blank' class='link_color_primary link_word_break'>https://www.facebook.com/business/products/pages</a>", "image": "" },
+        { "num": 2, "title": "Select Page Type", "content": "Select the type of Page you want to create, such as: <ul><li>Local business or place;</li><li>Company, organisation or institution;</li> <li>Brand or product;</li><li>Artist, band or public figure;</li><li>Entertainment;</li><li>Cause or community.</li></ul>", "image": "images/marketing/socialmedia/face-storefront-choosetype.png" },
+        { "num": 3, "title": "Enter Requested Details", "content": "Enter the details requested and then click the Get Started button.", "image": "images/marketing/socialmedia/face-storefront-getstarted.png" },
+        { "num": 4, "title": "Account", "content": "Create a new account or sign in with an existing Facebook account. If you use an existing account, you'll be able to select which account you want to manage in future whenever you log in.", "image": "" },
+        { "num": 5, "title": "Details", "content": "Add a Profile Photo and a Cover Photo (or skip these steps and add your details later).", "image": "" },
+        { "num": 6, "title": "Add Store", "content": "Visit the following URL to view our default app page: <a href='https://www.facebook.com/Free-Webstore-Storefront-Community-220032744764981/app/133570783413655/' target='_blank' class='link_color_primary link_word_break'>Freewebstore Community</a> and click the <strong>Add store to my page</strong> link.", "image": "" },
+        { "num": 7, "title": "Select a Page", "content": "Select the appropriate Page from the dropdown list then click the <strong>Add Page Tab</strong> button.", "image": "images/marketing/socialmedia/face-storefront-addpagetab.png" },
+        { "num": 8, "title": "Return", "content": "Once that's been done, return to your new Facebook Page and you'll see a <strong>Store</strong> icon on the left-hand side of the Page.", "image": "images/marketing/socialmedia/face-storefront-storeicon.jpg" },
+        { "num": 9, "title": "Store Icon", "content": "Click on the <strong>Store</strong> icon.", "image": "" },
+        { "num": 10, "title": "Shopkeeper ID", "content": "Enter your <strong>Shopkeeper ID</strong> in the box provided and click <strong>Submit</strong>. Your Shopkeeper ID is: <strong>" + storeId + "</strong>", "image": "images/marketing/socialmedia/face-storefront-entershopid.png" },
+        { "num": 11, "title": "Complete", "content": "That's it. Your products will then be listed in the <strong>Store</strong> app section of your Facebook Page. When a customer clicks on one of the products, they will be taken directly to the relevant product page on your store.", "image": "" }
+    ];
+
+    $.each(fbContentObj, function () {
+        if (this.num == fbStartNum) {
+            
+
+            var content = '<div class="face_storefront_item_content">' + this.content + '</div>';
+
+            var image = '';
+            if (this.image.length > 0) {
+
+                content = '<div class="width_50">';
+                content += '<div class="face_storefront_item_content">' + this.content + '</div>';
+                content += '</div>';
+                content += '<div class="width_50">';
+                content += '<img class="face_storefront_item_image" src="' + this.image + '" />';
+                content += '</div>';
+            }
+            var button1 = '';
+            var button2 = '';
+            if (this.num > 1) {
+                var button1Num = this.num - 1;
+                button1 = '<a class="button button_lgrey left" onclick="buildInstructions(' + button1Num + ');">Previous</a>';
+            }
+            if (this.num < 11) {
+                var button2Num = this.num + 1;
+                button2 = '<a class="button button_primary right" onclick="buildInstructions(' + button2Num + ');">Next</a>';
+            }
+
+            $("#face_storefront_container").append('<div class="panel_white face_storefront_item" data-num="' + this.num + '">' +
+                                                    '<h2><span class="face_storefront_item_number">'+this.num+'</span> ' + this.title + '</h2>' +
+                                                    '<div class="hide_overflow">' +
+                                                        content +
+                                                    '</div>' +
+                                                    '<div class="hide_overflow margint20">' +
+                                                        button1 +
+                                                        button2 +
+                                                    '</div>' +
+                                                   '</div>');
+
+        }
+    });
+}
+
+
+function sendTweetNow(id, detalis) {
+    axiosGet("/services/Facebook.svc/sendTweet?storeId=" + id + "&details=" + detalis).then(function () {
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}

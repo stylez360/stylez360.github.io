@@ -1,0 +1,298 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "TWITTER", uuid: beaverGuid });
+
+function isAuthenticated() {
+    return (localStorage.getItem('twitterScreenName') || localStorage.getItem('twitterAccessTokens')) ? true : false;
+}
+
+var hasLink = false;
+
+function buildPreview() {
+    if (isAuthenticated) {
+        var message = document.getElementById('message');
+        if (message.value.length > 0) {
+            var msgVal = message.value;
+            var date = new Date();
+            document.getElementById('twitterHandle').innerText = "@" + localStorage.getItem('twitterScreenName');
+            document.getElementById('tweetTime').innerText = moment(date).format('hh:mm A');
+            document.getElementById('tweetDate').innerText = moment(date).format('MMM DD, YYYY');
+            var url = "<a class='tweetLink' target='_blank' href='https://" + storeUrl + "'>https://" + storeUrl + "</a>";
+            msgVal = msgVal + " " + url;
+            if (!businessUser) {
+                msgVal = msgVal + " <a class='tweethighlight'>#FWS</a> <a class='tweethighlight'>@Freewebstore</a></span>";
+                if (!hasLink) { hasLink = true; document.getElementById('previewTweetHead').innerHTML += '<span class="static_tool_tip right" onclick="inputHelpText(\'previewFree\')">?</span>'; }
+            }
+            renderView(msgVal);
+        } else {
+            hideView();
+        }
+    }
+}
+
+function inputHelpText(el) {
+    $(".input_help_text[data-help='" + el + "']").slideToggle();
+}
+
+function renderView(message) {
+    document.getElementById('composedMsg').innerHTML = message;
+    document.getElementById('previewtweet').style.display = "block";
+}
+
+function hideView() {
+    document.getElementById('composedMsg').innerHTML = "";
+    document.getElementById('previewtweet').style.display = "none";
+}
+
+// URLS
+var callback = location.href;
+if (location.href.includes("localhost")) callback = 'http://localhost:55779/marketing_twitter.aspx';
+
+// Post tweet
+getId('tweet').addEventListener('click', function () {
+    tweet();
+});
+
+var isAuthenticated = isAuthenticated();
+
+// If user is authenticated, create their timelime, otherwise show the fws timeline
+isAuthenticated ? authenticate() : unAuthenticate();
+
+var oauthVerifier = getParameterByName('oauth_verifier');
+
+// Check the url to see if the 'oauth_verifier' param exists so we can get the access tokens
+if (oauthVerifier) setAccessToken(oauthVerifier);
+
+// Generate the Twitter Auth Url
+(function generateUrl() {
+    hideById("smtw_get_started_button_oops");
+    axiosPost('./services/thirdparty/twitter.svc/generateAuthToken', JSON.stringify({ "storeId": storeId, "callback": callback })).then(function (response) {
+        response = response.d;
+        console.log('Response from generateAuthToken', response);
+        if (response.url) {
+            localStorage.setItem('twitterRequestTokens', JSON.stringify(response));
+            getId('smtw_get_started_button').href = response.url;
+        } else {
+            getId('authorize_feedback').innerHTML = 'Failed to generate the Twitter Authorization URL.';
+            showById("smtw_get_started_button_oops");
+        }
+    }).catch(function () {
+        getId('authorize_feedback').innerHTML = 'Failed to generate the Twitter Authorization URL.';
+        showById("smtw_get_started_button_oops");
+    });
+})();
+
+function setAccessToken(oauthVerifier) {
+    console.log('Got oauth verifier!', oauthVerifier);
+    var twitterData = localStorage.getItem('twitterRequestTokens');
+    twitterDataParsed = JSON.parse(twitterData);
+    var requestToken = twitterDataParsed.requestToken;
+    var requestTokenSecret = twitterDataParsed.requestTokenSecret;
+
+    var data = JSON.stringify({
+        "storeId": storeId,
+        "requestToken": requestToken,
+        "requestTokenSecret": requestTokenSecret,
+        "oauth_verifier": oauthVerifier
+    });
+
+    axiosPost('./services/thirdparty/twitter.svc/setTokens', data).then(function (response) {
+        response = response.d;
+        console.log('Response from get access token', response);
+        localStorage.setItem('twitterScreenName', response.screen_name);
+        cleanUrl();
+        localStorage.setItem('twitterAccessTokens', JSON.stringify(response));
+        authenticate();
+    });
+}
+
+// Close modal
+function closeModal() {
+    document.body.classList.remove('body_modal_is_open');
+    fadeOutClass("modal_overlay", "modal", "modal_forced", "overlay_forced", "modal_doverlay", "modal_links", "modal_x_button");
+}
+
+function authenticate() {
+
+    // Set the screenname
+    var screenName = localStorage.getItem('twitterScreenName');
+    //getId('screen_name').setAttribute('screen-name', screenName);
+
+    // Create the timeline & show it
+    createTimeline(screenName, 'me');
+
+
+    hideById("busy_wait_smtw_container");
+    showById("smtw_stage1", "sharetwitter");
+    setTimeout(function () {
+        document.getElementById("smtw_stage1").classList.add("smtw_stage1_generating");
+    }, 100);
+    document.getElementById("revoke_access").style.display = "flex";
+    hideById("smtw_get_started_button_container");
+
+}
+
+function unAuthenticate() {
+
+    // Hide tweet box
+    hideById('sharetwitter');
+
+    // Create FWS Timeline
+    createTimeline('freewebstore', 'me');
+
+    // Clear error messages
+    getId('authorize_feedback').innerHTML = "";
+
+    hideById("busy_wait_smtw_container");
+    showById("smtw_stage1", "smtw_get_started_button_container");
+    setTimeout(function () {
+        document.getElementById("smtw_stage1").classList.add("smtw_stage1_generating");
+    }, 100);
+}
+
+function createTimeline(screenName, profile) {
+    var id;
+    if (profile === 'me') id = 'user_timeline';
+    else id = 'freewebstore_timeline';
+
+    document.querySelector(".twitter-timeline").setAttribute("href", "https://twitter.com/" + screenName)
+
+
+    twttr.widgets.createTimeline(
+        {
+            sourceType: 'profile',
+            screenName: screenName
+        },
+        document.getElementById(id),
+        {
+            width: '450',
+            height: '700',
+            related: 'twitterdev,twitterapi'
+        }).then();
+
+    showById("user_timeline");
+}
+
+// Revoke twitter auth
+function revokeTwitterAuth() {
+    localStorage.removeItem('twitterAccessTokens');
+    localStorage.removeItem('twitterScreenName');
+    unAuthenticate();
+    location.reload();
+}
+
+// Tweet
+function tweet() {
+    var message = getId('message').value;
+
+    // User hasn't entered a message
+    if (!message || storeId == "783418") return getId('tweet_feedback').innerHTML = '<p class="alert" style="display:block;">Please enter a message</p>';
+
+    // Clear the error
+    getId('tweet_feedback').innerHTML = "";
+
+    // Show loader
+    showAllByClass('.busy_wait_tweet');
+
+    if (hasAccessToken) {
+        console.log('User has access token!');
+        var twitterAccessTokens = localStorage.getItem('twitterAccessTokens');
+        var twitterAccessTokensParsed = JSON.parse(twitterAccessTokens);
+        var accessToken = twitterAccessTokensParsed.accessToken;
+        var accessTokenSecret = twitterAccessTokensParsed.accessTokenSecret;
+
+        var data = JSON.stringify({
+            "storeId": storeId,
+            "accessToken": accessToken,
+            "accessTokenSecret": accessTokenSecret,
+            "message": message
+        });
+
+        console.log('Data to be sent', data);
+        var url = './services/thirdparty/twitter.svc/Tweet';
+
+        axiosPost(url, data).then(function (response) {
+            response = response.d;
+            console.log('Response from Tweet', response);
+            hideAllByClass('.busy_wait_tweet');
+            if (response.m_Item1 === false) {
+                hideAllByClass('.busy_wait_tweet');
+                if (response.m_Item2 == "TWEET_RATE_LIMIT") {
+                    return getId('tweet_feedback').innerHTML = '<p class="alert" style="display:block;">You\'ve sent too many tweets in the past hour. Try again later.</p>';
+                }
+                return getId('tweet_feedback').innerHTML = '<p class="alert" style="display:block;">Failed to tweet! Please click the \'Revoke Twitter Access\' and try again.</p>';
+            }
+            closeModal();
+            var msg = 'Successfully tweeted!';
+            success(msg);
+        });
+    } else {
+        hideAllByClass('.busy_wait_tweet');
+        console.log('User has no access token!');
+    }
+}
+
+function success(msg) {
+    getId('tweet_feedback').innerHTML = '<p style="color: #5DC548">' + msg + '</p>';
+    getId('message').value = "";
+}
+
+// Checks if user has an access token so he can tweet
+function hasAccessToken() {
+    return localStorage.getItem('twitterAccessTokens') ? true : false;
+}
+
+// Clean url 
+function cleanUrl() {
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+// Get url param
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+var origNumber = 280;
+if (businessUser === 0) origNumber = (280 - 19);
+var _urlStr = "https://" + storeUrl;
+var maxLength = origNumber - _urlStr.length;
+getId('message').setAttribute('maxlength', maxLength);
+getId('chars').innerText = maxLength;
+
+multipleEventHandler('#message', 'keyup', function (el) {
+    var length = el.target.value.length;
+    length = maxLength - length;
+    getId('chars').innerText = length;
+});
+
+ready(function () {
+    if (businessUser === 0) showByClass('freeuser');
+    else hideByClass('freeuser');
+});
+
+
+function openTwitterShareHelp(which) {
+    divFadeIn(".modal_overlay", ".modal_smtw_help[data-id='" + which + "']");
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});

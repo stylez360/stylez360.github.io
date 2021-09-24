@@ -1,0 +1,236 @@
+﻿
+
+.busy_wait_smtw{
+    display: block;
+}
+
+#busy_wait_smtw_oops, #smtw_stage1, #sharetwitter, #revoke_access, #previewtweet, #user_timeline{
+    display: none;
+}
+
+
+#busy_wait_smtw_container{
+    margin: 10% auto 0 auto;
+    max-width: 350px;
+}
+
+#smtw_stage1{
+    margin-top: 10%;
+    text-align: center;
+    transition: 0.4s;
+}
+
+#smtw_stage1.smtw_stage1_generating{
+    margin-top: 5%;
+}
+
+#smtw_stage1_icon{
+    font-size: 8rem;
+    color: #27a1f2;
+}
+
+#smtw_stage1_title{
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+@media only screen and (min-width:600px) {
+    #smtw_stage1_title{
+        font-size: 2rem;
+    }
+}
+
+#smtw_stage1_subtitle{
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+
+
+
+#smtw_get_started_button_container {
+    margin: 40px auto 0 auto;
+    text-align: center;
+    display: none;
+}
+
+#smtw_get_started_button{
+    height: 50px;
+    line-height: 50px;
+    background-color: #27a1f2;
+    color: #FFF;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: 0.4s;
+}
+
+#smtw_get_started_button:hover{
+    background-color: #248cd2
+}
+
+#smtw_get_started_button:hover #smtw_get_started_button_text{
+    border-color: #27a1f2;
+}
+
+#smtw_get_started_button.smtw_get_started_button_generating{
+    background-color: #33415f !important; 
+    cursor: text;
+}
+
+#smtw_get_started_button_text{
+    padding: 0 20px;
+    border-right: 1px dashed #82c0e8;
+}
+
+#smtw_get_started_button.smtw_get_started_button_generating #smtw_get_started_button_text{
+    border-color: #536386 !important;
+}
+
+#smtw_get_started_button_icon{
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+#smtw_get_started_button_oops{
+    color: #ea1636;
+    font-weight: bold;
+    display: none;
+}
+
+
+
+#sharetwitter, #previewtweet, #user_timeline{
+    margin: 50px auto 0 auto;
+    max-width: 500px;
+}
+
+
+
+
+
+
+
+
+#smtw_help{
+    margin-top: 50px;
+}
+
+#smtw_help_title{
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#smtw_help_inner{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#smtw_help_inner .page_link{
+    margin: 0 20px 20px 20px;
+}
+
+.modal_smtw_help_link {
+    background-color: #f5f5f7;
+    display: inline-block;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+
+
+
+
+
+
+.container_wrapper {
+    padding-bottom: 20px;
+    position: relative;
+    width: 100%;
+    border-radius: 2px;
+    bottom: 10px;
+}
+
+.upper_img_container {
+    display: inline-block;
+}
+
+.upper_img_container img {
+    width: 40px;
+    border-radius: 50%;
+}
+
+.upper_user_container {
+    position: relative;
+    display: inline-block;
+    top: -5px;
+}
+
+.middle_container, .upper_container {
+    padding: 15px;
+}
+
+.middle_container, .bottom_container {
+    padding-top: 0px;
+    padding-left: 25px;
+}
+
+
+.bottom_container span {
+    color: rgb(136, 153, 166);
+    line-height: 1.3125;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    border: 0 solid black;
+    box-sizing: border-box;
+    display: inline;
+    font-size: 14px;
+    margin-left: 0px;
+    margin-right: 0px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.bottom_container div a, .tweethighlight {
+    white-space: normal;
+    color: rgb(224, 36, 94);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.tweetLink {
+    white-space: normal;
+    color: rgb(32, 183, 230);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.bottom_container span a:hover, .tweethighlight:hover, .tweetLink:hover {
+    text-decoration-line: underline;
+}
+
+#composedMsg {
+    color: rgb(0, 0, 0);
+    line-height: 1.3125;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    border: 0 solid black;
+    box-sizing: border-box;
+    display: inline;
+    font-size: 14px;
+    margin-left: 0px;
+    margin-right: 0px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
