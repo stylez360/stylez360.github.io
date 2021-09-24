@@ -1,0 +1,285 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "NEWSLETTER", uuid: beaverGuid });
+var allNewsletter;
+var newsletterItems;
+var subscribers;
+var startpg = 0;
+var limit = 10;
+var baseLimit = 10;
+
+var paginationTotalItems;
+var paginationPageItems;
+var paginationPageStart;
+var paginationShowAll;
+
+function loadNewsletterObject() {
+
+    hideById("newsletter_container", "newsletter_status_panel", "newsletter_error");
+    showByClass("busy_wait_newsletter", "busy_wait_newsletter_status");
+    showById("newsletter_table_container", "newsletter_status_container");
+    document.getElementById("newsletter_add_new").classList.add("button_disabled");
+
+
+    axiosGet("/services/Newsletter.svc/getNewsletterSettings?storeId=" + storeId).then(function (data) {
+        allNewsletter = data.d || data;
+        console.log(allNewsletter);
+
+        newsletterItems = allNewsletter.items;
+
+        subscribers = newsletterItems.sort(dynamicSort("created"));
+
+        if (allNewsletter.items.length > 0) {
+            hideById("zero_newsletter_found");
+            $("#newsletter_table").show();
+            $("#downloadCSV").removeClass("button_disabled");
+            showById("newsletter_sorts", "newsletter_search_container");
+        } else {
+            showById("zero_newsletter_found");
+            $("#newsletter_table").hide();
+            $("#downloadCSV").addClass("button_disabled");
+        }
+
+        buildNewsletter(startpg);
+
+        document.getElementById("newsletter_add_new").classList.remove("button_disabled");
+
+    }).catch(function (e) {
+        showById("newsletter_error");
+        hideById("newsletter_table_container", "newsletter_status_container");
+        document.getElementById("newsletter_add_new").classList.add("button_disabled");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    });
+
+}
+
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a, b) {
+        var result = (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+
+function buildNewsletter(startpg) {
+
+    if (allNewsletter.enabled == true) {
+        document.getElementById("newsletter_published").setAttribute("checked", true);
+    } else {
+        document.getElementById("newsletter_notpublished").setAttribute("checked", true);
+    }
+
+    if (allNewsletter.type == false) {
+        document.getElementById("newsletter_options").value = "newsletter_options_1";
+    } else {
+        document.getElementById("newsletter_options").value = "newsletter_options_2";
+    }
+
+    showById("newsletter_status_panel");
+    hideByClass("busy_wait_newsletter_status");
+
+    buildNewsletterTable(startpg, limit);
+
+}
+
+function newsletterPageSize() {
+
+    var size = document.getElementById("dlPageSize").value;
+    buildNewsletterTable(0, size)
+
+}
+
+
+function clearNewsletterSearch() {
+    document.getElementById("newsletter_search").value = "";
+    hideById("newsletter_container_zero_search");
+    newsletterSearch();
+}
+
+function newsletterSearch() {
+
+    var search = document.getElementById("newsletter_search").value.trim();
+
+    if (search.length === 0) {
+        subscribers = newsletterItems;
+        buildNewsletterTable(0, 10);
+    } else {
+        var searchedSubscribers = newsletterItems;
+
+        subscribers = [];
+
+        searchedSubscribers.filter(function (obj) {
+            if (obj.email.toString().includes(search) || obj.name.toString().includes(search)) {
+                subscribers.push(obj);
+            }
+        });
+
+        if (subscribers.length == 0) {
+            document.getElementById("newsletter_zero_search_value").innerText = search;
+            showById("newsletter_container_zero_search");
+            hideById("newsletter_container");
+        } else {
+            hideById("newsletter_container_zero_search");
+            showById("newsletter_container");
+            buildNewsletterTable(0, 10);
+        }
+
+    }
+
+}
+
+function buildNewsletterTable(startpg, limit) {
+    console.log(newsletterItems)
+    document.querySelector("#newsletter_table tbody").innerHTML = "";
+
+    var newsletterItemsList = subscribers.slice(startpg, limit);
+
+    var newsletterHtml = "";
+
+    for (var i = 0; i < newsletterItemsList.length; i++) {
+        var email = newsletterItemsList[i].email;
+        var dataDelete = false;
+        var iconDelete = "fa-times";
+        var titleDelete = "Delete";
+
+        if (tableRowDeleteArray.length > 0) {
+            for (var t = 0; t < tableRowDeleteArray.length; t++) {
+                if (tableRowDeleteArray[t].email == email) {
+                    dataDelete = true;
+                    iconDelete = "fa-undo";
+                    titleDelete = "Undo Delete";
+                }
+            }
+        }
+
+        
+        var button = '<td><a class="button button_primary" href="/orders_customers_view?cid=' + newsletterItemsList[i].customerid + '">View</td>';
+        
+
+        var newsletterItemHtml = '<tr class="newsletter_list_item" data-id="' + email + '" data-delete="' + dataDelete + '" data-newsletter="' + email + '">';
+        newsletterItemHtml += button;
+        newsletterItemHtml += '<td><strong class="color_primary">' + email + '</strong></td>';
+        newsletterItemHtml += '<td>' + newsletterItemsList[i].name.trim() + '</td>';
+        newsletterItemHtml += '<td>' + GetDateString(newsletterItemsList[i].created) + '</td>';
+        newsletterItemHtml += '<td><i class="fa ' + iconDelete + ' table_row_delete_icon newsletter_list_icon_delete" aria-hidden="true" title="' + titleDelete + '" onclick="tableRowDelete(\'newsletter_list_item\', \'' + email + '\', \'' + newsletterItems[i].customerid + '\')"></i></td>';
+        newsletterItemHtml += '</tr>';
+
+        newsletterHtml += newsletterItemHtml;
+    }
+
+    document.querySelector("#newsletter_table tbody").innerHTML = newsletterHtml;
+
+    paginationDataType = "subscriber";
+    paginationTotalItems = subscribers.length;
+    paginationPageItems = baseLimit;
+    paginationPageStart = startpg / baseLimit;
+    paginationPageStart = Math.ceil(paginationPageStart);
+    paginationShowAll = true;
+
+    $(".pagination_number_results, .pagination_text_results").remove();
+    pagination(paginationTotalItems, paginationPageItems, paginationPageStart, paginationShowAll);
+
+    setTimeout(function () {
+        showById("newsletter_container");
+        hideByClass("busy_wait_newsletter");
+    }, 2000);
+}
+
+function rebuildPaginationsubscriber(paginationRebuildNumber) {
+    var startpg = parseInt($(paginationRebuildNumber).attr("data-pagnum"));
+
+    var startpg = startpg * baseLimit;
+
+    limit = startpg + 10;
+
+    buildNewsletterTable(startpg, limit);
+}
+
+var tableRowDeleteArray = new Array();
+function tableRowDelete(className, id, customerId) {
+
+    var deleteStatus = $("." + className + "[data-id='" + id + "']").attr("data-delete");
+
+    if (deleteStatus == "false") {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "true");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").removeClass("fa-times").addClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Undo Delete");
+
+        tableRowDeleteArray.push({ "customerid": customerId, "email": id, "status": "delete" });
+
+    } else {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "false");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").addClass("fa-times").removeClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Delete");
+
+        $.each(tableRowDeleteArray, function (i) {
+
+            if (tableRowDeleteArray[i].email == id) {
+                tableRowDeleteArray.splice(i, 1);
+                return false;
+            }
+
+        });
+
+    }
+
+    if (tableRowDeleteArray.length > 0) {
+        save_changes_detected = true;
+        saveChangesDetected();
+    } else {
+        save_changes_detected = false;
+        saveChangesDetected();
+    }
+
+}
+
+function GetDateString(when) {
+
+    var then = moment(when, moment.ISO_8601);
+    var now = moment(new Date());
+
+    var duration = moment.duration(now.diff(then));
+    var days = duration.asDays();
+    var hours = duration.asHours();
+    var mins = duration.asMinutes();
+
+    var userDate = then.format("Do MMM YYYY");
+
+    return userDate;
+}
+
+
+
+
+function SaveCustomers(id, details) {
+
+
+    var returningPageName = "Marketing";
+    var returningPageLink = "/marketing.aspx";
+    var currentPageLink = "/marketing_newsletter.aspx";
+    var saveType = "post";
+	var saveUrl = ["/services/Newsletter.svc/saveNewsletters", JSON.stringify({ storeId: id, subs: details })];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, 2);
+
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
