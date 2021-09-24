@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<!-- saved from url=(0267)https://cdn.chatcreate.com/api/bots/1200/snippet/iframe?channelName=standalone&channel_id=78a4f699-d017-4d03-8933-003ed93fcf8f&ChatCreateHandoffName=733006&ChatCreateHandoffEmail=&url=https%3A%2F%2Fstylez360.github.io%2Fmanage_pages&isStarted=false&dismissedFlows= -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>ChatCreate</title>
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- HTML Meta Tags -->
+    <title>ChatCreate — Automate Simple Conversations</title>
+    <meta name="description" content="The Only Customer Support Chatbot You Can Launch Yourself In Minutes. Yes, Minutes. Right Now. Today. Instantly.">
+
+    <!--<base target="_blank">--><base href="." target="_blank">
+
+    <!-- Fonts -->
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com/">
+
+    <!-- Styles -->
+    <link href="./app.css" rel="stylesheet">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://d3uiagf2zpt00s.cloudfront.net/4f2a54c1-d131-49e4-8c1a-11e4e3635c80/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://d3uiagf2zpt00s.cloudfront.net/4f2a54c1-d131-49e4-8c1a-11e4e3635c80/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://d3uiagf2zpt00s.cloudfront.net/4f2a54c1-d131-49e4-8c1a-11e4e3635c80/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://d3uiagf2zpt00s.cloudfront.net/4f2a54c1-d131-49e4-8c1a-11e4e3635c80/images/favicon/site.webmanifest">
+    <script src="./jquery-3.4.1.min.js.download" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="./pusher.min.js.download"></script>
+    <script src="./showdown.min.js.download" integrity="sha512-L03kznCrNOfVxOUovR6ESfCz9Gfny7gihUX/huVbQB9zjODtYpxaVtIaAkpetoiyV2eqWbvxMH9fiSv5enX7bw==" crossorigin="anonymous"></script>
+    <style>
+        /* Customize website's scrollbar like Mac OS
+            Not supports in Firefox and IE */
+
+        /* total width */
+        #dialog::-webkit-scrollbar {
+            background-color: #fff;
+            width: 16px
+        }
+
+        /* background of the scrollbar except button or resizer */
+        #dialog::-webkit-scrollbar-track {
+            background-color: #fff
+        }
+
+        #dialog::-webkit-scrollbar-track:hover {
+            background-color: #f4f4f4
+        }
+
+        /* scrollbar itself */
+        #dialog::-webkit-scrollbar-thumb {
+            background-color: #babac0;
+            border-radius: 16px;
+            border: 5px solid #fff
+        }
+
+        #dialog::-webkit-scrollbar-thumb:hover {
+            background-color: #a0a0a5;
+            border: 4px solid #f4f4f4
+        }
+
+        /* set button(top and bottom of the scrollbar) */
+        #dialog::-webkit-scrollbar-button {
+            display: none
+        }
+
+        .bg-primary, .message-user, .btn-outline-primary:hover, .btn-outline-primary:active {
+            background: #3bf10d  !important;
+        }
+
+        .message-user, .btn-outline-primary {
+            border-color: #3bf10d  !important;
+        }
+
+        .btn-outline-primary {
+            color: #3bf10d  !important;
+        }
+
+        .btn-outline-primary:hover, .btn-outline-primary:active {
+            color: #fff !important;
+        }
+
+        #cc-chat-input {
+            position: relative;
+            top: 0;
+            opacity: 1;
+            transition: all 0.5s;
+        }
+
+        #cc-chat-input.disabled {
+            top: 25px;
+            opacity: 0;
+        }
+
+        #cc-handoff-form {
+            position: fixed;
+            bottom: 35px;
+            left: 30px;
+            transition: 0.5s;
+            width: calc(100% - 60px);
+            z-index: 11;
+        }
+
+        #cc-handoff-form.disabled {
+            opacity: 0;
+            bottom: 0px;
+            pointer-events: none;
+        }
+
+        #cc-popup-cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            transition: 0.5s;
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        #cc-popup-cover.disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #cc-chat-window {
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            -moz-transform: translate3d(0, 0, 0);
+            transition: 0.5s all ease-in-out;
+            position: relative;
+            bottom: 0;
+        }
+
+        #introduction {
+            transition: all 1s;
+        }
+
+        
+        .sending {
+            opacity: 0.75;
+        }
+
+        .message {
+            transition: all 0.25s !important;
+        }
+
+        .fadeIn {
+            /*opacity: 0.5;
+            box-shadow: none;*/
+        }
+
+        .transparent .btn-outline-primary {
+            background: #3bf10d  !important;
+            color: #fff !important;
+            transition: all 0.1s;
+        }
+
+        .transparent .btn-outline-primary:hover {
+            opacity: 0.75;
+        }
+
+        #cc-widget-top-nav {
+            position: fixed;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 9;
+            margin-top: 24px;
+        }
+
+        .widget-nav-button {
+            font-size: 16px;
+            text-align: center;
+            height: 24px;
+            width: 24px;
+            line-height: 25px;
+            background: #3bf10d;
+            color: #fff;
+            border-radius: 100px;
+            transition: all 0.25s;
+            box-shadow: 0 0 0 5px #fff;
+        }
+
+        .widget-nav-button:hover {
+            transform: scale(1.1);
+            opacity: 0.95;
+            cursor: pointer;
+        }
+
+        .transparent .widget-nav-button {
+            box-shadow: none !important;
+        }
+
+        .message-bot {
+            margin-left: 16px;
+        }
+
+        .message-bot * {
+            margin-bottom: 0;
+        }
+
+        .message-bot img {
+            max-width: 100%;
+        }
+
+        .message-bot::after {
+            content: '';
+            position: absolute;
+            left: -16px;
+            margin-top: -12px;
+            height: 24px;
+            width: 24px;
+            display: block;
+            background: url('https://s3-eu-west-1.amazonaws.com/static.fw1.biz/design_media/freewebstore/robots/fws-chatbot-robot-pink.png');
+            background-size: cover;
+            border-radius: 100px;
+            transition: all 0.25s;
+            opacity: 0;
+        }
+
+        .message-bot:last-of-type::after {
+            opacity: 1;
+        }
+
+        .mobile #dialog {
+            height: calc(100vh - 116px) !important;
+        }
+
+        .mobile #cc-chat-window {
+            border-radius: 0 !important;
+        }
+
+        body.mobile {
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+
+    </style>
+
+</head>
+<body id="cc-chat" cc-bot-id="1200" class="" style="background: none; padding: 20px; ">
+<div id="app">
+
+    <main>
+
+        <div id="cc-chat-window" class="card overflow-hidden" style="border-radius: 1.5rem 1.5rem 0.5rem 1.5rem;">
+
+            <div id="cc-popup-cover" class="disabled"></div>
+
+            <div id="cc-widget-top-nav">
+                <div class="row w-100 m-0">
+                    <div class="col-3 offset-9 d-flex justify-content-end align-items-center">
+                        <div class="widget-nav-button" onclick="hideWidget();">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0 mb-0">
+                <div class="px-4 pb-4 pt-0 mt-4" id="dialog" style="height: calc(100vh - 170px); overflow-x: hidden; overflow-y: scroll;">
+
+                    <div id="dialog-internal" class="d-flex flex-column position-relative" style="padding-top: 0px;">
+
+                        <div class="text-center py-5 px-4" id="introduction">
+
+                            <img src="./fws-chatbot-robot-pink.png" style="width: 100px; height: 100px; object-fit: cover; border-radius: 100%;">
+                            <h4 class="mt-4">
+                                Freewebstore's Bot
+                            </h4>
+                            <p class="text-secondary">
+                                Hey there, let me know if there's anything I can help you with!
+                            </p>
+                            
+                        </div>
+                                            </div>
+
+                    <div id="dialog-typing" class="animate-flicker text-center small font-weight-normal text-secondary " style="display: none; background: #fff; border-radius: 100px; padding: 0 0.5rem 0 0.3rem; position: absolute; bottom: 75px; height: 24px;  line-height: 24px; text-align: center;">
+                        <span class="" style="font-size: 6px; margin-right: 4px; position: relative; top: -2px;">
+                            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                        </span>
+                                                    <span>
+                                                                    <b>Bot</b> is typing
+                                                            </span>
+                                            </div>
+
+                </div>
+            </div>
+
+            <div class="card-body px-3 py-2">
+                <form id="cc-chat-input" class=" ">
+                                            <div class="input-group py-2 d-flex justify-content-between">
+                            <input class="form-control border-0 rounded" id="message" autocomplete="off" type="text" onfocus="markLastInteractionAsSeen()" placeholder="Type your message here..." aria-label="Type your message here..." style="background: #f5f5f5; padding: 10px 20px; width: calc(100% - 48px);">
+                            <button class="btn btn-outline-dark my-auto" id="messageSubmit" type="submit" style="width: 36px; height: 36px; padding: 0; ">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
+                                    </form>
+                <small class="text-center w-100 d-block" style="font-size: 10px;">
+                                            Powered By
+                        <a href="https://chatcreate.com/" class="text-dark font-weight-bold">
+                            ChatCreate
+                        </a>
+                        
+                                    </small>
+            </div>
+
+            <div class="">
+                <form id="cc-handoff-form" class="disabled p-4 rounded bg-white shadow">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="removeContactForm();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h5 class="text-dark">
+                            Please provide any additional information that may help our support team help with your enquiry
+                        </h5>
+                        <p class="small">
+                            Our agents will be in touch asap
+                        </p>
+                        <div class="form-group d-none">
+                            <label for="name" class="mb-0 font-weight-bold text-dark">
+                                Your name
+                            </label>
+                            <input class="form-control" name="name" type="text" placeholder="Type your name here..." value="733006">
+                        </div>
+                        <div class="form-group d-none">
+                            <label for="email" class="mb-0 font-weight-bold text-dark">
+                                Your email
+                            </label>
+                            <input class="form-control" name="email" type="email" placeholder="Type your email here..." value="bots+freewebstore@chatcreate.com">
+                        </div>
+                                                <div class="form-group">
+                            <label for="notes" class="mb-0 font-weight-bold text-dark">Notes</label>
+                            <textarea class="form-control" name="notes" type="text" rows="3" placeholder="If you have anything else to add..." style="resize: none;"></textarea>
+                        </div>
+                                                <div class="form-group mb-0">
+                            <input class="form-control btn btn-success" name="submit" type="submit" id="cc-handoff-submit" value="Send">
+                        </div>
+                                    </form>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script src="./bugsnag.min.js.download"></script>
+<script>Bugsnag.start({
+        apiKey:'1197dc5c5006e0a00c75d25cea81461a',
+        autoDetectErrors: false,
+})</script>
+<script>
+    /**
+     * Initial setup
+     */
+
+    var botId = 1200;
+    var channelId = '78a4f699-d017-4d03-8933-003ed93fcf8f';
+    var dialogContainer = $('#dialog-internal');
+    var channel = false;
+    var lastInteractionId = null;
+    var hostname = 'stylez360.github.io';
+    const url = 'https://stylez360.github.io/manage_pages';
+    const trigger = null;
+    const isStarted = false;
+    let pusher = null;
+
+    if (window.addEventListener) {
+        window.addEventListener("message", onMessage, false);
+    } else if (window.attachEvent) {
+        window.attachEvent("onmessage", onMessage, false);
+    }
+
+    function onMessage(event) {
+        if (event.data.func === "scrollDialog") scrollDialog();
+        if (event.data.func === "removeTransparency") removeTransparent();
+        if (event.data.func === "setParameter") setParameter(event.data.key, event.data.value);
+
+        if (event.data.func === "enableMobileWidget") $('body').addClass('mobile');
+        if (event.data.func === "disableMobileWidget") $('body').removeClass('mobile');
+    }
+
+    $(document).ready(function () {
+        scrollDialog();
+        if (isStarted) {
+            updateConversation();
+        } else {
+            applyTrigger();
+        }
+    });
+
+    $(document).keyup(function (e) {
+        if (e.which == 13) {
+            if (!$('#cc-chat-input').hasClass('disabled')) {
+                $('#cc-chat-input').submit();
+            }
+        }
+    });
+
+    function startPusher() {
+        if (!pusher) {
+            pusher = new Pusher('1e45cddbbab1c1d50475', {
+                cluster: 'eu',
+                forceTLS: true
+            });
+            const pusherChannel = pusher.subscribe('conversation.' + channelId);
+            pusherChannel.bind('App\\Events\\ConversationUpdated', function (event) {
+                updateConversation();
+            });
+            setTimeout(updateConversation, 2000);
+        }
+    }
+
+    /**
+     * When Handoff form is submitted
+     */
+
+    $('#cc-handoff-form').on('submit', function (e) {
+        e.preventDefault();
+        var name = $('input[name="name"]').val();
+        var email = $('input[name="email"]').val();
+        var notes = $('textarea[name="notes"]').val();
+        var phone = $('input[name="phone"]').val();
+
+        if (name && email) {
+            $('#cc-handoff-form .btn').val('Sending...').addClass('disabled');
+            $.post('https://chatcreate.com/api/standalone/handoff', {
+                'name': name,
+                'email': email,
+                'channel_id': channelId,
+                'notes': notes,
+                'phone': phone,
+                'userAgent': navigator.userAgent,
+            }).done(function (r) {
+                $('#cc-handoff-form').html('<h1 class="text-center"><i class="far fa-check-circle text-success"></i></h1><p class="lead text-center font-weight-bold">Success!<br><small>Our support will be in touch</small></p><button class="btn btn-sm rounded btn-outline-success mx-auto d-block mb-2" onclick="restart();"><i class="fas fa-undo-alt mr-1"></i>Restart</button><button class="btn btn-sm rounded btn-outline-dark mx-auto d-block" onclick="hideWidget();"><i class="fas fa-times mr-1"></i>Close</button>');
+            }).fail(function () {
+                $('#cc-handoff-form').html('<h1 class="text-center"><i class="far fa-times-circle text-danger"></i></h1><p class="lead text-center font-weight-bold">Something went wrong...<br><small>Please refresh the page and try again...</small></p><button class="btn btn-sm rounded btn-outline-dark mx-auto d-block" onclick="hideWidget();"><i class="fas fa-times mr-1"></i>Close</button>');
+            });
+        }
+    });
+
+
+    /**
+     * When Chat input is submitted
+     */
+
+    $('#cc-chat-input').on('submit', function (e) {
+        e.preventDefault();
+        var message = $('#message').val();
+        if (message) {
+            $('#message').val('').focus();
+            hideButtons();
+            addUserTextToChat(message, id = undefined, sending = true);
+            sendText(message);
+        }
+    });
+
+    function getTriggeredFlow() {
+        return trigger?.flow || '';
+    }
+
+    async function applyTrigger() {
+        if (!trigger) {
+            hideWidget();
+            return;
+        }
+
+        setTriggeredFlow(getTriggeredFlow());
+        const timeout = 0;
+        for (let i = 0; i < trigger.interactions.length; ++i) {
+            setTimeout(addInteractionToChat, timeout * i, trigger.interactions[i], true);
+        }
+        if (botId !== 2557) {
+            setTimeout(addTransparent, timeout * (trigger.interactions.length - 1) + 100);
+        }
+        setTimeout(notifyOfNewInteraction, timeout * (trigger.interactions.length - 1) + 100);
+        lastInteractionId = trigger.interactions[trigger.interactions.length - 1].id;
+    }
+
+    /**
+     * Ongoingly poll for updates from our backend for conversation state
+     */
+
+    function updateConversation() {
+        const reload = !document.getElementsByClassName('message').length;
+        const timestamp = new Date().getTime();
+        const timeout = (reload) ? 0 : 800;
+        let totalI = 0;
+        $.get('https://chatcreate.com/api/bots/' + botId + '/interactions?channelId=' + channelId + '&timestamp=' + timestamp + '&triggeredFlow=' + getTriggeredFlow()).done(function (interactions) {
+            if (!reload) {
+                interactions = interactions.filter(interaction => !interaction.is_conversation_starter);
+            }
+            if (interactions.length > 0) {
+                let setTransparent = true;
+                for (let i = 0; i < interactions.length; i++) {
+                    if (interactions[i].from === 'user' && interactions[i].type !== 'visitsUrl') {
+                        setTransparent = false;
+                        break;
+                    }
+                }
+                const newInteractions = getNewInteractions(interactions);
+                if (newInteractions.length > 0) {
+                    for (let i = 0; i < newInteractions.length; ++i) {
+                        setTimeout(addInteractionToChat, timeout * i, newInteractions[i], reload);
+                        totalI++;
+                    }
+                }
+                if (setTransparent && botId !== 2557) {
+                    setTimeout(addTransparent, timeout * totalI + 100);
+                }
+                setTimeout(notifyOfNewInteraction, timeout * totalI + 100);
+                lastInteractionId = interactions[interactions.length - 1].id;
+            }
+        }).fail(function () {
+            showResponseError('I have lost connection to the internet. Could you refresh and try again?');
+        });
+    }
+
+    function addInteractionToChat(interaction, reload) {
+        if (!isInteractionPresent(interaction)) {
+            showChatInput();
+            if (interaction['from'] === 'bot') {
+                hideTyping();
+                hideButtons();
+                if (interaction.type === 'startHandoff' && !reload) {
+                    setTimeout(startHandoff, 2000);
+                }
+                if (interaction['type'] === 'text') {
+                    addBotTextToChat(interaction['value'].message, interaction['id'], (interaction['value'].temporary === true));
+                }
+                if (interaction['type'] === 'buttons') {
+                    addBotButtonsToChat(interaction['value'], interaction['id']);
+                }
+            }
+            if (interaction['from'] === 'user') {
+                if (interaction['type'] === 'text') {
+                    if (reload) {
+                        addUserTextToChat(interaction['value'].message, interaction['id']);
+                    } else {
+                        replaceSendingWithSent(interaction['value'].message, interaction['id']);
+                    }
+                }
+                if (interaction['type'] === 'buttonClick') {
+                    if (interaction['value'].target === 'handoff_accept') {
+                        hideTyping();
+                    } else {
+                        if (reload) {
+                            addUserTextToChat(interaction['value'].label, interaction['id']);
+                        } else {
+                            replaceSendingWithSent(interaction['value'].label, interaction['id']);
+                        }
+                    }
+                }
+            }
+            $('.fadeIn').removeClass('fadeIn');
+        }
+    }
+
+
+    /**
+     * Actions the widget can run regards to the conversation
+     */
+
+    function addUserTextToChat(message, id = null, sending = false) {
+        var html = '<cc-user-text class=\"message message-user ' + ((sending) ? '' : '') + '\" interaction-id="' + id + '" interaction-value="' + message + '">' + encoded(message) + '</cc-user-text>';
+        hideButtons();
+        addHtmlToChat(html);
+    }
+
+    function replaceSendingWithSent(message, id) {
+        $('[interaction-value="' + message + '"][interaction-id="null"').removeClass('sending').attr('interaction-id', id);
+        if ($('[interaction-id="' + id + '"]').length > 1) {
+            Bugsnag.notify(`Interaction ID ${id} has been added to more than one message`);
+        }
+    }
+
+    function isSameHostAsParent(url) {
+        return new URL(url).hostname === hostname;
+    }
+
+    function addBotButtonsToChat(buttons, id = null) {
+        var html = '<div class="d-flex justify-content-end btn-container flex-wrap" interaction-id="' + id + '">';
+        $.each(buttons, function (index, button) {
+            let buttonHtml = '<button class="btn btn-outline-primary btn-sm rounded font-weight-normal mr-2 mt-2 " onClick="sendButtonClick(\'' + htmlEntities(button.target) + '\', \'' + htmlEntities(button.label) + '\', \'' + htmlEntities(button.url) + '\');">' + htmlEntities(button.label) + '</button>';
+                            if (button.url && !isSameHostAsParent(button.url)) {
+                    buttonHtml = '<a target="_blank" href="' + button.url + '" class="">' + buttonHtml + '</a>';
+                }
+                        html += buttonHtml;
+        });
+        html += '</div>';
+        addHtmlToChat(html);
+    }
+
+    function addBotTextToChat(reply, id = null, temporary = false) {
+        $('.message-temporary').hide();
+        var html = '<cc-bot-text class=\"message message-bot fadeIn ' + ((temporary) ? 'message-temporary' : '') + '\" interaction-id=\"' + id + '\">' + withBreakTagsApplied(urlify(reply))+ '</cc-bot-text>';
+        addHtmlToChat(html);
+    }
+
+    function sendButtonClick(target, label, url = null) {
+        startPusher();
+        if (url === 'undefined') {
+            url = null;
+        }
+        markLastInteractionAsSeen();
+        removeTransparent();
+        if (target === 'handoff_accept') {
+            startHandoff(  );
+        } else {
+            hideButtons();
+            addUserTextToChat(label, id = undefined, sending = true);
+            showChatInput();
+        }
+        showWidget();
+        emitEvent({
+            'type': 'button_clicked',
+            'from': 'user',
+            'value': {
+                'target': target,
+                'label': label,
+                'url': url
+            }
+        });
+        $.post('https://chatcreate.com/api/bots/' + botId + '/interactions', {
+            triggeredFlow: getTriggeredFlow(),
+            type: 'buttonClick',
+            value: {target: target, label: label, url: url},
+            channelId: channelId,
+            channel_name: 'standalone'
+        }).done(function (response) {
+            setIsStarted();
+                            if (url && isSameHostAsParent(url)) {
+                    navigateTo(url);
+                }
+                        if (target !== 'handoff_accept') {
+                showTyping();
+            }
+        }).fail(function () {
+            showResponseError();
+        });
+    }
+
+    function sendText(message) {
+        startPusher();
+        removeTransparent();
+        showWidget();
+        const creditCardPattern = /\b(?:\d{4}[ -]?){3}(?=\d{4}(?!\d))/gm;
+        const subst = `**** **** **** `;
+        message = message.replace(creditCardPattern, subst);
+
+        emitEvent({
+            'type': 'text_sent',
+            'from': 'user',
+            'value': message
+        });
+
+        $.post('https://chatcreate.com/api/bots/' + botId + '/interactions', {
+            triggeredFlow: getTriggeredFlow(),
+            type: 'text',
+            value: {'message': message},
+            channelId: channelId,
+            channel_name: 'standalone'
+        }).done(function (response) {
+            setIsStarted();
+            showTyping();
+        }).fail(function () {
+            showResponseError();
+        });
+    }
+
+    function setParameter(key, value) {
+        $.post('https://chatcreate.com/api/bots/' + botId + '/conversations/setParameter?channelId=' + channelId, {
+            'key': key,
+            'value': value
+        });
+    }
+
+    /**
+     * Widget's own functionality
+     */
+
+    function startHandoff(platform = 'standalone') {
+
+        if (platform === 'zendesk') {
+            $.get('https://chatcreate.com/api/bots/' + 1200 +'/conversations/summary?platform=zendesk&channel_id=' + channelId).done(function (summary) {
+                window.parent.postMessage({
+                    func: 'handoff', value: summary,
+                }, "*");
+            }).fail();
+        } else if (platform === 'standalone') {
+            showContactForm();
+        } else {
+            window.parent.postMessage({
+                'func': 'handoff'
+            }, "*");
+        }
+
+    }
+
+
+    /**
+     * Helpers
+     */
+
+    function scrollDialog() {
+        var myDiv = $('#dialog');
+        myDiv.stop(true, true).animate({scrollTop: myDiv.prop("scrollHeight") - myDiv.height()}, '2000');
+    }
+
+    function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
+
+    function withBreakTagsApplied(text) {
+        return text.replaceAll('{{ break }}', '<br>');
+    }
+
+    let converter = new showdown.Converter();
+    function urlify(text) {
+        text = converter.makeHtml(text);
+        const urlRegex = /( https?:\/\/[^<|\s]+)/gi;
+        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9]+)/gi;
+        text = text.replace(urlRegex, function (url) {
+            return '<a href="' + url + '">' + url + '</a>';
+        });
+        return text.replace(emailRegex, function (email) {
+            return '<a href="mailto:' + email + '">' + email + '</a>';
+        });
+    }
+
+    function encoded(s = '') {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/\\/g, '\\\\');
+    }
+
+    function isInteractionPresent(interaction) {
+        return (interaction['value'].target === 'handoff_accept') ? true : (document.querySelectorAll("[interaction-id='" + interaction['id'] + "']").length > 0);
+    }
+
+    function getNewInteractions(interactions) {
+        var newInteractions = [];
+        for (i = 0; i < interactions.length; ++i) {
+            if (!isInteractionPresent(interactions[i])) {
+                newInteractions.push(interactions[i]);
+            }
+        }
+        return newInteractions;
+    }
+
+    function restart() {
+        window.parent.postMessage({
+            'func': 'restart'
+        }, "*");
+    }
+
+    function removeContactForm() {
+        showChatInput();
+        $('#cc-handoff-form, #cc-popup-cover').addClass('disabled');
+    }
+
+    function showContactForm() {
+        hideChatInput();
+        $('#cc-handoff-form, #cc-popup-cover').removeClass('disabled');
+    }
+
+    function hideChatInput() {
+        $('#cc-chat-input').addClass('disabled');
+    }
+
+    function showChatInput() {
+        $('#cc-chat-input').removeClass('disabled');
+    }
+
+    function setHandoffName(value) {
+        $('input[name="name"]').val(value);
+    }
+
+    function setHandoffEmail(value) {
+        $('input[name="email"]').val(value);
+    }
+
+    function showTyping() {
+        $('#dialog-typing').stop(true, true).slideDown();
+    }
+
+    function hideTyping() {
+        $('#dialog-typing').slideUp('fast');
+    }
+
+    function addHtmlToChat(html) {
+        dialogContainer.append(html);
+        scrollDialog();
+    }
+
+    function hideButtons() {
+        $('.btn-container').attr("style", "display: none !important");
+    }
+
+    function showResponseError(message = 'Hmm... Something went wrong while getting you a response, can you please try again?') {
+        setTimeout(function () {
+            addBotTextToChat(message, null, true);
+        }, 800);
+    }
+
+    function setDismissedFlow(flow) {
+        window.parent.postMessage({
+            'func': 'setDismissedFlow',
+            'value': flow,
+        }, "*");
+    }
+
+    function setIsStarted() {
+        window.parent.postMessage({
+            func: 'setIsStarted',
+            channelId: channelId,
+        }, "*");
+    }
+
+    function setTriggeredFlow(flow) {
+        window.parent.postMessage({
+            func: 'setTriggeredFlow',
+            value: flow,
+        }, "*");
+    }
+
+    function notifyOfNewInteraction() {
+        markLastInteractionAsSeen();
+
+        window.parent.postMessage({
+            'func': 'notifyOfNewInteraction',
+            'value': lastInteractionId,
+        }, "*");
+    }
+
+    function markLastInteractionAsSeen() {
+        window.parent.postMessage({
+            'func': 'markLastInteractionAsSeen',
+            'value': lastInteractionId,
+        }, "*");
+    }
+
+    function showWidget(height = '630px') {
+        window.parent.postMessage({
+            'func': 'showWidget',
+            'height': height,
+        }, "*");
+    }
+
+    function hideWidget() {
+        window.parent.postMessage({
+            'func': 'hideWidget'
+        }, "*");
+    }
+
+    function removeTransparent() {
+        showWidget();
+        $('#cc-chat').removeClass('minimized-widget');
+    }
+
+    function addTransparent() {
+
+        markLastInteractionAsSeen();
+
+        if (trigger.isDismissed) {
+            return;
+        }
+        $('#cc-chat').addClass('minimized-widget');
+        var height = $('#dialog-internal')[0].scrollHeight - $('#introduction')[0].scrollHeight + 180;
+
+        window.parent.postMessage({
+            'func': 'transparentWidget',
+            'height': String(height) + 'px',
+            'delay': trigger.delay,
+        }, "*");
+    }
+
+    function navigateTo(target) {
+        window.parent.postMessage({
+            'func': 'navigateTo',
+            'value': target,
+        }, '*');
+    }
+
+    function htmlEntities(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&rsquo;');
+    }
+
+    function emitEvent(event) {
+        window.parent.postMessage({
+            'func': 'event',
+            'event': event,
+        }, '*');
+    }
+
+</script>
+
+
+</body></html>

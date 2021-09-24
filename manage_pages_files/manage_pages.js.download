@@ -1,0 +1,505 @@
+﻿
+var beaver = new Logger({ storeId: storeId, prefix: "MANAGE-PAGES", uuid: beaverGuid });
+
+checkEmptyPageSections();
+
+
+$('body').on('contextmenu', '.manage_pages_list_item', function() {
+
+    var xPositionMinus = 0;
+
+    if ($(document).width() > 1230) {
+        xPositionMinus = 250;
+    } else if ($(document).width() > 770) {
+        xPositionMinus = 55;
+    }
+
+
+    /* Edit Button */
+    var pageUrl = $(this).find(".manage_page_list_edit").attr("onclick");
+    $(".page_list_custom_menu_edit").attr("onclick", pageUrl);
+
+    var pageId = $(this).attr("data-pg");
+
+    /* Move */
+    if (!$(this).find(".manage_pages_list_handle").hasClass("fa-arrows")) {
+        $("#page_list_custom_menu_has_subs_move").addClass("page_list_custom_menu_disabled");
+    } else {
+        $("#page_list_custom_menu_has_subs_move").removeClass("page_list_custom_menu_disabled");
+
+        $(".page_list_custom_menu_sub_inner_item").removeClass("page_list_custom_menu_disabled");
+        $(".page_list_custom_menu_sub_inner_item").attr("data-pageId", pageId);
+
+        var movePageParent = $(this).parent().attr("id");
+
+        switch (movePageParent) {
+            case "manage_pages_list_other":
+                $(".page_list_custom_menu_sub_inner_item[data-id='additional']").addClass("page_list_custom_menu_disabled");
+                break;
+            case "manage_pages_list_hidden":
+                $(".page_list_custom_menu_sub_inner_item[data-id='hidden']").addClass("page_list_custom_menu_disabled");
+                break;
+            default:
+                $(".page_list_custom_menu_sub_inner_item[data-id='main']").addClass("page_list_custom_menu_disabled");
+                break;
+        }
+    }
+
+    /* Position */
+
+    $(".page_list_custom_menu_sub_inner_position span").remove();
+
+    if (!$(this).find(".manage_pages_list_handle").hasClass("fa-arrows") && !$(this).find(".manage_pages_list_handle").hasClass("fa-arrows-v")) {
+        $("#page_list_custom_menu_has_subs_position").addClass("page_list_custom_menu_disabled");
+    } else {
+        $("#page_list_custom_menu_has_subs_position").removeClass("page_list_custom_menu_disabled");
+
+        var positionPageParent = $(this).parent().attr("id");
+
+        switch (positionPageParent) {
+            case "manage_pages_list_other":
+                var positionListPages = $("#manage_pages_list_other .manage_pages_list_item").length;
+                break;
+            case "manage_pages_list_hidden":
+                var positionListPages = $("#manage_pages_list_hidden .manage_pages_list_item").length;
+                break;
+            default:
+                var positionListPages = $("#manage_pages_list_main .manage_pages_list_item").length;
+                break;
+        }
+        var positionCurrentPage = $(".manage_pages_list_item[data-pg='" + pageId + "']").index();
+
+        console.log(positionCurrentPage)
+        console.log(positionListPages);
+
+        for (var i = 0; i < positionListPages; i++) {
+            if (i === positionCurrentPage) {
+                $(".page_list_custom_menu_sub_inner_position").append('<span class="page_list_custom_menu_disabled">Current Position: ' + (i + 1) + '</span>');
+            } else {
+                if (positionPageParent == "manage_pages_list_main" && i == 0) {
+                    $(".page_list_custom_menu_sub_inner_position").append('<span class="page_list_custom_menu_disabled">Position: ' + (i + 1) + '</span>');
+                } else {
+                    $(".page_list_custom_menu_sub_inner_position").append('<span onclick="pageCustomMenuPosition(\'' + positionPageParent + '\',' + i + ', ' + pageId + ')">Position: ' + (i + 1) + '</span>');
+                }
+            }
+        }
+
+
+    }
+
+
+    document.getElementById("pages_list_custom_menu").className = "showcd";  
+    document.getElementById("pages_list_custom_menu").style.top =  (mouseY(event) - 50) + "px";
+    document.getElementById("pages_list_custom_menu").style.left = (mouseX(event) - xPositionMinus) + "px";
+
+    window.event.returnValue = false;
+});
+
+ $(document).bind("click", function(event) {
+     document.getElementById("pages_list_custom_menu").className = "hidecd";
+ });
+
+function mouseX(evt) {
+    if (evt.pageX) {
+        return evt.pageX;
+    } else if (evt.clientX) {
+        return evt.clientX + (document.documentElement.scrollLeft ?
+            document.documentElement.scrollLeft :
+            document.body.scrollLeft);
+    } else {
+        return null;
+    }
+}
+
+function mouseY(evt) {
+    if (evt.pageY) {
+        return evt.pageY;
+    } else if (evt.clientY) {
+        return evt.clientY + (document.documentElement.scrollTop ?
+            document.documentElement.scrollTop :
+            document.body.scrollTop);
+    } else {
+        return null;
+    }
+}
+
+function pageCustomMenuMove(where, el) {
+
+    var id = $(el).attr("data-pageId");
+
+    var thePage = $(".manage_pages_list_item[data-pg='" + id + "']").clone();
+    $(".manage_pages_list_item[data-pg='" + id + "']").remove();
+
+    switch (where) {
+        case "additional":
+            $("#manage_pages_list_other").append(thePage);
+            break;
+        case "hidden":
+            $("#manage_pages_list_hidden").append(thePage);
+            break;
+        default:
+            $("#manage_pages_list_main").append(thePage);
+            break;
+    }
+
+    checkEmptyPageSections();
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+function pageCustomMenuPosition(where, position, pageId) {
+
+    var thePage = $(".manage_pages_list_item[data-pg='" + pageId + "']").clone();
+    $(".manage_pages_list_item[data-pg='" + pageId + "']").remove();
+
+    switch (where) {
+        case "manage_pages_list_other":
+            if (position == 0) {
+                $(thePage).insertBefore("#manage_pages_list_other .manage_pages_list_item:nth-child(1)");
+            } else {
+                $("#manage_pages_list_other .manage_pages_list_item:nth-child(" + position + ")").after(thePage);
+            }
+            
+            break;
+        case "manage_pages_list_hidden":
+            if (position == 0) {
+                $(thePage).insertBefore("#manage_pages_list_hidden .manage_pages_list_item:nth-child(1)");
+            } else {
+                $("#manage_pages_list_hidden .manage_pages_list_item:nth-child(" + position + ")").after(thePage);
+            }
+            break;
+        default:
+            $("#manage_pages_list_main .manage_pages_list_item:nth-child(" + position + ")").after(thePage);
+            break;
+    }
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+
+function pagesHelp(el) {
+    var modal = ".modal_pages_help_" + el;
+    divFadeIn(modal, ".modal_overlay");
+}
+
+
+var pages1SortableContainer = document.querySelector("#manage_pages_list_main");
+var pages2SortableContainer = document.querySelector("#manage_pages_list_other");
+var pages3SortableContainer = document.querySelector("#manage_pages_list_hidden");
+var pages4SortableContainer = document.querySelector("#manage_pages_list_system");
+
+
+var sortable1 = new Sortable(pages1SortableContainer, {
+    handle: ".manage_pages_list_handle",
+    draggable: ".manage_pages_list_item:not(.ui-state-disabled)",
+    animation: 150,
+    group: {
+        name: "moveablePages"
+    },
+    onSort: function (evt) {
+        checkEmptyPageSections();
+        save_changes_detected = true;
+        saveChangesDetected();
+    },
+    onChoose: function (evt) {
+        checkAvailableSections(evt.item);
+    },
+    onEnd: function (evt) {
+        removeAvailableSections();
+    }
+});
+
+var sortable2 = new Sortable(pages2SortableContainer, {
+    handle: ".manage_pages_list_handle",
+    draggable: ".manage_pages_list_item:not(.ui-state-disabled)",
+    animation: 150,
+    group: {
+        name: "moveablePages"
+    },
+    onSort: function (evt) {
+        checkEmptyPageSections();
+        save_changes_detected = true;
+        saveChangesDetected();
+    },
+    onChoose: function (evt) {
+        checkAvailableSections(evt.item);
+    },
+    onEnd: function (evt) {
+        removeAvailableSections();
+    }
+});
+
+var sortable3 = new Sortable(pages3SortableContainer, {
+    handle: ".manage_pages_list_handle",
+    draggable: ".manage_pages_list_item:not(.ui-state-disabled)",
+    animation: 150,
+    group: {
+        name: "moveablePages"
+    },
+    onSort: function (evt) {
+        checkEmptyPageSections();
+        save_changes_detected = true;
+        saveChangesDetected();
+    },
+    onChoose: function (evt) {
+        checkAvailableSections(evt.item);
+    },
+    onEnd: function (evt) {
+        removeAvailableSections();
+    }
+});
+
+var sortable4 = new Sortable(pages4SortableContainer, {
+    handle: ".manage_pages_list_handle",
+    draggable: ".manage_pages_list_item:not(.ui-state-disabled)",
+    animation: 150,
+    put: false,
+    onSort: function (evt) {
+        checkEmptyPageSections();
+        save_changes_detected = true;
+        saveChangesDetected();
+    },
+    onChoose: function (evt) {
+        checkAvailableSections(evt.item);
+    },
+    onEnd: function (evt) {
+        removeAvailableSections();
+    }
+});
+
+function checkAvailableSections(el) {
+
+    if ($(el).hasClass("mpl_addi")) {
+        $(".manage_pages_list_container_mpl_addi").addClass("manage_page_list_disabled");
+        sortable2.option("disabled", true);
+    }
+
+    if ($(el).hasClass("mpl_hidd")) {
+        $(".manage_pages_list_container_mpl_hidd").addClass("manage_page_list_disabled");
+        sortable3.option("disabled", true);
+    }
+
+    if ($(el).hasClass("mpl_syst")) {
+        $(".manage_pages_list_container_mpl_syst").addClass("manage_page_list_disabled");
+        sortable4.option("disabled", true);
+    }
+
+}
+
+function removeAvailableSections() {
+
+    sortable2.option("disabled", false);
+    sortable3.option("disabled", false);
+    sortable4.option("disabled", false);
+
+    $(".manage_pages_list_container_mpl_addi, .manage_pages_list_container_mpl_syst, .manage_pages_list_container_mpl_main, .manage_pages_list_container_mpl_hidd").removeClass("manage_page_list_disabled");
+}
+
+function checkEmptyPageSections() {
+
+    console.log("Did this run")
+
+    // Main
+    if ($("#manage_pages_list_main .manage_pages_list_item").length != 0) {
+        $("#manage_pages_list_main").removeClass("manage_pages_list_empty").removeAttr("onclick");
+    } else {
+        $("#manage_pages_list_main").addClass("manage_pages_list_empty").attr("onclick", "dropPagesPlaceholder(this);");
+    }
+
+    // Additional
+    if ($("#manage_pages_list_other .manage_pages_list_item").length != 0) {
+        $("#manage_pages_list_other").removeClass("manage_pages_list_empty").removeAttr("onclick");
+    } else {
+        $("#manage_pages_list_other").addClass("manage_pages_list_empty").attr("onclick", "dropPagesPlaceholder(this);");
+    }
+
+    // Hidden
+    if ($("#manage_pages_list_hidden .manage_pages_list_item").length != 0) {
+        $("#manage_pages_list_hidden").removeClass("manage_pages_list_empty").removeAttr("onclick");
+    } else {
+        $("#manage_pages_list_hidden").addClass("manage_pages_list_empty").attr("onclick", "dropPagesPlaceholder(this);");
+    }
+
+    // System
+    if ($("#manage_pages_list_system .manage_pages_list_item").length != 0) {
+        $("#manage_pages_list_system").removeClass("manage_pages_list_empty").removeAttr("onclick");
+    } else {
+        $("#manage_pages_list_system").addClass("manage_pages_list_empty").attr("onclick", "dropPagesPlaceholder(this);");
+    }
+
+}
+
+function EditPage(obj, pagetype) {
+    switch (pagetype) {
+        case "BasketPage"://basket
+            window.location.href = "/manage_pages_edit_basket.aspx?pageid=" + obj;
+            break;
+        case "ContactPage"://contact page
+            window.location.href = "/manage_pages_edit_contact.aspx?pageid=" + obj;
+            break;
+        case "OffersPage"://special offers page
+            window.location.href = "/manage_pages_edit_offers.aspx?pageid=" + obj;
+            break;
+        case "ExternalLinkPage"://external link page
+            window.location.href = "/manage_pages_edit_external.aspx?pageid=" + obj;
+            break;
+        case "InstagramGallery"://instagram
+            window.location.href = "/manage_pages_instagramv3.aspx";
+            break;
+        case "BlogPage"://blog
+            window.location.href = "/app/storeblog/index.aspx";
+            break;
+        case "HomePage"://homepage
+            if (tourIsLive == true && tourIsLiveId == "ACHIEVEMENT_EDIT_HOMEPAGE3") {
+                window.location.href = "/manage_pages_edit.aspx?pageid=" + obj + "&tour=ACHIEVEMENT_EDIT_HOMEPAGE4";
+            } else {
+                window.location.href = "/manage_pages_edit.aspx?pageid=" + obj;
+            }
+            break;
+        case "custom-error"://Custom Error Page
+            window.location.href = "/app/custom404/index.aspx";
+            break;
+        case "FAQ":
+            window.location.href = "/manage_pages_edit.aspx?pageid=" + obj + "&isFaq=true";
+            break;
+        default:
+            window.location.href = "/manage_pages_edit.aspx?pageid=" + obj;
+            break;
+    }
+
+
+}
+
+$(document).bind("click", function (event) {
+    if (!$(event.target).closest('.manage_pages_list_empty').length && !$(event.target).closest('#drop_pages_add_modal').length) {
+        document.getElementById("drop_pages_add_modal").className = "hideDropPagesAddModal";
+    } else {
+        event.stopPropagation();
+    }
+});
+
+function dropPagesPlaceholder(el) {
+
+    document.getElementById("drop_pages_add_modal").className = "showDropPagesAddModal";  
+
+    // Which List
+    var list = $(el).attr("id");
+
+    if (list == "manage_pages_list_other") {
+        $("#drop_pages_add_modal_title_text").text("Additional");
+    } else {
+        $("#drop_pages_add_modal_title_text").text("Hidden");
+    }
+
+    $("#drop_pages_add_modal_list").html('');
+
+    // Iterate through page lists to see which can be moved to this list
+    $(".manage_pages_list:not('#manage_pages_list_system') .manage_pages_list_item").each(function () {
+        
+        if (list === "manage_pages_list_other" && !$(this).hasClass("mpl_addi") && !$(this).hasClass("ui-state-disabled")) {
+            var name = $(this).attr("data-pgname");
+            var id = $(this).attr("data-pg");
+            $("#drop_pages_add_modal_list").append("<a class='drop_pages_add_modal_list_item' data-id='" + id + "' data-where='additional' onclick='dropPagesModalItemClick(this);'>" + name + "</a>");
+        }
+
+        if (list === "manage_pages_list_hidden" && !$(this).hasClass("mpl_hidd") && !$(this).hasClass("ui-state-disabled")) {
+            var name = $(this).attr("data-pgname");
+            var id = $(this).attr("data-pg");
+            $("#drop_pages_add_modal_list").append("<a class='drop_pages_add_modal_list_item' data-id='" + id + "' data-where='hidden' onclick='dropPagesModalItemClick(this);'>" + name + "</a>");
+        }
+
+    });
+
+    // Get Mouse Position
+
+    var xPositionMinus = 0;
+
+    if ($(document).width() > 1230) {
+        xPositionMinus = 250;
+    } else if ($(document).width() > 770) {
+        xPositionMinus = 55;
+    }
+
+    document.getElementById("drop_pages_add_modal").style.top = (mouseY(event) - 50) + "px";
+    document.getElementById("drop_pages_add_modal").style.left = (mouseX(event) - xPositionMinus) + "px";
+
+}
+
+function dropPagesModalItemClick(el) {
+
+    var id = $(el).attr("data-id");
+    var where = $(el).attr("data-where");
+
+    $(el).remove();
+
+    var thePage = $(".manage_pages_list_item[data-pg='" + id + "']").clone();
+    $(".manage_pages_list_item[data-pg='" + id + "']").remove();
+
+    switch (where) {
+        case "additional":
+            $("#manage_pages_list_other").append(thePage);
+            break;
+        case "hidden":
+            $("#manage_pages_list_hidden").append(thePage);
+            break;
+        default:
+            $("#manage_pages_list_main").append(thePage);
+            break;
+    }
+
+    checkEmptyPageSections();
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+});
+
+function runSavePageLocal() {
+    console.log("Change detected. Saving new list.");
+
+    var order = [];
+
+    //loop through and get the new list of pages
+
+    //Main Navigation
+    $("#manage_pages_list_main div").each(function (e) {
+        var pg = { id: $(this).attr('data-pg'), navigation: true, hidden: false };
+        order.push(pg);
+    });
+
+    //Other Pages
+    $("#manage_pages_list_other div").each(function (e) {
+        var pg = { id: $(this).attr('data-pg'), navigation: false, hidden: false };
+        order.push(pg);
+    });
+
+    //Hidden Pages
+    $("#manage_pages_list_hidden div").each(function (e) {
+        var pg = { id: $(this).attr('data-pg'), navigation: false, hidden: true };
+        order.push(pg);
+    });
+
+    var data = JSON.stringify({ 'storeId': storeId, 'pages': order })
+
+    var returningPageName = "Manage";
+    var returningPageLink = "/manage.aspx";
+    var currentPageLink = "/manage_pages.aspx";
+    var saveType = "post";
+    var saveUrl = ['/services/Pages.svc/UpdatePageSet', data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+
+}

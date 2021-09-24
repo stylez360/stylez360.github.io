@@ -1,0 +1,1463 @@
+﻿
+
+function billingv2StartPaymentProcess(payload, deviceData) {
+
+    showByClass("modal_billingv2_processing", "busy_wait_billingv2_processing");
+    hideByClass("modal_billingv2_cards_in_vault", "modal_billingv2_no_cards_in_vault", "modal_billingv2_add_new_card", "modal_billingv2_overview");
+
+    hideById("modal_billingv2_processing_case1a_error", "modal_billingv2_processing_case1a_error_card", "modal_billingv2_processing_case1a_error_message", "modal_billingv2_processing_case1a_error_invoice");
+    hideById("modal_billingv2_processing_case2_error", "modal_billingv2_processing_case2_error_message")
+    hideById("modal_billingv2_processing_case4a_error", "modal_billingv2_processing_case4a_error_message", "modal_billingv2_processing_case2_error_message");
+    hideById("modal_billingv2_processing_case5_error", "modal_billingv2_processing_case5_complete");
+    hideById("modal_billingv2_processing_case6_error", "modal_billingv2_processing_case6_complete", "modal_billingv2_processing_case6_error_message");
+    hideById("modal_billingv2_processing_case7_error", "modal_billingv2_processing_case7_error_message", "modal_billingv2_processing_case7_success")
+
+    console.log("Processsinggggg");
+    console.log(payload);
+
+    // Case 1 or Case 4a
+    if (billingv2ConfirmPaymentFinal != true) {
+
+        if (billingV2InstructionsCase != null && (billingV2InstructionsCase === "1a" || billingV2InstructionsCase === "4a" || billingV2InstructionsCase === "2" || billingV2InstructionsCase === "3" || billingV2InstructionsCase === "7" || billingV2InstructionsCase === "8" || billingV2InstructionsCase === "9")) {
+            if (payload.type === "PayPalAccount") {
+                document.getElementById("modal_billingv2_processing_title").innerText = "Adding PayPal Account";
+                document.getElementById("busy_wait_billingv2_processing_text").innerText = "Adding PayPal Account";
+                setTimeout(function () {
+                    billinigV2InstructionsCase1aAddPaypal(payload);
+                }, 1000);
+            } else {
+                document.getElementById("modal_billingv2_processing_title").innerText = "Adding Card";
+                document.getElementById("busy_wait_billingv2_processing_text").innerText = "Adding Card";
+                billinigV2InstructionsCase1aAddCard(payload);
+            }
+        }
+
+
+    } else {
+
+        document.getElementById("modal_billingv2_processing_title").innerText = "Processing";
+        document.getElementById("busy_wait_billingv2_processing_text").innerText = "Processing";
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "1a") {
+            billingV2InstructionsCase1aFinalPayment(payload, deviceData);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "2") {
+            billingV2InstructionsCase2FinalPayment(payload, deviceData);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "3") {
+            billingV2InstructionsCase3FinalPayment(payload, deviceData);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "4a") {
+            billingV2InstructionsCase4aFinalPayment(payload);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "7") {
+            billingV2InstructionsCase7FinalPayment(payload);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "8") {
+            billingV2InstructionsCase8FinalPayment(payload, deviceData);
+        }
+
+        if (billingV2InstructionsCase != null && billingV2InstructionsCase === "9") {
+            billingV2InstructionsCase9FinalPayment(payload, deviceData);
+        }
+
+    }
+
+    // Case 5
+    if (billingV2InstructionsCase != null && billingV2InstructionsCase === 5) {
+        document.getElementById("modal_billingv2_processing_title").innerText = "Updating Billing Details";
+        document.getElementById("busy_wait_billingv2_processing_text").innerText = "Updating Billing Details";
+        billinigV2InstructionsCase5UpdateDetails(payload);
+    }
+
+    // Case 6
+    if (billingV2InstructionsCase != null && billingV2InstructionsCase === 6) {
+
+        if (payload.type === "PayPalAccount") {
+            document.getElementById("modal_billingv2_processing_title").innerText = "Adding PayPal Account";
+            document.getElementById("busy_wait_billingv2_processing_text").innerText = "Adding PayPal Account";
+            setTimeout(function () {
+                billingV2InstructionsCase6Completed('PayPal Account');
+            }, 2000);
+        } else {
+            document.getElementById("modal_billingv2_processing_title").innerText = "Adding Card";
+            document.getElementById("busy_wait_billingv2_processing_text").innerText = "Adding Card";
+            billinigV2InstructionsCase6AddCard(payload);
+        }
+
+    }
+
+}
+
+
+
+
+
+/* ======================================== */
+/* Case 1a ================================ */
+/* ======================================== */
+
+// Adding new card or paypal account
+function billinigV2InstructionsCase1aAddPaypal(payload) {
+    billingv2AddedCardOverview(payload.details.payerId, "PayPalAccount");
+
+    hideById("modal_billingv2_overview_card_selected", "modal_billingv2_overview_card_hascards", "modal_billingv2_overview_card_nocards");
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview", "busy_wait_billingv2_overview_card");
+}
+
+function billinigV2InstructionsCase1aAddCard(payload) {
+
+    hideById("modal_billingv2_processing_case1a_error_card_message");
+
+    var data = {
+        "storeId": storeId,
+        "nonce": payload.nonce,
+        "failDuplicate": false,
+        "makeDefault": false,
+        "deviceData": payload.deviceData,
+        "address": billingv2NewCardAddress
+    }
+
+    console.log(data);
+
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/AddNewPaymentMethod';
+
+    axiosPost(url, data).then(function (data) {
+
+        // success
+
+        var addNewCardResult = data.d;
+        console.log(addNewCardResult);
+
+        if (addNewCardResult != null) {
+
+            addNewCardResult = JSON.parse(addNewCardResult);
+            console.log(addNewCardResult);
+
+            if (addNewCardResult.success == true) {
+                // success
+                billingv2AddedCardOverview(addNewCardResult.payment_token, "CreditCard");
+
+                hideById("modal_billingv2_overview_card_selected", "modal_billingv2_overview_card_hascards", "modal_billingv2_overview_card_nocards");
+                hideByClass("modal_billingv2_processing");
+                showByClass("modal_billingv2_overview", "busy_wait_billingv2_overview_card");
+            } else {
+                showById("modal_billingv2_processing_case1a_error_card");
+                hideByClass("busy_wait_billingv2_processing");
+                if (addNewCardResult.errors != null && addNewCardResult.errors.length > 0) {
+                    var message = addNewCardResult.errors;
+                    if (message == "Credit card type is not accepted by this merchant account.") {
+                        message = "Unfortunately, we do not accept the card type you are trying to add. Please use a different card type";
+                    }
+                    if (message == "Do Not Honor" || message == "Processor Declined") {
+                        message = "Unfortunately, your bank is unwilling to accept transactions on this card and we are therefore unable to add it.<br /><br />Please contact your bank for more details regarding this.";
+                    }
+
+                    document.getElementById("modal_billingv2_processing_case1a_error_card_message_inner").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case1a_error_card_message"); 
+                }
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case1a_error_card");
+        }
+
+
+    }).catch(function (err) {
+        console.log(err);
+
+        if (err != null) {
+            if (err.Message != null) {
+
+                var message = err.Message;
+                if (message == "Credit card type is not accepted by this merchant account.") {
+                    message = "Unfortunately, we do not accept the card type you are trying to add. Please use a different card type";
+                }
+                if (message == "Do Not Honor" || message == "Processor Declined") {
+                    message = "Unfortunately, your bank is unwilling to accept transactions on this card and we are therefore unable to add it.<br /><br />Please contact your bank for more details regarding this.";
+                }
+
+                document.getElementById("modal_billingv2_processing_case1a_error_card_message_inner").innerHTML = "<p>" + message + "</p>";
+                showById("modal_billingv2_processing_case1a_error_card_message"); 
+            }
+        }
+
+        showById("modal_billingv2_processing_case1a_error_card");
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+}
+
+// Final Payment - Invoice
+function billingV2InstructionsCase1aFinalPayment(payload, deviceData) {
+
+    var data = {
+        "storeId": storeId,
+        "invoiceId": invoiceId,
+        "nonce": payload,
+        "deviceData": deviceData
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payInvoice';
+    axiosPost(url, data).then(function (data) {
+
+        var payInvoiceResult = data.d;
+
+        if (payInvoiceResult != null) {
+
+            if (payInvoiceResult.success === true) {
+                showById("modal_billingv2_processing_case1a_complete");
+
+                if (payInvoiceResult.invoicePaid === false) {
+                    showById("modal_billingv2_processing_case1a_error_invoice");
+                }
+
+            } else {
+                showById("modal_billingv2_processing_case1a_error");
+
+                var errorCode = "";
+                if (payInvoiceResult.errorCode != null && payInvoiceResult.errorCode.length > 0) {
+                    errorCode = "<strong>" + payInvoiceResult.errorCode + ": </strong>";
+                }
+
+                if (payInvoiceResult.errorMessage != null && payInvoiceResult.errorMessage.length > 0) {
+                    document.getElementById("modal_billingv2_processing_case1a_error_message").innerHTML = "<p>" + errorCode + payInvoiceResult.errorMessage + "</p>";
+                } else {
+                    document.getElementById("modal_billingv2_processing_case1a_error_message").innerHTML = "<p>Sorry, we were unable to process your payment!</p>";
+                }
+                showById("modal_billingv2_processing_case1a_error_message");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case1a_error");
+        }
+
+        
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case1a_error");
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+// Redirect to homepage
+function billingV2InstructionsCase1aClose() {
+    hideByClass("overlay_forced", "modal_billingv2_processing");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+}
+
+// Try Again
+function billingV2InstructionsCase1aTryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+
+
+/* ======================================== */
+/* Case 2 ================================= */
+/* ======================================== */
+
+// Final Payment - Subscription
+function billingV2InstructionsCase2FinalPayment(payload, deviceData) {
+
+    console.log(billingV2InstructionsAll);
+    console.log(billingV2InstructionsAll.packageType);
+    console.log(billingV2InstructionsAll.packagePeriod);
+
+    var thePageUrl = "";
+    try {
+        thePageUrl = location.pathname;
+    } catch(e){ }
+
+    var trial = false;
+    if (billingV2InstructionsAll.trial != null && billingV2InstructionsAll.trial == true) {
+        trial = true;
+    }
+
+    var data = {
+        "storeId": storeId,
+        "packageType": billingV2InstructionsAll.packageType,
+        "nonce": payload,
+        "packagePeriod": billingV2InstructionsAll.packagePeriod,
+        "currency": billingV2Currency,
+        "pageReferralUrl": location.href,
+        "trial": trial,
+        "deviceData": deviceData
+    }
+    console.log("HIT HERE")
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/paySubscription';
+    axiosPost(url, data).then(function (data) {
+
+        var paySubscriptionResult = data.d;
+        console.log(paySubscriptionResult);
+
+        if (paySubscriptionResult != null) {
+
+            paySubscriptionResult = JSON.parse(paySubscriptionResult);
+            console.log(paySubscriptionResult);
+
+            if (paySubscriptionResult.success === true) {
+                showById("modal_billingv2_processing_case2_success");
+            } else {
+                if (paySubscriptionResult.errors != null && paySubscriptionResult.errors.length > 0) {
+
+                    var message = paySubscriptionResult.errors;
+
+                    document.getElementById("modal_billingv2_processing_case2_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case2_error_message");
+                }
+                showById("modal_billingv2_processing_case2_error");
+
+            }
+        } else {
+            showById("modal_billingv2_processing_case2_error");
+        }
+    
+
+    }).catch(function () {
+        showById("modal_billingv2_processing_case2_error");
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+function billingV2InstructionsCase2TryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+function billingV2InstructionsCase2Close() {
+    location.reload();
+}
+
+function billingV2InstructionsCase2CloseFinal() {
+    location.href = "/main_ridge.aspx";
+}
+
+/* ======================================== */
+/* Case 3 ================================= */
+/* ======================================== */
+
+function billingV2InstructionsCase3FinalPayment(payload, deviceData) {
+
+    var data = {
+        "storeId": storeId,
+        "domain": billingV2InstructionsAll.domain,
+        "nonce": payload,
+        "currency": billingV2Currency,
+        "deviceData": deviceData
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payDomain';
+    axiosPost(url, data).then(function (data) {
+
+        var payDomainResult = data.d;
+
+        if (payDomainResult != null) {
+
+            if (payDomainResult.success === true) {
+
+                document.getElementById("modal_billingv2_processing_title").innerText = "Payment Processed";
+
+                showById("modal_billingv2_processing_case3_success");
+                showById("modal_billingv2_processing_footer");
+
+                getDomainRegistrationAddress();
+
+            } else {
+
+                showById("modal_billingv2_processing_case3_error");
+
+                var errorCode = "";
+                if (payDomainResult.errorCode != null && payDomainResult.errorCode.length > 0) {
+                    errorCode = "<strong>" + payInvoiceResult.errorCode + ": </strong>";
+                }
+
+                if (payDomainResult.errorMessage != null && payDomainResult.errorMessage.length > 0) {
+                    document.getElementById("modal_billingv2_processing_case3_error_message").innerHTML = "<p>" + errorCode + payDomainResult.errorMessage + "</p>";
+                } else {
+                    document.getElementById("modal_billingv2_processing_case3_error_message").innerHTML = "<p>Sorry, we were unable to process your payment!</p>";
+                }
+                showById("modal_billingv2_processing_case3_error_message");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case3_error");
+        }
+
+
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case3_error");
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+function getDomainRegistrationAddress() {
+
+    if (existingBillingAddressLoaded == true) {
+
+        var fname = existingBillingAddress.forename;
+        var lname = existingBillingAddress.surname;
+        var address1 = existingBillingAddress.address1;
+        var address2 = existingBillingAddress.address2;
+        var city = existingBillingAddress.city;
+        var country = existingBillingAddress.country;
+        var zip = existingBillingAddress.zip;
+
+        if (fname != null && fname.length > 0) { document.querySelector("#modal_buyDomainAddress_fname").value = fname; }
+        if (lname != null && lname.length > 0) { document.querySelector("#modal_buyDomainAddress_lname").value = lname; }
+        if (address1 != null && address1.length > 0) { document.querySelector("#modal_buyDomainAddress_address1").value = address1; }
+        if (address2 != null && address2.length > 0) { document.querySelector("#modal_buyDomainAddress_state").value = address2; }
+        if (city != null && city.length > 0) { document.querySelector("#modal_buyDomainAddress_city").value = city; }
+        if (country != null && country.length > 0) { document.querySelector("#modal_buyDomainAddress_country").value = country; }
+        if (zip != null && zip.length > 0) { document.querySelector("#modal_buyDomainAddress_code").value = zip; }
+
+        hideByClass("busy_wait_billingv2_processing_registration_form");
+        showById("modal_billingv2_processing_case3_success_step2");
+        document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.remove("button_disabled");
+        document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = 'Register Domain';
+        $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", false);
+        hideById("modal_billingv2_processing_case3_success_step2_error");
+        showById("modal_billingv2_processing_case3_success_step2");
+
+    } else {
+
+        showByClass("busy_wait_billingv2_processing_registration_form");
+
+        axiosGet('/services/billing/billingv2.svc/getBillingAddress?storeId=' + storeId).then(function (data) {
+            trace("getBillingAddress:success");
+
+            existingBillingAddress = data.d;
+            console.log(existingBillingAddress);
+
+            if (existingBillingAddress != null) {
+
+                existingBillingAddressLoaded = true;
+
+                console.log(existingBillingAddress.forename)
+
+                var fname = existingBillingAddress.forename;
+                var lname = existingBillingAddress.surname;
+                var address1 = existingBillingAddress.address1;
+                var city = existingBillingAddress.city;
+                var state = existingBillingAddress.state;
+                var country = existingBillingAddress.country;
+                var zip = existingBillingAddress.zip;
+                
+                if (existingBillingAddress.mobile != null && existingBillingAddress.mobile.length > 0) {
+                    var number = existingBillingAddress.mobile;
+                } else if (existingBillingAddress.telephone != null && existingBillingAddress.telephone.length > 0) {
+                    var number = existingBillingAddress.telephone;
+                }
+
+                if (fname != null && fname.length > 0) { document.querySelector("#modal_buyDomainAddress_fname").value = fname; }
+                if (lname != null && lname.length > 0) { document.querySelector("#modal_buyDomainAddress_lname").value = lname; }
+                if (address1 != null && address1.length > 0) { document.querySelector("#modal_buyDomainAddress_address1").value = address1; }
+                if (city != null && city.length > 0) { document.querySelector("#modal_buyDomainAddress_city").value = city; }
+                if (state != null && state.length > 0) { document.querySelector("#modal_buyDomainAddress_state").value = state; }
+                if (country != null && country.length > 0) { document.querySelector("#modal_buyDomainAddress_country").value = country; }
+                if (zip != null && zip.length > 0) { document.querySelector("#modal_buyDomainAddress_code").value = zip; }
+                if (number != null && number.length > 0) { document.querySelector("#modal_buyDomainAddress_telephone").value = number; }
+
+            }
+
+        }).catch(function () {
+            trace("getBillingAddress:error");
+        }).then(function () {
+
+            hideByClass("busy_wait_billingv2_processing_registration_form");
+            showById("modal_billingv2_processing_case3_success_step2");
+            document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.remove("button_disabled");
+            document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = 'Register Domain';
+            $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", false);
+            hideById("modal_billingv2_processing_case3_success_step2_error");
+            showById("modal_billingv2_processing_case3_success_step2");
+
+        });
+
+    }
+
+}
+
+
+function billingV2InstructionsCase3TryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+function billingV2InstructionsCase3Close() {
+    location.reload();
+}
+
+function billingV2InstructionsCase3FormSubmitSupport() {
+
+    hideByClass("alert_modal_billingv2_processing_case3_success_step2_help");
+    hideByClass("alert_modal_billingv2_processing_case3_success_step2_help_oops");
+
+    document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").classList.add("button_disabled");
+    document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting';
+    document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.add("button_disabled");
+
+    $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").removeClass("input_alert");
+    hideByQueryAll("#modal_billingv2_processing_case3_success_step2_form .alert");
+    $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", true);
+
+    var fname = stripHTML(document.getElementById("modal_buyDomainAddress_fname").value.trim());
+    var lname = stripHTML(document.getElementById("modal_buyDomainAddress_lname").value.trim());
+    var address1 = stripHTML(document.getElementById("modal_buyDomainAddress_address1").value.trim());
+    var city = stripHTML(document.getElementById("modal_buyDomainAddress_city").value.trim());
+    var state = stripHTML(document.getElementById("modal_buyDomainAddress_state").value.trim());
+    var zip = stripHTML(document.getElementById("modal_buyDomainAddress_code").value.trim());
+    var country = stripHTML(document.getElementById("modal_buyDomainAddress_country").value.trim());
+    var telephone = stripHTML(document.getElementById("modal_buyDomainAddress_telephone").value.trim());
+
+    var registrationValid = true;
+
+    if (fname == null || fname.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_fname").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_fname");
+    }
+
+    if (lname == null || lname.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_lname").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_lname");
+    }
+
+    if (address1 == null || address1.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_address1").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_address1");
+    }
+
+    if (city == null || city.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_city").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_city");
+    }
+
+    if (state == null || state.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_state").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_state");
+    }
+
+    if (zip == null || zip.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_code").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_code");
+    }
+
+    if (country == null || country.length == 0 || country == "-1" || country == -1) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_country").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_country");
+    }
+
+    if (telephone == null || telephone.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone");
+    }
+
+    if (telephone.substr(0, 1) != "+") {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone3");
+    }
+
+    if (telephone.length < 10) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone2");
+    }
+
+    if (!telephone.includes(".")) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone4");
+    }
+
+    var registrationValidCharacters = /[^+0-9.]/;
+    if (registrationValidCharacters.test(telephone)) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone5");
+    }
+
+
+    if (registrationValid === false) {
+        document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.remove("button_disabled");
+        document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").classList.remove("button_disabled");
+        document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").innerHTML = 'Submit to Support';
+        showByClass("alert_modal_billingv2_processing_case3_success_step2_help");
+        $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", false);
+    } else {
+
+        var message = 'Hi, please can you register my domain name for me:\n\n';
+        message += 'Domain Name: ' + billingV2InstructionsAll.domain + '\n\n';
+        message += 'First Name: ' + fname + '\n';
+        message += 'Last Name: ' + lname + '\n';
+        message += 'Address Line 1: ' + address1 + '\n';
+        message += 'Address City: ' + city + '\n';
+        message += 'Address State/ County: ' + state + '\n';
+        message += 'Address Zip/ Post Code: ' + zip + '\n';
+        message += 'Address Country: ' + country + '\n';
+        message += 'Telephone/ Mobile Number: ' + telephone;
+        
+        var registerDomainNameTicket = {
+            storeId: storeId,
+            subject: "Struggling to Register Domain Name",
+            message: message.trim(),
+            type: billingV2InstructionsAll.domain
+        };
+
+        //Save to the server
+        var url = "/services/support/Support.svc/CreateTicket";
+        var data = JSON.stringify({ 'shopkeeper': storeId, 'ticket': registerDomainNameTicket });
+        axiosPost(url, data).then(function (res) {
+            console.log(res);
+            if (res.d == true) {
+                showById("modal_billingv2_processing_case3_success_step2_help_sent");
+                document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").innerHTML = '<i class="fa fa-check color_green"></i> Submitted';
+                hideById("modal_billingv2_processing_case3_success_step2_form_container");
+            } else {
+                document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").classList.remove("button_disabled");
+                document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").innerHTML = 'Submit to Support';
+                showByClass("alert_modal_billingv2_processing_case3_success_step2_help_oops");
+            }
+            
+        }).catch(function (err) {
+            document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").classList.remove("button_disabled");
+            document.getElementById("modal_billingv2_processing_case3_success_step2_help_button").innerHTML = 'Submit to Support';
+            showByClass("alert_modal_billingv2_processing_case3_success_step2_help_oops");
+        });
+
+    }
+
+}
+
+
+var billingv2RegisterDomainFailCount = 0;
+function billingv2RegisterDomain() {
+
+    document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.add("button_disabled");
+    document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = '<i class="fa fa-spinner fa-spin"></i> Registering Domain';
+
+    $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").removeClass("input_alert");
+
+    hideByQueryAll("#modal_billingv2_processing_case3_success_step2_form .alert");
+
+    $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", true);
+
+
+    var fname = stripHTML(document.getElementById("modal_buyDomainAddress_fname").value.trim());
+    var lname = stripHTML(document.getElementById("modal_buyDomainAddress_lname").value.trim());
+    var address1 = stripHTML(document.getElementById("modal_buyDomainAddress_address1").value.trim());
+    var city = stripHTML(document.getElementById("modal_buyDomainAddress_city").value.trim());
+    var state = stripHTML(document.getElementById("modal_buyDomainAddress_state").value.trim());
+    var zip = stripHTML(document.getElementById("modal_buyDomainAddress_code").value.trim());
+    var country = stripHTML(document.getElementById("modal_buyDomainAddress_country").value.trim());
+    var telephone = stripHTML(document.getElementById("modal_buyDomainAddress_telephone").value.trim());
+
+    var registrationValid = true;
+
+    if (fname == null || fname.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_fname").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_fname");
+    }
+
+    if (lname == null || lname.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_lname").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_lname");
+    }
+
+    if (address1 == null || address1.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_address1").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_address1");
+    }
+
+    if (city == null || city.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_city").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_city");
+    }
+
+    if (state == null || state.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_state").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_state");
+    }
+
+    if (zip == null || zip.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_code").classList.add("input_alert");
+        showByClass("alert_modal_buy_domain_address_code");
+    }
+
+    function postcodeSpace(s) {
+        regex = /\s/g;
+        return regex.test(s);
+    }
+
+    if (country != null && country == "GB") {
+        if (zip != null && zip.length > 0) {
+            if (!postcodeSpace(zip)) {
+                registrationValid = false;
+                document.getElementById("modal_buyDomainAddress_code").classList.add("input_alert");
+                showByClass("alert_modal_buy_domain_address_code1");
+            }
+        }
+    }
+
+    if (country == null || country.length == 0 || country == "-1" || country == -1) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_country").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_country");
+    }
+
+    if (telephone == null || telephone.length == 0) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone");
+    }
+
+    if (telephone.substr(0,1) != "+") {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone3");
+    }
+
+    if (telephone.length < 10) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone2");
+    }
+
+    if (!telephone.includes(".")) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone4");
+    } 
+
+    var registrationValidCharacters = /[^+0-9.]/;
+    if (registrationValidCharacters.test(telephone)) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone5");
+    }
+
+    var registrationTelephoneValidFullStore = /^.{2}[\.]/;
+    var registrationTelephoneValidFullStore2 = /^.{3}[\.]/;
+    var registrationTelephoneValidFullStore3 = /^.{4}[\.]/;
+    if (!registrationTelephoneValidFullStore.test(telephone) && !registrationTelephoneValidFullStore2.test(telephone) && !registrationTelephoneValidFullStore3.test(telephone)) {
+        registrationValid = false;
+        document.getElementById("modal_buyDomainAddress_telephone").classList.add("input_alert");
+        showByClass("alert_modal_buyDomainAddress_telephone6");
+    }
+    
+
+    if (registrationValid === false) {
+        document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.remove("button_disabled");
+        document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = 'Register Domain';
+        $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", false);
+
+        billingv2RegisterDomainFailCount++;
+        if (billingv2RegisterDomainFailCount > 1) {
+            showById("modal_billingv2_processing_case3_success_step2_help");
+        }
+
+    } else {
+
+        console.log("Form is valid");
+        hideById("modal_billingv2_processing_case3_success_step2");
+        showByClass("busy_wait_billingv2_processing_registration_form");
+        document.getElementById("busy_wait_billingv2_processing_registration_form_text").innerText = "Registering Domain";
+        
+
+        var domainAddress = {
+            "fname": fname,
+            "lname": lname,
+            "address1": address1,
+            "city": city,
+            "state": state,
+            "zip": zip,
+            "country": country,
+            "telephone": telephone
+        }
+
+        var data = {
+            "storeId": storeId,
+            "address": domainAddress,
+            "domain": billingV2InstructionsAll.domain
+        }
+
+        data = JSON.stringify(data);
+
+
+        var url = '/services/billing/billingv2.svc/registerDomain';
+        axiosPost(url, data).then(function (data) {
+
+            var payDomainResult = data.d;
+            console.log(payDomainResult);
+            console.log("1");
+
+            if (payDomainResult != null) {
+                console.log("2");
+                payDomainResult = JSON.parse(payDomainResult);
+
+                if (payDomainResult.tokenSuccess == false) {
+                    console.log("3");
+
+                    document.getElementById("billingV2InstructionsCase3FormTryAgain_button").innerText = "Try Again";
+                    document.getElementById("billingV2InstructionsCase3FormTryAgain_button").setAttribute("onclick", "billingV2InstructionsCase3FormTryAgain();");
+
+                    if (payDomainResult.errorMessage != null && payDomainResult.errorMessage.length > 0) {
+                        console.log("4")
+                        if (payDomainResult.errorMessage == "eligibility") {
+                            document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>Unable to check eligibility for domain name.</p>";
+                        } else if (payDomainResult.errorMessage == "payment") {
+                            document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>Payment is required for domain registration.</p>";
+                            document.getElementById("billingV2InstructionsCase3FormTryAgain_button").innerText = "Go to: Payment Overview";
+                            document.getElementById("billingV2InstructionsCase3FormTryAgain_button").setAttribute("onclick", "billingV2InstructionsCase3FormTryAgainPayment();");
+                        } else if (payDomainResult.errorMessage == "availability") {
+                            document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>Domain name no longer available to register.</p><p>Please choose a different domain name</p>";
+                            document.getElementById("billingV2InstructionsCase3FormTryAgain_button").innerText = "Back To: Choose a Domain Name";
+                            document.getElementById("billingV2InstructionsCase3FormTryAgain_button").setAttribute("onclick", "billingV2InstructionsCase3Close();");
+                        } else {
+                            document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>Sorry, we were unable to register your domain name.</p>";
+                        }
+                    } else {
+                        document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>Sorry, we were unable to register your domain name.</p>";
+                    }
+
+                    showById("modal_billingv2_processing_case3_success_step2_error_message");
+                    showById("modal_billingv2_processing_case3_success_step2_error");
+                    document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = "Register Domain";
+
+                } else {
+
+                    // Check to see if register was a success
+
+                    if (payDomainResult.success == false) {
+                        console.log(payDomainResult.errorMessage);
+
+                        if (payDomainResult.errorMessage != null && payDomainResult.errorMessage.length > 0) {
+
+                            var errorMessages = '';
+                            for (var i = 0; i < payDomainResult.errorMessage.length; i++) {
+
+                                var errorMessagesItem = '<p>' + payDomainResult.errorMessage[i] + '</p>';
+                                errorMessages += errorMessagesItem;
+
+                            }
+
+                            showById("modal_billingv2_processing_case3_success_step2_error_message");
+                            document.getElementById("modal_billingv2_processing_case3_success_step2_error_message").innerHTML = "<p>" + errorMessages + "</p>";
+                        }
+
+                        document.getElementById("billingV2InstructionsCase3FormTryAgain_button").innerText = "Try Again";
+                        document.getElementById("billingV2InstructionsCase3FormTryAgain_button").setAttribute("onclick", "billingV2InstructionsCase3FormTryAgain();");
+
+                        showById("modal_billingv2_processing_case3_success_step2_error");
+                        document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = "Register Domain";
+
+                    } else {
+
+                        // Successfully registered domain name
+                        showById("modal_billingv2_processing_case3_success_step3");
+                        document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = "Domain Registered";
+
+                        if (payDomainResult.errorMessage != null && payDomainResult.errorMessage.length > 0) {
+                            if (payDomainResult.errorMessage == "pending") {
+                                showById("modal_billingv2_processing_case3_success_step3_pending");
+                            }
+                        }
+
+
+                    }
+
+                }
+
+            } else {
+
+                showById("modal_billingv2_processing_case3_success_step2_error");
+
+            }
+
+
+        }).catch(function() {
+            showById("modal_billingv2_processing_case3_success_step2_error");
+        }).then(function () {
+
+            hideByClass("busy_wait_billingv2_processing_registration_form");
+
+        });
+        
+    }
+}
+
+function errorIsInArray(value, array) {
+    return array.indexOf(value) > -1;
+}
+
+function billingV2InstructionsCase3FormTryAgain() {
+    document.getElementById("modal_billingv2_processing_footer_register_domain_button").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_processing_footer_register_domain_button").innerHTML = 'Register Domain';
+    $("#modal_billingv2_processing_case3_success_step2_form input, #modal_billingv2_processing_case3_success_step2_form select").attr("disabled", false);
+    hideById("modal_billingv2_processing_case3_success_step2_error");
+    showById("modal_billingv2_processing_case3_success_step2");
+    showById("modal_billingv2_processing_case3_success_step2_help");
+}
+
+function billingV2InstructionsCase3FormTryAgainPayment() {
+    if (billingV2InstructionsAll != null && (billingV2InstructionsAll.domain != null && billingV2InstructionsAll.domain.length)) {
+        hideByClass("modal_billingv2_processing");
+        showByClass("modal_billingv2_overview");
+        document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+        document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+        document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+        document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+        billingV2Instructions(billingV2InstructionsAll);
+    } else {
+        location.href = "/marketing_domains_register.aspx";
+    }
+}
+
+/* ======================================== */
+/* Case 4a ================================ */
+/* ======================================== */
+
+
+// Final Payment - App
+function billingV2InstructionsCase4aFinalPayment(payload) {
+
+    if (payload == "") {
+        document.getElementById("modal_billingv2_processing_title").innerText = "Enabling App";
+        document.getElementById("busy_wait_billingv2_processing_text").innerText = "Enabling App";
+    }
+
+    var planId = null;
+    if (hasSubscription.status == 1) {
+        planId = hasSubscription.planId;
+    }
+
+
+    var data = {
+        "storeId": storeId,
+        "appId": appId,
+        "nonce": payload,
+        "planId": planId,
+        "currency": billingV2Currency
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payApp';
+    axiosPost(url, data).then(function (data) {
+
+        var payAppResult = data.d;
+        console.log(payAppResult);
+
+        if (payAppResult != null) {
+
+            payAppResult = JSON.parse(payAppResult);
+            console.log(payAppResult);
+
+            if (payAppResult.success === true) {
+                showById("modal_billingv2_processing_case4a_success");
+
+                if (payAppResult.url != null && payAppResult.url.length > 0) {
+                    
+                    if (location.pathname == "/editor.aspx" || location.pathname == "/editor") {
+                        document.getElementById("modal_billingv2_processing_case4a_success_gotoapp_button").setAttribute("onclick", "editorAppInstalled();");
+                    } else {
+                        document.getElementById("modal_billingv2_processing_case4a_success_gotoapp_button").setAttribute("href", payAppResult.url);
+                    }
+                    showByIdInline("modal_billingv2_processing_case4a_success_gotoapp_button");
+                }
+
+            } else {
+                if (payAppResult.errors != null && payAppResult.errors.length > 0) {
+
+                    var message = payAppResult.errors;
+                    if (message.includes("Cannot edit a canceled subscription")) {
+                        message = "<strong>Unable to bill a cancelled subscription!</strong></br ></br >Please <a href='/support_new_ticket.aspx' class='link_color_primary'>contact support</a> for assistance."
+                    }
+
+                    document.getElementById("modal_billingv2_processing_case4a_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case4a_error_message");
+                }
+                showById("modal_billingv2_processing_case4a_error");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case4a_error");
+        }
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case4a_error");
+        
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+// Try Again
+function billingV2InstructionsCase4aTryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+// Close
+function billingV2InstructionsCase4aClose() {
+    if (location.pathname == "/editor.aspx" || location.pathname == "/editor") {
+        editorAppInstalled();
+    } else {
+        location.reload();
+    }
+}
+
+
+
+
+/* ======================================== */
+/* Case 5 ================================= */
+/* ======================================== */
+
+// Update Billing Address
+function billinigV2InstructionsCase5UpdateDetails(payload) {
+    billingv2AddNewCardButton.removeEventListener('click', billingv2AddNewCardButtonProcess);
+    console.log("this ran")
+
+    var data = payload;
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/updateBillingDetails';
+    axiosPost(url, data).then(function (data) {
+
+        // success
+        showById("modal_billingv2_processing_case5_complete");
+        
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case5_error");
+        
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+}
+
+// Try Again
+function billingV2InstructionsCase5TryAgain() {
+
+    showByClass("modal_billingv2_add_new_card");
+    hideByClass("modal_billingv2_processing");
+    document.getElementById("modal_billingv2_add_new_card_button").classList.remove("button_disabled");
+
+}
+
+// Close (Reload method list)
+function billingV2InstructionsCase5Close() {
+    hideByClass("overlay_forced", "modal_billingv2_processing");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+
+    if (typeof getPaymentMethods === "function") {
+        getPaymentMethods();
+    }
+
+}
+
+
+
+
+/* ======================================== */
+/* Case 6 ================================= */
+/* ======================================== */
+
+// Add New Method
+function billinigV2InstructionsCase6AddCard(payload) {
+
+    var data = {
+        "storeId": storeId,
+        "nonce": payload.nonce,
+        "failDuplicate": false,
+        "makeDefault": false,
+        "deviceData": payload.deviceData,
+        "address": billingv2NewCardAddress
+    }
+
+    console.log(data);
+
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/AddNewPaymentMethod';
+
+    axiosPost(url, data).then(function (data) {
+
+        var addNewCardResult = data.d;
+        console.log(addNewCardResult);
+
+        if (addNewCardResult != null) {
+
+            addNewCardResult = JSON.parse(addNewCardResult);
+            console.log(addNewCardResult);
+
+            if (addNewCardResult.success == true) {
+                // success
+                billingV2InstructionsCase6Completed('Card');
+            } else {
+                showById("modal_billingv2_processing_case6_error");
+                hideByClass("busy_wait_billingv2_processing");
+                if (addNewCardResult.errors != null && addNewCardResult.errors.length > 0) {
+
+                    var message = addNewCardResult.errors;
+                    if (message == "Credit card type is not accepted by this merchant account.") {
+                        message = "Unfortunately, we do not accept the card type you are trying to add. Please use a different card type.";
+                    }
+                    if (message == "Do Not Honor" || message == "Processor Declined") {
+                        message = "Unfortunately, your bank is unwilling to accept transactions on this card and we are therefore unable to add it.<br /><br />Please contact your bank for more details regarding this.";
+                    }
+
+                    document.getElementById("modal_billingv2_processing_case6_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case6_error_message");
+                }
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case6_error");
+            hideByClass("busy_wait_billingv2_processing");
+        }
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case6_error");
+        hideByClass("busy_wait_billingv2_processing");
+
+    }).then(function () {
+
+    });
+
+}
+
+// Try Again
+function billingV2InstructionsCase6TryAgain() {
+
+    showByClass("modal_billingv2_add_new_card");
+    hideByClass("modal_billingv2_processing");
+    document.getElementById("modal_billingv2_add_new_card_button").classList.remove("button_disabled");
+
+}
+
+// Complete
+function billingV2InstructionsCase6Completed(type) {
+
+    document.getElementById("modal_billingv2_processing_case6_complete_text").innerText = type;
+
+    showById("modal_billingv2_processing_case6_complete");
+    hideByClass("busy_wait_billingv2_processing");
+
+}
+
+// Close (Reload method list)
+function billingV2InstructionsCase6Close() {
+
+    hideByClass("overlay_forced", "modal_billingv2_processing");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+
+    if (typeof getPaymentMethods === "function") {
+        getPaymentMethods();
+    }
+
+}
+
+
+
+
+/* ======================================== */
+/* Case 7 ================================= */
+/* ======================================== */
+
+
+function billingV2InstructionsCase7FinalPayment(payload) {
+
+    var data = {
+        "storeId": storeId,
+        "nonce": payload,
+        "currency": billingV2Currency
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payRestricted';
+    axiosPost(url, data).then(function (data) {
+
+        var payRestrictedResult = data.d;
+        console.log(payRestrictedResult);
+
+        if (payRestrictedResult != null) {
+
+            payRestrictedResult = JSON.parse(payRestrictedResult);
+            console.log(payRestrictedResult);
+
+            if (payRestrictedResult.success === true) {
+                showById("modal_billingv2_processing_case7_success");
+
+            } else {
+                if (payRestrictedResult.errors != null && payRestrictedResult.errors.length > 0) {
+
+                    var message = payRestrictedResult.errors;
+
+                    document.getElementById("modal_billingv2_processing_case7_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case7_error_message");
+                }
+                showById("modal_billingv2_processing_case7_error");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case7_error");
+        }
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case7_error");
+
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+
+// Try Again
+function billingV2InstructionsCase7TryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+// Close
+function billingV2InstructionsCase7Close() {
+    location.reload();
+}
+
+
+
+
+
+
+
+
+
+
+/* ======================================== */
+/* Case 8 ================================= */
+/* ======================================== */
+
+
+function billingV2InstructionsCase8FinalPayment(payload, deviceData) {
+
+    var data = {
+        "storeId": storeId,
+        "nonce": payload,
+        "currency": billingV2Currency,
+        "net": billingv2OverviewInfo.amount,
+        "deviceData": deviceData
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payCreditDeposit';
+    axiosPost(url, data).then(function (data) {
+
+        var payCreditDepositResult = data.d;
+        console.log(payCreditDepositResult);
+
+        if (payCreditDepositResult != null) {
+
+            //payCreditDepositResult = JSON.parse(payCreditDepositResult);
+            console.log(payCreditDepositResult);
+
+            if (payCreditDepositResult.success === true) {
+                showById("modal_billingv2_processing_case8_success");
+
+            } else {
+                if (payCreditDepositResult.errors != null && payCreditDepositResult.errors.length > 0) {
+
+                    var message = payCreditDepositResult.errors;
+
+                    document.getElementById("modal_billingv2_processing_case8_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case8_error_message");
+                }
+                showById("modal_billingv2_processing_case8_error");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case8_error");
+        }
+
+    }).catch(function () {
+
+        showById("modal_billingv2_processing_case8_error");
+
+
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+
+}
+
+
+// Try Again
+function billingV2InstructionsCase8TryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+// Close
+function billingV2InstructionsCase8Close() {
+    location.reload();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* ======================================== */
+/* Case 9 ================================= */
+/* ======================================== */
+
+function billingV2InstructionsCase9FinalPayment(payload, deviceData) {
+
+    var data = {
+        "storeId": storeId,
+        "nonce": payload,
+        "currency": billingV2Currency,
+        "domains": domainNamesCart,
+        "deviceData": deviceData
+    }
+
+    console.log(data);
+    data = JSON.stringify(data);
+
+    var url = '/services/billing/billingv2.svc/payMultipleDomains';
+    axiosPost(url, data).then(function (data) {
+
+        var payMultipleDomainsResult = data.d;
+        console.log(payMultipleDomainsResult);
+
+        if (payMultipleDomainsResult != null) {
+
+            console.log(payMultipleDomainsResult);
+
+            if (payMultipleDomainsResult.success === true) {
+                showById("modal_billingv2_processing_case9_success");
+
+            } else {
+                if (payMultipleDomainsResult.errors != null && payMultipleDomainsResult.errors.length > 0) {
+
+                    var message = payMultipleDomainsResult.errors;
+
+                    document.getElementById("modal_billingv2_processing_case8_error_message").innerHTML = "<p>" + message + "</p>";
+                    showById("modal_billingv2_processing_case9_error_message");
+                }
+                showById("modal_billingv2_processing_case9_error");
+            }
+
+        } else {
+            showById("modal_billingv2_processing_case9_error");
+        }
+
+    }).catch(function () {
+        showById("modal_billingv2_processing_case9_error");
+    }).then(function () {
+        hideByClass("busy_wait_billingv2_processing");
+    });
+}
+
+// Try Again
+function billingV2InstructionsCase9TryAgain() {
+    hideByClass("modal_billingv2_processing");
+    showByClass("modal_billingv2_overview");
+    document.getElementById("modal_billingv2_overview_confirm_payment").classList.remove("button_disabled");
+    document.getElementById("modal_billingv2_overview_card_selected_change").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_close_button_X").classList.remove("link_disabled");
+    document.getElementById("modal_billingv2_overview_confirm_payment").innerHTML = "<i class='fa fa-lock marginr5' aria-hidden='true'></i>Confirm Payment";
+}
+
+// Close
+function billingV2InstructionsCase9Close() {
+    location.reload();
+}
