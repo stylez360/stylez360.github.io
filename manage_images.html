@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        
+            <title>Login to StyleZ 360 Control Panel</title>
+            <link rel="icon" sizes="192x192" id="freewebstore_cp_favicon" href="//d11fdyfhxcs9cr.cloudfront.net/design_media/freewebstore/logo/favicon-fws_opt.png">
+            <meta name="theme-color" content="#20b7e6">
+            <meta name="msapplication-navbutton-color" content="#20b7e6">
+            <meta name="apple-mobile-web-app-status-bar-style" content="#20b7e6">
+            <meta name="description" content="Login to your StyleZ 360 Control Panel and start managing your free online store" />
+            <meta name="keywords" content="freewebstore, login, admin, manage, password reset, eCommerce, online store" />
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44336959-1"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { dataLayer.push(arguments); }
+                gtag('js', new Date());
+
+                gtag('config', 'UA-44336959-1');
+                gtag('config', 'UA-128525343-1');
+            </script>
+        
+
+        
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <meta name="ROBOTS" content="INDEX, NOFOLLOW" />
+        <!-- Load Beaver locally so cannot be blocked -->
+        <script>
+            var __VER__ = "1.0.0", storeId = -1, beaverGuid = guid(); function guid() { return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4() } function s4() { return Math.floor(65536 * (1 + Math.random())).toString(16).substring(1) } function _instanceof(e, t) { return null != t && "undefined" != typeof Symbol && t[Symbol.hasInstance] ? !!t[Symbol.hasInstance](e) : e instanceof t } function _toConsumableArray(e) { return _arrayWithoutHoles(e) || _iterableToArray(e) || _unsupportedIterableToArray(e) || _nonIterableSpread() } function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.") } function _unsupportedIterableToArray(e, t) { if (e) { if ("string" == typeof e) return _arrayLikeToArray(e, t); var r = Object.prototype.toString.call(e).slice(8, -1); return "Object" === r && e.constructor && (r = e.constructor.name), "Map" === r || "Set" === r ? Array.from(e) : "Arguments" === r || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r) ? _arrayLikeToArray(e, t) : void 0 } } function _iterableToArray(e) { if ("undefined" != typeof Symbol && Symbol.iterator in Object(e)) return Array.from(e) } function _arrayWithoutHoles(e) { if (Array.isArray(e)) return _arrayLikeToArray(e) } function _arrayLikeToArray(e, t) { (null == t || t > e.length) && (t = e.length); for (var r = 0, n = new Array(t); r < t; r++)n[r] = e[r]; return n } function _classCallCheck(e, t) { if (!_instanceof(e, t)) throw new TypeError("Cannot call a class as a function") } function _defineProperties(e, t) { for (var r = 0; r < t.length; r++) { var n = t[r]; n.enumerable = n.enumerable || !1, n.configurable = !0, "value" in n && (n.writable = !0), Object.defineProperty(e, n.key, n) } } function _createClass(e, t, r) { return t && _defineProperties(e.prototype, t), r && _defineProperties(e, r), e } function _defineProperty(e, t, r) { return t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e } var Logger = function () { "use strict"; function e(t) { _classCallCheck(this, e), _defineProperty(this, "_storeId", -1), _defineProperty(this, "_prefix", "[CONTROLPANEL]"), _defineProperty(this, "_debugEnabled", !1), _defineProperty(this, "_uuid", null), _defineProperty(this, "_isDev", !1), void 0 !== t && null !== t && (t.storeId && (this._storeId = t.storeId), t.prefix && (this._prefix = t.prefix), t.debugEnabled && (this._debugEnabled = t.debugEnabled), t.uuid && (this._uuid = t.uuid), t.isDev && (this._isDev = t.isDev)) } return _createClass(e, [{ key: "isDebugEnabled", value: function () { return this._debugEnabled } }, { key: "log", value: function (e) { if (this._isDev) { for (var t, r = arguments.length, n = new Array(r > 1 ? r - 1 : 0), o = 1; o < r; o++)n[o - 1] = arguments[o]; (t = console).log.apply(t, ["".concat(location.href, " [").concat(this._prefix, "] [").concat(this._storeId, "] [").concat(this._uuid, "] [").concat((new Date).toISOString(), "] ").concat(e, " ")].concat(n)) } this._isDev || this.sendToServer.apply(this, ["[".concat((new Date).toISOString(), " - ").concat(__VER__, "] ").concat(e), 0].concat(n)) } }, { key: "warn", value: function (e) { for (var t, r = arguments.length, n = new Array(r > 1 ? r - 1 : 0), o = 1; o < r; o++)n[o - 1] = arguments[o]; (t = console).warn.apply(t, ["".concat(location.href, " [").concat(this._prefix, "] [").concat(this._storeId, "] [").concat(this._uuid, "] [").concat((new Date).toISOString(), "] ").concat(e, " ")].concat(n)), this._isDev || this.sendToServer.apply(this, ["[".concat((new Date).toISOString(), " - ").concat(__VER__, "] ").concat(e), 1].concat(n)) } }, { key: "error", value: function (e) { for (var t, r = arguments.length, n = new Array(r > 1 ? r - 1 : 0), o = 1; o < r; o++)n[o - 1] = arguments[o]; (t = console).error.apply(t, ["".concat(location.href, " [").concat(this._prefix, "] [").concat(this._storeId, "] [").concat(this._uuid, "] [").concat((new Date).toISOString(), "] ").concat(e, " ")].concat(n)), this._isDev || this.sendToServer.apply(this, ["[".concat((new Date).toISOString(), " - ").concat(__VER__, "] ").concat(e), 2].concat(n)) } }, { key: "debug", value: function (e) { for (var t = arguments.length, r = new Array(t > 1 ? t - 1 : 0), n = 1; n < t; n++)r[n - 1] = arguments[n]; var o; this._debugEnabled && (o = console).log.apply(o, ["".concat(location.href, " [").concat(this._prefix, "] [").concat(this._storeId, "] [").concat(this._uuid, "] [").concat((new Date).toISOString(), "] ").concat(e, " ")].concat(r)); this._isDev || this.sendToServer.apply(this, ["[".concat((new Date).toISOString(), " - ").concat(__VER__, "] ").concat(e), 0].concat(r)) } }, { key: "sendToServer", value: function (e, t) { var r = new XMLHttpRequest; r.open("POST", "/services/utilities/beaver.svc/log", !0), r.setRequestHeader("Content-Type", "application/json"); for (var n = "", o = arguments.length, a = new Array(o > 2 ? o - 2 : 0), i = 2; i < o; i++)a[i - 2] = arguments[i]; try { n = JSON.stringify.apply(JSON, _toConsumableArray(a || "")) } catch (e) { } "{}" === n && (n = JSON.stringify.apply(JSON, a.concat([Object.getOwnPropertyNames.apply(Object, a)]))), void 0 === n && (n = ""); var c = { shopkeeper: this._storeId, action: "RIDGE#CLIENT#" + this._prefix, errorlevel: t, type: "DEBUG_ID", typeid: this._uuid, message: e + " ".concat(n) }, s = JSON.stringify({ log: c }); r.send(s); var u = this; r.onload = function () { 200 !== r.status && console.error("Error in sendToServer. Status ".concat(r.status, ":").concat(r.statusText)) }, r.onerror = function () { }, r.ontimeout = function () { console.error("Error in sendToServer ontimeout handler. ResponseText: [".concat(r.responseText, "]. Status: [").concat(r.status, "]")) } } }]), e }();
+        </script>
+        
+        <link type="text/css" rel="stylesheet" href="/css/main.css?v=566a67aa5c4d675ed7af7841de2b0fb6" />
+        <link rel="stylesheet" type="text/css" href="//d11fdyfhxcs9cr.cloudfront.net/design_media/freewebstore/fonts/stylesheet.min.css" />
+        <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/c2dd136024.js"></script>
+
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+        <script src="/javascript/reusable/jquery-1.11.3.min.js?v=f1b904c2136d1ed15438bee154a6b7b7" ></script>
+        <script src="/javascript/reusable/axios.js?v=7c7f2e13ba172f1bea56a6ffa1d86da7" ></script>
+        <script src="/javascript/js-cookie/js.cookie.js?v=6d7222a7d9c6b29d0a294ae647ce3726" ></script>
+        <script src="/javascript/reusable/cleanxss.js?v=a14ec8b27e4cd556fa42bab74e6a0265" ></script>
+        <script src="/javascript/utilities.js?v=28dab99e208826eb8f909055e8520c20" ></script>
+        <script src="/javascript/auth/forgotpassword.js?v=f2f43a1c9d4e96c9336e7a374fd59a66" ></script>
+
+        <link type="text/css" rel="stylesheet" href="/css/settings/login.css?v=ab16bcf145a191e576edee003a4546a6" />
+
+        <link type="text/css" rel="stylesheet" href="/css/cp_theme/fws_pink.css?v=778001f3d9892ab88bf1456b10f9ced5" />
+
+        
+        <noscript>
+            <style> #loginDisabled { display: block; } </style>
+        </noscript>
+        <link type="text/css" rel="stylesheet" href="/css/cp_theme/base_elements.css?v=9638a3688f9b63c14d96422490725e3a" />
+    </head>
+    <body class="login_normal_color" style="overflow-x: hidden;overscroll-behavior:contain;position:relative;">
+        <div id="outdated_browser_container"></div>
+        <div id="login">
+            
+            <a href="/login" class="login_logo login_fws_attr" title="Freewebstore Logo">
+                <svg width="231px" height="54px" viewBox="0 0 231 54" enable-background="new 0 0 231 54">
+                <g>
+	                <g>
+		                <path fill="#FFFFFF" d="M8.001,38.404V22.347c0-4.405,2.406-6.607,7.218-6.607c1.315,0,2.509,0.204,3.579,0.612v3.211
+			                c-1.01-0.407-2.105-0.612-3.288-0.612c-2.305,0-3.456,1.132-3.456,3.396h4.817v3.211h-4.817v12.846H8.001z"/>
+		                <path fill="#FFFFFF" d="M18.263,38.404V22.347h3.135l0.505,2.049c1.406-1.366,2.896-2.049,4.465-2.049v3.272
+			                c-1.509,0-2.859,0.627-4.052,1.881v10.904H18.263z"/>
+		                <path fill="#FFFFFF" d="M35.437,22.347c4.873,0,7.31,2.487,7.31,7.463c0,0.662-0.046,1.324-0.138,1.987H31.949
+			                c0,2.264,1.662,3.396,4.986,3.396c1.621,0,3.242-0.153,4.862-0.459v3.211c-1.417,0.307-3.14,0.459-5.169,0.459
+			                c-5.821,0-8.731-2.737-8.731-8.212C27.897,24.962,30.41,22.347,35.437,22.347z M31.949,28.984h6.852v-0.123
+			                c0-2.222-1.121-3.333-3.364-3.333C33.295,25.528,32.133,26.68,31.949,28.984z"/>
+		                <path fill="#FFFFFF" d="M52.564,22.347c4.873,0,7.311,2.487,7.311,7.463c0,0.662-0.046,1.324-0.138,1.987H49.078
+			                c0,2.264,1.661,3.396,4.985,3.396c1.621,0,3.242-0.153,4.863-0.459v3.211c-1.417,0.307-3.141,0.459-5.169,0.459
+			                c-5.822,0-8.732-2.737-8.732-8.212C45.025,24.962,47.538,22.347,52.564,22.347z M49.078,28.984h6.851v-0.123
+			                c0-2.222-1.121-3.333-3.364-3.333C50.424,25.528,49.262,26.68,49.078,28.984z"/>
+		                <path fill="#FFFFFF" d="M61.542,22.347h4.083l2.08,11.179l3.716-11.179h3.472l4.007,11.179l1.805-11.179h4.221l-4.19,16.057
+			                h-3.809l-3.776-11.393l-3.823,11.393h-3.869L61.542,22.347z"/>
+		                <path fill="#FFFFFF" d="M94.146,22.347c4.873,0,7.31,2.487,7.31,7.463c0,0.662-0.046,1.324-0.138,1.987H90.659
+			                c0,2.264,1.662,3.396,4.985,3.396c1.621,0,3.242-0.153,4.863-0.459v3.211c-1.417,0.307-3.14,0.459-5.169,0.459
+			                c-5.821,0-8.732-2.737-8.732-8.212C86.606,24.962,89.12,22.347,94.146,22.347z M90.659,28.984h6.852v-0.123
+			                c0-2.222-1.122-3.333-3.364-3.333C92.005,25.528,90.843,26.68,90.659,28.984z"/>
+		                <path fill="#FFFFFF" d="M104.5,16.536h4.053v7.035c1.213-0.815,2.563-1.223,4.052-1.223c4.567,0,6.852,2.569,6.852,7.708
+			                c0,5.566-2.615,8.35-7.845,8.35c-2.203,0-4.573-0.219-7.111-0.657V16.536z M108.553,34.688c0.927,0.296,2.003,0.443,3.227,0.443
+			                c2.446,0,3.67-1.728,3.67-5.185c0-2.824-1.055-4.236-3.166-4.236c-1.366,0-2.609,0.275-3.73,0.826V34.688z"/>
+		                <path fill="#FFFFFF" d="M122.515,37.641v-3.365c1.784,0.714,3.844,1.07,6.179,1.07c1.743,0,2.615-0.561,2.615-1.682
+			                c0-1.07-0.587-1.605-1.759-1.605h-2.906c-3.263,0-4.894-1.606-4.894-4.818c0-3.364,2.381-5.047,7.142-5.047
+			                c2.019,0,3.921,0.306,5.704,0.918v3.364c-1.783-0.713-3.721-1.07-5.811-1.07c-2.192,0-3.288,0.561-3.288,1.682
+			                c0,1.07,0.637,1.605,1.911,1.605h2.6c3.568,0,5.354,1.605,5.354,4.817c0,3.364-2.274,5.047-6.821,5.047
+			                C126.308,38.558,124.299,38.252,122.515,37.641z"/>
+		                <path fill="#FFFFFF" d="M137.961,19.747h2.997l0.611,2.6h4.038v3.211h-3.594v7.387c0,1.498,0.647,2.248,1.941,2.248h1.652v3.211
+			                h-3.609c-2.691,0-4.037-1.442-4.037-4.328V19.747z"/>
+		                <path fill="#FFFFFF" d="M147.596,30.376c0-5.383,2.65-8.075,7.952-8.075c5.301,0,7.952,2.691,7.952,8.075
+			                c0,5.373-2.651,8.06-7.952,8.06C150.267,38.436,147.615,35.749,147.596,30.376z M155.548,35.346c2.6,0,3.899-1.677,3.899-5.031
+			                c0-3.272-1.3-4.909-3.899-4.909c-2.601,0-3.9,1.636-3.9,4.909C151.647,33.669,152.947,35.346,155.548,35.346z"/>
+		                <path fill="#FFFFFF" d="M166.559,38.404V22.347h3.135l0.505,2.049c1.407-1.366,2.896-2.049,4.466-2.049v3.272
+			                c-1.509,0-2.86,0.627-4.053,1.881v10.904H166.559z"/>
+		                <path fill="#FFFFFF" d="M183.732,22.347c4.873,0,7.311,2.487,7.311,7.463c0,0.662-0.046,1.324-0.138,1.987h-10.659
+			                c0,2.264,1.661,3.396,4.985,3.396c1.621,0,3.242-0.153,4.863-0.459v3.211c-1.417,0.307-3.141,0.459-5.169,0.459
+			                c-5.822,0-8.732-2.737-8.732-8.212C176.193,24.962,178.706,22.347,183.732,22.347z M180.246,28.984h6.851v-0.123
+			                c0-2.222-1.121-3.333-3.364-3.333C181.592,25.528,180.43,26.68,180.246,28.984z"/>
+	                </g>
+	                <path fill="#FFFFFF" d="M204.135,26.862c0.413,1.134,0.829,2.159,1.236,3.294c0.05,0.137,0.137,0.073,0.239,0.073
+		                c2.103,0,4.205-0.029,6.308-0.024c0.149,0.001,0.215-0.055,0.266-0.197c0.325-0.916,0.662-1.62,0.995-2.535
+		                c0.079-0.219,0.159-0.473,0.248-0.473c-3.124,0-6.211,0-9.304,0C204.128,27,204.127,26.843,204.135,26.862z"/>
+	                <path fill="#FFFFFF" d="M225.627,28.199l-6.828-8.572c-0.371-0.468-1.166-0.851-1.765-0.849l-17.521,0.024
+		                c-0.598,0-1.087,0.49-1.086,1.089l0.025,18.395c0.002,0.599,0.491,1.086,1.09,1.086l17.521-0.025c0.598,0,1.393-0.385,1.764-0.854
+		                l6.803-8.592C226,29.434,226,28.668,225.627,28.199z M205.437,35.697c-0.771-0.004-1.386-0.631-1.383-1.407
+		                c0.003-0.756,0.634-1.377,1.395-1.374c0.761,0.004,1.386,0.631,1.386,1.387C206.834,35.072,206.203,35.702,205.437,35.697z
+		                 M211.864,35.697c-0.771-0.004-1.386-0.631-1.383-1.407c0.003-0.756,0.634-1.377,1.396-1.374c0.76,0.004,1.386,0.631,1.385,1.387
+		                C213.262,35.072,212.631,35.702,211.864,35.697z M217.987,24.661c-0.491,0.011-0.982,0.014-1.473-0.003
+		                c-0.203-0.006-0.289,0.056-0.358,0.249c-0.78,2.176-1.57,4.253-2.359,6.425C213.6,31.875,213.281,32,212.701,32
+		                c-2.58,0-5.16,0-7.739,0c-0.132,0-0.264,0.084-0.395,0.07c-0.413-0.049-0.672-0.23-0.813-0.622
+		                c-0.416-1.164-0.665-2.302-1.091-3.462c-0.277-0.762-0.664-1.497-0.664-2.257c0-0.132,0-0.264,0-0.396
+		                c0-0.017-0.145-0.031-0.137-0.05c0.199-0.537,0.404-0.74,0.969-0.739c1.071,0.002,2.098,0.001,3.168,0.001
+		                c2.661,0,5.302-0.001,7.963,0.004c0.163,0,0.238-0.036,0.288-0.202c0.076-0.259,0.188-0.331,0.264-0.59
+		                c0.134-0.46,0.383-0.757,0.86-0.757c0.924,0,1.848,0,2.771,0c0.046,0,0.092-0.135,0.139-0.119c0.461,0.164,0.753,0.539,0.682,0.995
+		                C218.89,24.376,218.494,24.65,217.987,24.661z M221.204,30.609c-0.857,0-1.552-0.693-1.554-1.551c0-0.856,0.692-1.551,1.55-1.553
+		                c0.857-0.001,1.553,0.693,1.553,1.549C222.756,29.912,222.063,30.607,221.204,30.609z"/>
+                </g>
+                </svg>
+            </a>
+
+            <a href="/login" class="login_logo login_ridge_attr" title="Ridge Logo">
+                <svg width="100px" height="33px" viewBox="0 0 1761.798 337.659">
+                    <g>
+                        <polygon fill="#FFFFFF" points="324.854,162.43 617.602,337.659 280.937,0 0,337.795 278.798,92.771 278.798,259.354 	"/>
+                        <text transform="matrix(1 0 0 1 754.2627 280.7949)" fill="#FFFFFF" font-family="'Merriweather Sans'" font-weight="700" font-size="300" letter-spacing="18">RIDGE</text>
+                    </g>
+                </svg>
+            </a>
+
+            <div class="login_main_container">
+                <div id="login_signup_new" class="panel_white align_center"></div>
+                <div class="login_container">
+                    <div class="login_container_inner">
+                        <h2 class="login_title">Log In</h2>
+                        <input type="button" id="facebook_login" class="login-with-facebook-btn" value="Sign in with Facebook" aria-label="Facebook Login" onclick="doFBLogin();" />
+                        <input type="button" id="google_login" class="login-with-google-btn" value="Sign in with Google" aria-label="Google Login" onclick="doGoogleLogin();" />
+                        <div class="login_container_or">or</div>
+                        <div class="input_container">
+                            <input name="login_email" type="email" id="login_email" placeholder="Email Address" autocomplete="on" aria-label="Email Address" onfocus="var temp_value=this.value; this.value=&#39;&#39;; this.value=temp_value" />
+                        </div>
+                        <div class="input_container">
+                            <div class="input_container_password">
+                                <input name="login_password" type="password" id="login_password" placeholder="Password" aria-label="Password" />
+                                <div class="input_container_password_reveal" onclick="passwordReveal('login_password');"><i class="fa fa-eye-slash" data-id="login_password" aria-hidden="true"></i></div>
+                            </div>
+                        </div>
+                        <div class="input_container">
+                            <input style='display:none' id="twofactor" type="number" value="" maxlength="10" placeholder="Enter 2FA Code" aria-label="Enter 2FA Code" />
+                        </div>
+                        <div id="remember_me_checkbox" style="display: none;">
+                            <input type="checkbox" id="checkbox_twofactor"/>
+                            <label for="checkbox_twofactor">Remember this device for 30 days</label>
+                        </div>
+                        <div class="input_container">
+                            <div class="input_container_password">
+                                <input name="login_password_new" type="password" id="login_password_new" style="display:none" placeholder="New Password" aria-label="New Password" />
+                                <div class="input_container_password_reveal" id="login_password_new_reveal" style="display: none;" onclick="passwordReveal('login_password_new');"><i class="fa fa-eye-slash" data-id="login_password_new" aria-hidden="true"></i></div>
+                            </div>
+                        </div>
+                        <span class="alert login_alert">Email or password incorrect</span>
+						<input style="display:none;" type="button" id="resend_confirmation_code" class="button button_primary" value="Resend Activation Link" aria-label="Resend Activation Link" onclick="resendConfirmationCode();">
+                        <input type="button" id="login_button" class="button button_primary button_nojs" value="Login" aria-label="Login Button" onclick="ValidateLoginV2();" />
+                        
+                        <div id="loginDisabled">
+                            <p>Login Disabled: Javascript is Disabled.</p>
+                            <p>You can learn how to enable it <a href="https://www.enable-javascript.com/" class="link_color_primary">here</a></p>
+                        </div>
+                        <input style="display:none;" type="button" id="validate2fa" class="button button_primary" value="Continue" aria-label="Continue" />
+                    </div>
+                </div>
+                <div class="login_footer">
+                    <a onclick="loginForgotButton();" class="link_color_white">Forgotten Login Details?</a>
+                    <a href="/Register.aspx" class="link_color_white">No Account? Sign Up Now!</a>
+                </div>
+            </div>
+
+            <div class="login_forgot">
+                <div class="login_forgot_container">
+                    <!-- Email Reminder -->
+                    <div class="login_container_inner">
+                        <h2>Email Reminder</h2>
+                        <div id="email_reminder_container">
+                            <p>Enter your email address and press the <strong>Send Code</strong> button to receive a verification email.</p>
+                            <div class="input_container">
+                                <input id="login_forgot_input" type="email" placeholder="Email Address" value="" autocomplete="on" aria-label="Email Address for Forgotten Password" />
+                            </div>
+                            <span class="alert login_forgot_alert">You must enter a valid email address</span>
+                            <input type="submit" id="login_forgot_input_button" class="button button_primary" value="Send Code" aria-label="Send Forgot Password Button" onclick="forgotLogin();" />
+                        </div>
+                    </div>
+                    <!-- Email Reminder -->
+
+                    <!-- Enter Code -->
+                    <div class="login_container_inner">
+                        <h2>Enter Code</h2>
+                        <div id="forgot_password_container">
+                            <p id="forgot_password_text" style="display:none; color:green">We have just sent you an email with your verification code. Please copy &amp; paste the code in the box below along with your new password.</p>
+                            <div class="input_container">
+                                <div class="input_container_password">
+                                    <input type="password" id="confirm_password_input" style="margin-bottom: 10px;" placeholder="New Password" aria-label="New Password" value="" autocomplete="on">
+                                    <div class="input_container_password_reveal" onclick="passwordReveal('confirm_password_input');"><i class="fa fa-eye-slash" data-id="confirm_password_input" aria-hidden="true"></i></div>
+                                </div>
+                                <input id="confirm_code_input" placeholder="Code" value="" aria-label="Confirm New password Code" >
+                            </div>
+                            <span class="alert forgot_password_alert">Your password must be at least 6 characters.</span>
+                            <input type="submit" id="confirm_password_input_button" class="button button_primary" value="Change Password">
+                        </div>
+                    </div>
+                    <!-- Enter Code -->
+
+                    <!-- Get In Touch -->
+                    <div class="login_container_inner">
+                        <h2>Get in Touch</h2>
+                        <p>If you do not have access to your email account or have any other questions, please get in touch with our support team.</p>
+                        <a href="https://freewebstore.com/contact.html" class="link_color_primary">Send Email</a>
+                    </div>
+                    <!-- Get In Touch -->
+
+                    <a class="link_color_dgrey" onclick="loginForgotBack();">Back to Login</a>
+                </div>
+                <div class="login_forgot_container_sent">
+                    <div class="login_container_inner">
+                        <h2>Email Sent</h2>
+                        <p>An email containing a link to reset your password has been sent to the <strong class="color_primary login_forgot_container_sent_email"></strong>.</p>
+                        <p>Please make sure you have added <strong>freewebstore.com</strong> as a trusted domain. If the email does not arrive promptly then check your spam/ junk mail folder.</p>
+                        <p>If you can no longer access this email account then simply <a href="https://freewebstore.com/contact.html" class="link_color_primary">contact us here</a> to have the account reset.</p>
+                    </div>
+                    <a class="link_color_dgrey" onclick="loginForgotBack();">Back to Login</a>
+                </div>
+                <div class="login_footer center paddingb20">
+                    <a href="/Register.aspx" class="link_color_white login_oops_center">No Account? Sign Up Now!</a>
+                </div>
+             </div>
+
+            <div class="login_known">
+                <div class="login_known_container">
+                    <div class="login_container_inner">
+                        <h2>No Stores Found</h2>
+                        <p>We recognize your account however there are currently no stores associated with it.</p>
+                        <p>If you want to try and restore your old store please <a href="https://freewebstore.com/contact.html" class="link_color_red link_word_break">contact us</a>.</p>
+                    </div>
+
+                    <div class="login_container_inner">
+                        <p><strong>Alternatively, you could:</strong></p>
+                        <p>Create a new store under this account</p>
+                        <a id="login_new_store_button" class="button button_red">Create New Store</a>
+                        <p>Or, sign up for a new account and store.</p>
+                        <a href="/Register.aspx" class="button button_red">Sign up</a>
+                    </div>
+                    <a class="link_color_dgrey login_known_back">Back to Login</a>
+                </div>
+                <div class="login_footer align_center paddingb20">
+                    <a href="/Register.aspx" class="link_color_white login_oops_center">No Account? Sign Up Now!</a>
+                </div>
+            </div>
+
+            <div class="login_migrate_continue">
+                <div class="login_container">
+                    <div class="login_container_inner">
+                        <h2>Migrate</h2>
+                        <p>You are about to login to the new control panel.</p>
+                        <p>Doing so will migrate your store and you will be unable to login to the old one.</p>
+                    </div>
+                    <div class="login_container_inner">
+                        <div id="new_migration_container">
+                            <input type="submit" id="confirm_new_migration_button" class="button button_primary" value="Migrate">
+                        </div>
+                    </div>
+                    <a class="link_color_dgrey" style="position: relative; top: 7px;" onclick="location.href='https://admin.freewebstore.org/'">Back to CPV1</a>
+                </div>
+                <div class="login_footer align_center paddingb20">
+                    <a href="/Register.aspx" class="link_color_white login_oops_center">No Account? Sign Up Now!</a>
+                </div>
+            </div>
+
+            <div class="login_migrate_failure">
+                <div class="login_container">
+                    <div class="login_container_inner">
+                        <h2>Migrate</h2>
+                        <p>Your current password is not strong enough.</p>
+                        <p>Please enter a new password for <strong><span id="migration_email"></span></strong>.</p>
+                    </div>
+                    <div class="login_container_inner">
+                        <h2>New Password</h2>
+                        <div id="new_password_container">
+                            <div class="input_container">
+                                <input type="password" id="confirm_new_password_input" style="margin-bottom: 10px;" placeholder="New Password" aria-label="New Password" value="" autocomplete="on">
+                                <input type="password" id="confirm_new_password_second_input" style="margin-bottom: 10px;" placeholder="Confirm Password" aria-label="Confirm Password" value="" autocomplete="off">
+                            </div>
+                            <span class="alert migrate_password_alert">Your password must be at least 6 characters.</span>
+                            <input type="submit" id="confirm_new_password_input_button" class="button button_primary" value="Change Password">
+                        </div>
+                    </div>
+                    <a class="link_color_dgrey" onclick="loginMigrateBack()">Back to Login</a>
+                </div>
+                <div class="login_footer align_center paddingb20">
+                    <a href="/Register.aspx" class="link_color_white login_oops_center">No Account? Sign Up Now!</a>
+                </div>
+            </div>
+
+            <div class="login_oops">
+                <div class="login_oops_container">
+                    <div class="login_container_inner">
+                        <h2>Oops</h2>
+                        <p>Sorry we don't recognize those login details.</p>
+                        <p>You could try resetting your password below.</p>
+                        <a onclick="loginForgotButton2();" class="button button_red">Password Reset</a>
+                        <a href="https://freewebstore.com/contact.html" class="button button_red">Contact Support</a>
+                    </div>
+                    <a class="link_color_dgrey login_opps_back">Back to Login</a>
+                </div>
+                <div class="login_footer align_center paddingb20">
+                    <a href="/Register.aspx" class="link_color_white login_oops_center">No Account? Sign Up Now!</a>
+                </div>
+             </div>
+
+            <div class="login_mca">                    
+                <div class="login_mca_p">Please select an account:</div>
+                    <div id="mca_accounts_holder">
+                 
+                           <div class="mca_item">
+                                <div class="mca_header">
+                                    <div class="mca_header_text" id="shop_name"></div>
+                                    <img id="imgStore" class="mca_header_img" />
+                                </div>
+                               
+                                <div class="mca_url" title=""></div>
+                               
+                                <div class="mca_body">
+                                    <div class="mca_body_item">
+                                        <strong>Store Currency:</strong><span ID="lblCurrency"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Product Limit:</strong><span ID="lblProductSlots"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Date Created:</strong><span ID="lblCreated"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Account ID:</strong><span ID="lblStoreId"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Account Type:</strong><span ID="lblAccountType"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Last Login:</strong><span ID="lblLastLogin"></span>
+                                    </div>
+                                    <div class="mca_body_item">
+                                        <strong>Verified by Email:</strong><span ID="lblVerified"></span>
+                                    </div>
+                                    <div class="mca_body_button">
+                                        <a href="javascript:void(0);" class="button button_primary mca_login">Login</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                    </div>
+            </div>
+        </div>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+        <script>
+            var dbgBrowser = "Chrome 93.0.4577";
+            var dbgPlatform = "Windows 10";
+            var dbgProtocolAddr = "NzQuMTg3LjE1OC42MA==";
+            var dbgLogEnabled = "True".toLowerCase();
+        </script>
+        <script src="/javascript/login.js?v=1e5256c914a631f3e382c2864efdff79" ></script>
+        <script type="text/javascript">
+            window.$zopim || (function (d, s) {
+                var z = $zopim = function (c) { z._.push(c) }, $ = z.s =
+                                                                   d.createElement(s), e = d.getElementsByTagName(s)[0]; z.set = function (o) {
+                    z.set.
+                        _.push(o)
+                }; z._ = []; z.set._ = []; $.async = !0; $.setAttribute("charset", "utf-8");
+                $.src = "https://v2.zopim.com/?55zvj4XfrXeG1gwbXTH91yYvEExlBBDq"; z.t = +new Date; $.
+                    type = "text/javascript"; e.parentNode.insertBefore($, e)
+            })(document, "script");
+
+            $zopim(function () {
+                $zopim.livechat.window.hide();
+                $zopim.livechat.set({
+                    language: 'en'
+                });
+                $zopim.livechat.addTags('Login Page', 'Ridge');
+            });
+        </script>
+        <script src="/javascript/css_variables.js"></script>
+        <script src="javascript/moment/moment.min.js"></script>
+        <script>
+            function GetDateString(when) {
+                var then = moment(when, moment.ISO_8601);
+                var now = moment(new Date());
+
+                var duration = moment.duration(now.diff(then));
+                var days = duration.asDays();
+                var hours = duration.asHours();
+                var mins = duration.asMinutes();
+
+                var userDate = then.format("DD MMM YYYY");
+
+                if (mins < 1)
+                    userDate = "Just now";
+                else if (hours < 1)
+                    userDate = Math.round(mins) + " mins ago";
+                else if (days < 1)
+                    userDate = Math.round(hours) + " hours ago";
+
+                return userDate;
+            }
+        </script>
+
+    <script defer="defer"> 
+        var $buoop = {
+            required: { e: 11 /*, f: 44, o: 36, s: 10, c: 49*/ }, // ie/edge 11, firefox 44, opera 36, safari 10, chrome 49 ( 2015-2017 releases )
+            reminder: 0, // Show all the time
+            reminderClosed: 4, // If manually closed, show again after 4 hours
+            l: false, // force english
+            newwindow: true,// open link in new window/tab
+            noclose: false, // hide the close button
+            jsshowurl: "//browser-update.org/update.show.min.js", // js that runs if browser not supported
+            container: document.getElementById("outdated_browser_container"), // where to inject the toast js
+            no_permanent_hide: false, // Do not give the user the option to permanently hide the notification
+            insecure: false, // Notify all browser versions with severe security issues.
+            style: "top", // where to position the banner ( top, bottom, corner )
+            shift_page_down: false,
+            text: {
+                'msg': 'Your web browser ({brow_name}) is out of date.', // Primary Message
+                'msgmore': 'We recommend updating to a more modern browser.' // Secondary Message
+            },
+            nostatistics: true, // Don't send stats to browser-update
+            onshow: function(info) {
+                document.getElementById("outdated_browser_container").style.display = "block";
+            },
+            onclose: function (info) {
+                document.getElementById("outdated_browser_container").style.display = "none";
+            },
+            api: 2020.08, // dont touch this
+            test: false // to show the panel on all browsers
+        };
+        function $buo_f() {
+            var e = document.createElement("script");
+            e.src = "//browser-update.org/update.min.js";
+            document.body.appendChild(e);
+        };
+        try { document.addEventListener("DOMContentLoaded", $buo_f, false) }
+        catch (e) { window.attachEvent("onload", $buo_f) }
+    </script>
+    <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+    <script>
+        TrackJS.install({
+            token: "a32e563fb84543f88c831dd9d04625bd",
+            application: "ridge",
+            network: { error: false },
+            console: {
+                display: (location.hostname === "localhost" || location.hostname === "ridge.fw1.biz" ? true : false)
+            }
+        });
+
+        // Attach a callback for when network errors occur
+        $(document).ajaxError(function (evt, xhr, opts, message) {
+            if (!window.TrackJS) { return; } // Safety Check
+
+            // Log the relevant info to the Telemetry Console
+            TrackJS.console.log({
+                message: message,
+                method: opts.type,
+                url: opts.url,
+                status: xhr.status,
+                statusText: xhr.statusText,
+                request: opts.data,
+                response: xhr.responseText
+            });
+
+            // Record the Error
+            TrackJS.track(xhr.status + " " + xhr.statusText + ": " + opts.type + " " + url);
+        });
+    </script>
+    </body>
+</html>
