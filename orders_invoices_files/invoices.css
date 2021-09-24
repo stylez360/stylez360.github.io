@@ -1,0 +1,158 @@
+﻿/* Invoice Logo Preview */
+#invoice_logo_preview {
+    display: none;
+}
+
+#invoice_tabs_container {
+    display: none;
+}
+
+.designs{
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    grid-gap: 10px;
+    justify-content: center;
+}
+
+.invoice_preview_box {
+    width: 100%;
+	max-width:130px;
+    background-color: #fff;
+	border:1px solid #ddd;
+	position: relative;
+}
+
+@media only screen and (min-width:600px) {
+
+    .invoice_preview_box{
+        max-width: 150px;
+    }
+
+}
+
+.invoice_preview_box[data-invoicedesign='0']{
+    cursor: pointer;
+}
+
+.invoice_preview_box_selected{
+    border-color: #20b7e6;
+}
+
+.invoice_preview_box_title{
+    background-color: #20b7e6;
+    color: #FFF;
+    display: inline-block;
+    line-height: 20px;
+    border-radius: 4px;
+    padding: 0px 10px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    opacity: 0;
+    visibility: hidden;
+    -webkit-transition: all 0.4s ease;
+    -moz-transition: all 0.4s ease;
+    -ms-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.invoice_preview_box img{
+    width: 100%;
+}
+
+.invoice_preview_box_locked{
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    height: 20px;
+    line-height: 20px !important;
+    padding: 0 5px;
+    text-align: center;
+    background-color: #3bf10d;
+    color: #FFF;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 1;
+    font-weight: bold;
+    transition: 0.4s;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.invoice_preview_box_locked i{
+    margin-right: 5px;
+}
+
+.invoice_preview_box_selected .invoice_preview_box_locked{
+    display: none;
+}
+
+.invoice_preview_box_selected, .invoice_preview_box_clickable{
+    cursor: pointer;
+}
+
+.invoice_preview_box:hover {
+	box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.08);
+}
+
+.invoice_preview_box[data-locked="true"]:hover .invoice_preview_box_locked{
+    opacity: 1;
+    visibility: visible
+}
+
+.invoice_preview_box[data-locked="true"]:hover img{
+    filter: grayscale(100%) blur(2px);
+    
+}
+
+.invoice_preview_box:hover .invoice_preview_box_title, .invoice_preview_box_selected .invoice_preview_box_title{
+    opacity: 1;
+    visibility: visible;
+}
+
+
+
+#logo_preview_box{
+    max-width: 300px;
+    max-height: 300px;
+}
+
+#logo_preview_box img{
+    max-width: 100%;
+    max-height: 100%;
+}
+
+
+.invoice_advanced_settings_item{
+    margin-top: 20px;
+}
+
+.invoice_advanced_settings_item .range_slider_text_container{
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+}
+
+
+#invoice_font_list_container{
+    display: none;
+}
+
+#invoice_font_list{
+    text-transform: capitalize;
+}
+
+.previewinvoice{
+    border: 1px solid #ddd;
+}
+
+
+#list_tokens .input_container_50{
+    margin-bottom: 10px;
+}
+
+#cropimg {
+    display: none;
+}

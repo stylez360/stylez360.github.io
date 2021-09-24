@@ -1,0 +1,588 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "ORDERS-INVOICES", uuid: beaverGuid });
+
+var img = "";
+function loadInvoiceDesigns() {
+
+    axiosGet('services/invoice.svc/LoadDesigns').then(function (data) {
+
+        var invoiceDesigns = data.d || data;
+        console.log(invoiceDesigns);
+
+        var invoiceDesignsHtml = '';
+
+        for (var i = 0; i < invoiceDesigns.length; i++) {
+
+            if (packageTypeId != 11 && packageTypeId != 12 && packageTypeId != 13) {
+
+                if (i == 0) {
+                    var invoiceItem = "<div class='design invoice_preview_box' data-invoiceDesign='" + [i] + "' data-design='" + invoiceDesigns[i].id + "' onclick='makeSelected(this)'>";
+                        invoiceItem += "<div class='invoice_preview_box_title'>" + invoiceDesigns[i].name + "</div>";
+                        invoiceItem += "<img src= '" + invoiceDesigns[i].thumbnail + "' />";
+                    invoiceItem += "</div>";
+                } else {
+                    var invoiceItem = "<div class='design invoice_preview_box' data-invoiceDesign='" + [i] + "' data-design='" + invoiceDesigns[i].id + "' data-locked='true'>";
+                        invoiceItem += "<div class='invoice_preview_box_title'>" + invoiceDesigns[i].name + "</div>";
+                        invoiceItem += "<img src= '" + invoiceDesigns[i].thumbnail + "' />";
+                        invoiceItem += "<a href='upgrade.aspx' class='invoice_preview_box_locked'><i class='fa fa-lock'></i><span>Upgrade To Unlock</span></a>"
+                    invoiceItem += "</div>";
+                }
+
+            } else {
+
+                var invoiceItem = "<div class='design invoice_preview_box invoice_preview_box_clickable' data-invoiceDesign='" + [i] + "' data-design='" + invoiceDesigns[i].id + "' onclick='makeSelected(this)'>";
+                    invoiceItem += "<div class='invoice_preview_box_title'>" + invoiceDesigns[i].name + "</div>";
+                    invoiceItem += "<img src= '" + invoiceDesigns[i].thumbnail + "' />";
+                invoiceItem += "</div>";
+
+            }
+
+            
+
+            invoiceDesignsHtml += invoiceItem;
+        }
+
+        document.querySelector(".designs").innerHTML = invoiceDesignsHtml;
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        loadInvoicePreview();
+        loadInvoiceSettings();
+        loadInvoiceTokens();
+    });
+
+    $('.busy_wait_preview').show();
+    
+}
+
+var invoiceMarginTop = 10;
+var invoiceMarginLeft = 5;
+var invoiceMarginBottom = 10;
+var invoiceMarginRight = 10;
+var invoiceZoom = 1.25;
+
+function loadInvoiceSettings() {
+    axiosGet('services/invoice.svc/LoadSettings?storeId=' + storeId).then(function (data) {
+
+        trace('Load Invoice Settings Success');
+
+        var invoiceSettings = data.d;
+        console.log(invoiceSettings);
+
+        if (invoiceSettings.length > 0) {
+            console.log(invoiceSettings);
+
+            $('.colorA').val(invoiceSettings[0].color);
+
+            $(".colorA").val(invoiceSettings[0].color);
+
+            $(".colorA").spectrum({
+                showInitial: true,
+                showInput: true
+            });
+
+            $('.invoice_preview_box[data-design="' + invoiceSettings[0].design + '"]').addClass("invoice_preview_box_selected");
+            $('.dropdown').val(invoiceSettings[0].variant);
+            $('.address').text(invoiceSettings[0].CompanyAddress);
+            $('.name').val(invoiceSettings[0].CompanyName);
+            $('.email').val(invoiceSettings[0].CompanyEmail);
+            $('.tel').val(invoiceSettings[0].companyTel);
+            $('.footermsg').text(invoiceSettings[0].footer);
+            checkInvoiceFooterWordCount();
+            $('.comnum').val(invoiceSettings[0].companyNumber);
+            $('.VAT').val(invoiceSettings[0].vat_no);
+            $('.busy_wait_preview').fadeOut();
+
+            /* Advanced Settings */
+            $("input[name='invoice_advanced_orientation'][value='" + invoiceSettings[0].pdfOrientation + "']").attr("checked", true);
+            $("input[name='invoice_advanced_size'][value='" + invoiceSettings[0].pdfPageSize + "']").attr("checked", true);
+
+            invoiceMarginTop = invoiceSettings[0].pdfMarginTop;
+            invoiceMarginLeft = invoiceSettings[0].pdfMarginLeft;
+            invoiceMarginBottom = invoiceSettings[0].pdfMarginBottom;
+            invoiceMarginRight = invoiceSettings[0].pdfMarginRight;
+            invoiceZoom = invoiceSettings[0].pdfZoom;
+            buildInvoiceSliders();
+            buildInvoiceFonts(invoiceSettings[0].fontFamily);
+
+            $("input[name='invoice_advanced_shipping_combined'][value='" + invoiceSettings[0].postageCombined + "']").attr("checked", true);
+
+            if (invoiceSettings[0].logoURL.length > 0) {
+                $('#previewimg').attr('src', invoiceSettings[0].logoURL);
+                //Messy code incoming...
+                var brokenDownImg = invoiceSettings[0].logoURL.replace('/300', '');
+                //console.log(brokenDownImg);
+                brokenDownImg = brokenDownImg.replace('/150', '');
+                //console.log(brokenDownImg);
+                brokenDownImg = brokenDownImg.replace('/0', '');
+                //console.log(brokenDownImg);
+                brokenDownImg = brokenDownImg.replace('//d1f7geppf3ca7.cloudfront.net/resize/' + storeId + '/', '');
+                brokenDownImg = brokenDownImg.replace('/', '');
+                //console.log("final", brokenDownImg);
+                $('#previewimg').attr('data-img', brokenDownImg);
+                $('#previewimg').show();
+                showById("invoice_logo_preview");
+                img = invoiceSettings[0].logoURL;
+            } else
+                $('#previewimg').hide();
+        }
+        else {
+            document.getElementsByClassName('tab_nav_item')[3].style.display = "none";
+            buildInvoiceSliders();
+            buildInvoiceFonts();
+        }
+        if (img == "") $('#previewimg').hide();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        $(".busy_wait_invoices").hide();
+        $("#invoice_tabs_container").show();
+    });
+
+}
+
+function invoiceFontChange() {
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+function loadInvoicePreview() {
+    axiosGet('services/invoice.svc/LoadInvoicePreview?storeId=' + storeId).then(function (data) {
+        var html = data.d;
+        if (html.length > 0) getClass('previewinvoice').src = "data:text/html;charset=utf-8," + encodeURIComponent(html);
+        else hideById('tab4');
+    }).catch(function (e) {
+        hideById('tab4');
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e));
+    });
+}
+
+var defaultFonts = [
+    "courier new",
+    "garamond",
+    "arial",
+    "georgia",
+    "tahoma",
+    "times new roman",
+    "verdana"
+];
+
+function buildInvoiceFonts(currentFont) {
+    
+    var url = 'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyDK4Jz71F7DQCrUhXYaF3xgEXoQGLDk5iE&sort=alpha';
+
+    document.getElementById("invoice_font_list").innerHTML = "<option value='' data-isgooglefont='false'>Default</option>";
+
+    ajaxGetUtil(url, function (data) {
+        fonts = data.items;
+
+        var markup =
+            fonts.map(function (item) {
+                item.isGoogleFont = true;
+                return fontItemHtml(item);
+            }).join('');
+
+        document.getElementById("invoice_font_list").innerHTML += markup;
+
+        // Append the default fonts as well
+        defaultFonts.forEach(function (font) {
+            document.getElementById("invoice_font_list").innerHTML += fontItemHtml({ family: font, isGoogleFont: false });
+        });
+
+        if (currentFont != undefined) {
+            if (currentFont.match("fonts.googleapis.com")) {
+                console.log(currentFont);
+                currentFont = currentFont.substring(currentFont.indexOf("=") + 1, currentFont.lastIndexOf(":"));
+                console.log(currentFont);
+                currentFont = currentFont.replace(/\+/g, " ");
+                console.log(currentFont);
+            }
+
+            defaultFonts.filter(function (obj) {
+                if (obj == currentFont.toLowerCase()) {
+                    currentFont = obj;
+                }
+
+            });
+
+
+            document.getElementById("invoice_font_list").value = currentFont;
+        }
+        
+
+        showById("invoice_font_list_container");
+        hideById("invoice_fonts_loader");
+    });
+
+}
+
+function fontItemHtml(item) {
+    return '<option data-isgooglefont=' + item.isGoogleFont + ' value="' + item.family + '">' + item.family + '</option>';
+}
+
+
+function loadInvoiceTokens() {
+
+    axiosGet('services/invoice.svc/LoadTokens?storeId=' + storeId).then(function (data) {
+        var list = data.d || data;
+        console.log(list)
+        $.each(list, function (i) {
+            token_names.push(list[i].key);
+            $("#list_tokens").append('<div class="input_container_50">' +
+                '<label>' + list[i].key + '</label>' +
+                '<input class="token_input" type="text" placeholder="' + list[i].key + '" value="' + list[i].value + '" maxlength="150" />' +
+                '</div>');
+        });
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        $(".token_input").on('change keyup paste input', function () {
+            var labelName = stripHTML($(this).parent().find("label").text());
+            var inputVal = stripHTML($(this).parent().find("input").val());
+            var inputVal = stripHTML(inputVal.trim());
+            if (!tokens.some(function (x) { return x.key == labelName })) {
+                tokens.push({ key: labelName, value: inputVal });
+            } else {
+                var _token = tokens.filter(function (data) { return (data.key == labelName) });
+                if (_token) _token[0].value = inputVal.replace("VAT #", "VAT Number");
+            }
+            save_changes_detected = true;
+            saveChangesDetected();
+        });
+    });
+}
+
+
+var token_names = [];
+
+function resetAllTokens() {
+    divFadeIn(".modal_invoices_reset_translations", ".modal_overlay");
+}
+
+function confirmResetInvoiceTokens() {
+    $(".token_input").each(function (i) {
+        $(this).val(token_names[i]);
+        $(this).change();
+    });
+    hideByClass("modal_overlay", "modal_invoices_reset_translations");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+}
+
+var logo_max_width = 350;
+var logo_max_height = 100;
+
+function imageGalleryFinalClient(imageGalleryType) {
+    if (imageGalleryType == "invoice") {
+        var url = '//d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + imageGallerySelected[0];
+        var img = new Image();
+        img.onload = function () {
+            console.log('img.load');
+            console.log(img);
+
+            var width = img.width;
+            var height = img.height;
+
+            
+            console.log('Logo width:' + width + ' height:' + height);
+            console.log('Max width:' + logo_max_width + ' height:' + logo_max_height);
+            
+            if (width === logo_max_width && height === logo_max_height) {
+                setTimeout(function () {
+                    var url = '//d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + imageGallerySelected[0];
+                    document.getElementById("previewimg").setAttribute("src", url);
+                    document.getElementById("previewimg").setAttribute('data-img', imageGallerySelected[0]);
+                    document.getElementById("previewimg").style.display = "block";
+                    console.log("Did this run");
+                }, 600);
+                save_changes_detected = true;
+                saveChangesDetected();
+            }
+            else {
+                var url = '//d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + imageGallerySelected[0];
+                openCroppie(url, logo_max_width, logo_max_height, 'invoice');
+            }
+            showById("invoice_logo_preview");
+        }
+
+        img.onerror = function () {
+            alert('there was an error getting the image');
+        }
+
+        console.log('Setting image src....');
+        img.src = url;
+    }
+}
+
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+
+var obj = [];
+var tokens = [];
+
+function getGoogleFontDetails(selectedFont, cb) {
+    console.log('getGoogleFontDetails', selectedFont)
+
+    selectedFont = selectedFont.replace(/['"]+/g, '')
+
+    var url = 'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyDK4Jz71F7DQCrUhXYaF3xgEXoQGLDk5iE&sort=popularity'
+
+    ajaxGetUtil(url, function (data) {
+        console.log(selectedFont)
+        var fonts = data.items
+
+        var result = fonts.filter(function (font) {
+            if (font.family === selectedFont) return font
+        });
+
+        cb(result[0])
+    })
+}
+
+function createGoogleFontUrl(font, isGoogleFont, cb) {
+
+    // Return with a null apiUrl for non-google fonts
+    if (!isGoogleFont)
+        return cb(null);
+
+    console.log('createGoogleFontUrl', font)
+
+    getGoogleFontDetails(font, function (font) {
+        var apiUrl = [];
+        apiUrl.push('https://fonts.googleapis.com/css?family=');
+        apiUrl.push(font.family.replace(/ /g, '+'));
+        if (font.variants.length) {
+            var variants = font.variants.map(function (item) { return item; })
+            apiUrl.push(':')
+            apiUrl.push(variants)
+        }
+
+        if (font.subsets.length) {
+            var variants = font.subsets.map(function (item) { return item; })
+            apiUrl.push('&subset=')
+            apiUrl.push(variants)
+        }
+
+        // url: 'https://fonts.googleapis.com/css?family=Anonymous+Pro:italic&subset=greek'
+        var url = apiUrl.join('');
+
+        cb(url)
+    })
+}
+
+multipleEventHandler('#invoice_details_footer_message', 'input', function () {
+    checkInvoiceFooterWordCount();
+});
+
+function checkInvoiceFooterWordCount() {
+    var content = getId('invoice_details_footer_message');
+    getId('wordCount').innerText = content.value.length;
+    content.value.length >= 1000 ? getId('wordCount').parentNode.classList.add('color_red') : getId('wordCount').parentNode.classList.remove('color_red');
+}
+
+function runSavePageLocal() {
+
+    var fontSelect = document.getElementById("invoice_font_list");
+
+    var fontFamily = fontSelect.value;
+    var fontGoogle = fontSelect.selectedOptions[0].getAttribute("data-isgooglefont");
+
+    console.log("Font: ");
+    console.log(fontFamily);
+    console.log(fontGoogle);
+
+    if (fontGoogle == "true") {
+        createGoogleFontUrl(fontFamily, fontGoogle, function (apiUrl) {
+
+            console.log(apiUrl);
+            apiUrl = apiUrl.replace("https:", "");
+            apiUrl = apiUrl.replace("http:", "");
+
+
+            finalizeInvoiceSave(apiUrl)
+        });
+    } else {
+        finalizeInvoiceSave(fontFamily)
+    }
+
+    
+}
+
+function finalizeInvoiceSave(font) {
+
+    giveAchievement('ACHIEVEMENT_EDIT_INVOICE');
+
+    var selectedDesign = $('.invoice_preview_box_selected').attr("data-design");
+
+    var postageCombined = true;
+    if ($("input[name='invoice_advanced_shipping_combined']:checked").attr("value") == "false") {
+        postageCombined = false;
+    }
+
+    obj.push({
+        CompanyName: stripHTML($('.name').val().trim()),
+        CompanyEmail: stripHTML($('.email').val().trim()),
+        CompanyAddress: parseTextAndStripPost($('.address').val().trim()),
+        companyTel: stripHTML($('.tel').val().trim()),
+        companyNumber: stripHTML($('.comnum').val().trim()),
+        vat_no: stripHTML($('#VAT').val().trim()),
+        footer: parseTextAndStripPost($('.footermsg').val().trim()),
+        design: selectedDesign,
+        variant: $('.dropdown').val(),
+        color: $('.colorA').val().replace('#', ''),
+        logoURL: $('#previewimg').attr('data-img'),
+        pdfOrientation: $("input[name='invoice_advanced_orientation']:checked").attr("value"),
+        pdfPageSize: $("input[name='invoice_advanced_size']:checked").attr("value"),
+        pdfMarginBottom: $("#invoice_slider_margin_bottom").slider("value"),
+        pdfMarginTop: $("#invoice_slider_margin_top").slider("value"),
+        pdfMarginLeft: $("#invoice_slider_margin_left").slider("value"),
+        pdfMarginRight: $("#invoice_slider_margin_right").slider("value"),
+        pdfZoom: $("#invoice_slider_zoom").slider("value"),
+        postageCombined: postageCombined,
+        font: font
+    });
+
+    console.log(obj[0]);
+
+    var fullObj = {
+        "designInfo": obj[0],
+        "designTokens": tokens
+    }
+
+    var data = { "storeId": storeId, "data": fullObj };
+
+    data = JSON.stringify(data)
+
+    var saveSettingsCount = 1;
+
+    var returningPageName = "Orders";
+    var returningPageLink = "/orders.aspx";
+    var currentPageLink = "/orders_invoices.aspx";
+    var saveType = "post";
+    var saveUrl = ['services/invoice.svc/saveAllInfo', data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl, null, null, saveSettingsCount);
+
+}
+
+var cropper_action;
+function launchLogoEditor(id, src) {
+            showById('cropimg');
+            document.getElementById('cropimg').style.display = "inline-block";
+            document.getElementById(id).setAttribute('src', src);
+            cropper_action = new Cropper(document.getElementById(id), {
+                cropBoxResizable: false,
+                toggleDragModeOnDblclick: false,
+                minCropBoxWidth: logo_max_width,
+                minCropBoxHeight: logo_max_height,
+                movable: false,
+                zoomable: false,
+                scalable: false,
+                ready: function() {
+					this.cropper.setCropBoxData({"width": logo_max_width, "height": logo_max_height});
+					this.cropper.setDragMode("none")
+                }
+            });
+        return false;
+    }
+
+var rImageType = /data:(image\/.+);base64,/;
+    function base64ToBlob(data) {
+        var mimeString = '';
+        var raw, uInt8Array, i, rawLength;
+
+        raw = data.replace(rImageType, function(header, imageType) {
+            mimeString = imageType;
+
+            return '';
+        });
+
+        raw = atob(raw);
+        rawLength = raw.length;
+        uInt8Array = new Uint8Array(rawLength); // eslint-disable-line
+
+        for (i = 0; i < rawLength; i += 1) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], {type: mimeString});
+    }
+
+document.getElementById('cropimg').addEventListener('click', function (e) {
+    if (cropper_action != undefined || cropper_action != null) {
+		var crop = cropper_action.getCroppedCanvas({ width: logo_max_width, height: logo_max_height });
+		setTimeout(function () {
+			var imageName = cropper_action.image.src;
+			imageName = imageName.split('/').pop().split('?')[0];
+			document.getElementById("previewimg").setAttribute('src', crop.toDataURL());
+			var blob, type;
+			blob = base64ToBlob(crop.toDataURL());
+			type = blob.type.split('/')[1];
+			if (imageName.split('.').pop() !== type) {
+				imageName = imageName;
+			}
+			var noMime = /(.*)\.[^.]+$/.exec(imageName);
+			var filename = noMime[1] + "_" + new Date().getTime().toString() + "." + imageName.split('.').pop();
+			if (/Edge/.test(navigator.userAgent) || /Trident/.test(navigator.userAgent)) {
+				var file = new Blob([blob], { type: blob.type });
+				file.name = filename;
+			} else {
+				var file = new File([blob], filename, { type: blob.type });
+            }
+
+            file.uploadURL = "./services/image/service.svc/uploadImage";
+            uploadingFileName = cleanProdImageName(file.name);
+            file.parsedname = file.name;
+
+            checkImageExists(uploadingFileName, function (output) {
+                uploadingFileName = cleanProdImageName(output);
+                var xhr = new XMLHttpRequest();
+                var _send = xhr.send;
+
+                xhr.open("POST", file.uploadURL, true);
+                xhr.setRequestHeader("storeId", storeId);
+                xhr.setRequestHeader("fileName", uploadingFileName);
+                _send.call(xhr, file);
+                var newURL = 'https://d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + uploadingFileName;
+                setTimeout(function () {
+                    document.getElementById("previewimg").setAttribute('src', newURL);
+                    document.getElementById("previewimg").setAttribute('data-img', filename);
+                    document.getElementById("previewimg").style.display = "block";
+                }, 700);
+                hideById('cropimg');
+                cropper_action.destroy();
+                save_changes_detected = true;
+                saveChangesDetected();
+            });            
+		}, 1000);
+    }
+});
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
+
+function invoiceAdvancedSettingsChange() {
+    save_changes_detected = true;
+    saveChangesDetected();
+}
