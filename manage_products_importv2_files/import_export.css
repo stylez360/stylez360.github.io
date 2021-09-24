@@ -1,0 +1,121 @@
+﻿#export_orders_selectall, #export_products_selectall{
+    display: block;
+}
+
+#import_images_continue, #import_products_continue, #import_coupons_continue {
+    display: none;
+    margin-top: 20px;
+}
+
+#modal_export_delete2, #modal_export_delete3, #import_export_history_error, #customer_export_history_error, #customer_export_history_zero,
+#customer_export_container1, #customer_export_container2, #modal_export_confirm_error{
+    display: none;
+}
+
+.busy_wait_customer_export_history, .busy_wait_customer_export{
+    display: block;
+}
+
+/* ========================= */
+/* Import Export History === */
+/* ========================= */
+
+.import_export_history{
+    background-color: #FFF;
+    margin-bottom: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 600px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.08);
+}
+
+.import_export_history_header{
+    background-color: #FFB432;
+    border: 1px solid #FFB432;
+    color: #FFF;
+    padding: 20px;
+}
+
+.import_export_history_body{
+    padding: 20px 20px 10px 20px;
+}
+
+.busy_wait_import_export_history{
+    display: block;
+}
+
+.import_export_history_zero{
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.import_export_history_item{
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.import_export_history_item:last-child{
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.import_export_history_item div{
+    display: block;
+    line-height: 20px;
+}
+
+.import_export_history_item_cancelled, .import_export_history_item_error, .import_export_history_item_failed, .import_export_history_item_deleted {
+    color: #ea1636;
+    font-weight: bold;
+}
+.import_export_history_item_pending, .import_export_history_item_working{ color: #FFB432; font-weight: bold; }
+.import_export_history_item_completed, .import_export_history_item_complete{ color: #5DC548; font-weight: bold; }
+.import_export_history_item_delete{
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.import_export_history_item_delete:hover{
+    background-color: #bb112b;
+}
+
+/* Import Products */
+
+#import_products_step2{ display: none; }
+
+/* Export Products */
+
+.inline_checkboxes_large .checkbox_container{
+    width: 47%;
+}
+
+/* Misc */
+
+.question_mark_tool_tip_import{
+    top: -1px;
+    margin-left: 25px;
+    background-color: #ddd;
+    color: #404041;
+}
+
+.question_mark_tool_tip:hover{
+    color: #FFF;
+}
+
+#openDateFromCalenderPanel, #openDateToCalenderPanel{
+    display: none;
+}

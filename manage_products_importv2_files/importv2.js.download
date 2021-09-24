@@ -1,0 +1,1436 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "PRODUCT-IMPORT", uuid: beaverGuid });
+var importHistory;
+var importHistoryPending = 0;
+
+function getImportHistory() {
+
+    showByClass("busy_wait_product_import", "busy_wait_import_export_history");
+    hideById("import_export_history_error");
+
+    axiosGet('/services/manage/products/import.svc/GetHistory?storeId=' + storeId).then(function (data) {
+
+        document.getElementById("import_export_history_body_items").innerHTML = "";
+        importHistory = data.d;
+
+        console.log(importHistory)
+
+        var getHistoryCount = 0;
+
+        if (importHistory.length > 0) {
+
+            for (var i = 0; i < importHistory.length; i++) {
+
+                var status = "Pending";
+                var completed = "";
+                var bytes = "";
+                var download = '';
+                var deleteButton = '';
+
+                if (importHistory[i].status == "COMPLETED" || importHistory[i].status == "FAILED") {
+
+                    deleteButton = "<i class='fa fa-times import_export_history_item_delete' onclick='deleteProductImport(\"" + importHistory[i].jobId + "\")'></i>";
+                    status = "Completed";
+                    if (importHistory[i].status == "FAILED") {
+                        status = "Failed";
+                        completed = "<div><strong>Completed: </strong>" + importHistory[i].completed + "</div>";
+                    }
+                   
+                    if (importHistory[i].bytes > 0) {
+
+                        var newBytes = importHistory[i].bytes;
+                        var newBytesSize = "bytes";
+                        if (newBytes >= 1024 && newBytes < 1048576) {
+                            newBytes = importHistory[i].bytes / 1024;
+                            newBytesSize = "kb";
+                        } else if (newBytes >= 1048576) {
+                            newBytes = (importHistory[i].bytes / 1024) / 1024;
+                            newBytesSize = "mb";
+                        }
+                        newBytes = parseFloatFixed(newBytes);
+
+                        bytes = '<div><strong>File Size: </strong>' + newBytes + newBytesSize + '</div>';
+                    }
+
+                } else {
+                    importHistoryPending++;
+                }
+
+                download = '<div class="import_export_history_item_exportlink"><strong>Imported File: </strong><a onclick="downloadExport(\'' + importHistory[i].file + '\')" target="_blank" class="link_color_primary">Download</a></div>';
+
+                var email = '';
+                if (importHistory[i].email != null && importHistory[i].email.length > 0) {
+                    email = '<div><strong>Emailed To: </strong>' + importHistory[i].email + '</div>';
+                    if (importHistory[i].completed == null || importHistory[i].completed.length == 0 || importHistory[i].status == "FAILED") {
+                        email = '<div><strong>Recipient: </strong>' + importHistory[i].email + '</div>';
+                    }
+                }
+
+                var importHistoryItem = "<div class='import_export_history_item' data-file='" + importHistory[i].jobId + "'>";
+                importHistoryItem += "<div><strong>Status: </strong><span class='import_export_history_item_status import_export_history_item_" + status.toLowerCase() + "'>" + status + "</span></div>"
+                importHistoryItem += "<div><strong>Requested: </strong>" + importHistory[i].requested + "</div>"
+                importHistoryItem += bytes;
+                importHistoryItem += completed;
+                importHistoryItem += download;
+                importHistoryItem += email;
+                importHistoryItem += deleteButton;
+                importHistoryItem += "</div>";
+
+
+                var importHistoryBody = document.getElementById("import_export_history_body_items");
+                importHistoryBody.innerHTML += importHistoryItem;
+
+                /*var status = importHistory[i].status;
+
+                if (importHistory[i].status == "Pending") {
+                    importHistoryPending++;
+                }
+
+
+                var importFile = '<div class="import_export_history_item_exportlink"><strong>Imported File: </strong>' + importHistory[i].Url + ' ' + importHistory[i].log + '</div>';
+                if (importHistory[i].deleted) {
+                    importFile = '';
+                    status = "Deleted";
+                }
+
+                
+
+                var importHistoryItem = '<div class="import_export_history_item" data-file="' + importHistory[i].file + '">';
+                    importHistoryItem += '<div><strong>Status: </strong><span class="import_export_history_item_status import_export_history_item_' + status.toLowerCase() + '">' + status + '</span></div>';
+                    importHistoryItem += '<div><strong>Requested: </strong>' + importHistory[i].requested + '</div>';
+                    importHistoryItem += '<div><strong>Total: </strong>' + importHistory[i].total + '</div>';
+                    importHistoryItem += '<div><strong>Inserted: </strong>' + importHistory[i].inserted + '</div>';
+                    importHistoryItem += '<div><strong>Updated: </strong>' + importHistory[i].updated + '</div>';
+                    importHistoryItem += '<div><strong>Errors: </strong>' + importHistory[i].error + '</div>';
+                    importHistoryItem += importFile;
+
+                if (importHistory[i].status != "Pending" && !importHistory[i].deleted) {
+                    importHistoryItem += "<i class='fa fa-times import_export_history_item_delete' onclick='deleteProductImport(\"" + importHistory[i].file + "\", \"" + importHistory[i].id + "\")'></i>";
+                }
+
+                importHistoryItem += '</div>';
+
+                document.getElementById("import_export_history_body_items").innerHTML += importHistoryItem;*/
+            }
+
+            document.getElementById("import_export_history_zero").style.display = "none";
+        } else {
+            document.getElementById("import_export_history_zero").style.display = "block";
+        }
+
+        if (importHistoryPending > 0) {
+            showById("product_import_pending");
+        } else {
+            showById("product_import_1");
+        }
+
+    }).catch(function (e) {
+
+        showById("import_export_history_error");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+        hideById("product_import_busy_wait");
+
+        document.getElementById("busy_wait_import_export_history").style.display = "none";
+    });
+
+}
+
+
+function downloadExport(filename) {
+    downloadExportRun('./download/product_export.aspx?sk=' + storeId + '&fn=' + encodeURIComponent(filename) + '&type=productImport');
+}
+
+function downloadExportRun(url) {
+    console.log(url)
+    var a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.click();
+    createSimulation(a);
+}
+
+function createSimulation(el) {
+    el.addEventListener('click', function (e) {
+        e.click();
+    });
+}
+
+
+
+
+
+
+
+Dropzone.autoDiscover = false;
+var myDropzone;
+function importProductsPageStart() {
+    var uploadingFileName = "";
+
+    var csvFileName = new Date().getTime() + ".csv";
+
+    myDropzone = new Dropzone("div#drop-target",
+        {
+            url: "#",
+            maxFiles: 1, //Limit of 1 file at a time
+            maxFilesize: 50, //250Mb
+            autoProcessQueue: false,
+            acceptedFiles: ".csv",
+            method: "put", //As this is S3, we'll use the PUT method
+            accept: function (file, done) {
+                myDropzone = this;
+                $("#upload_imported_file").removeClass("button_disabled")
+                $("#upload_imported_file").click(function () {
+                    manualSigningProducts(storeId, csvFileName, file.type, '', function (signedUrl) { file.uploadURL = signedUrl.url; console.log("Parsed:" + signedUrl.filename); uploadingFileName = signedUrl.filename; file.parsedname = signedUrl.filename; console.log("Filename:" + file.parsedname); console.log(file); done(); myDropzone.processQueue(); });
+                });
+                myDropzone.emit("complete", file);
+            },
+            sending(file, xhr) {
+                xhr.setRequestHeader("Content-Type", file.type);
+                var _send = xhr.send;
+                xhr.send = function () {
+                    _send.call(xhr, file);
+                };
+            },
+            init: function () {
+                this.on("addedfile", function (file) { console.log("File Added: " + file.name); });
+                this.on("success", function (file) { console.log("File uploaded successfully!"); importProductsConvert(file); });
+                this.on("dragenter", function (event) { console.log("Drag Enter"); $("#drop-target").addClass("dragover"); });
+                this.on("dragleave", function (event) { console.log("Drag Leave"); $("#drop-target").removeClass("dragover"); });
+                this.on("processing", function (file) { console.log("onProcessing to:" + file.uploadURL); this.options.url = file.uploadURL; });
+                this.on("sending", function (file, xhr, formData) { console.log("onSending"); });
+                this.on("error", function (file, error, xhr) { $(".alert_import_translations_dropzone").show(); console.log("onERROR"); console.log(error); console.log(xhr); });
+            }
+        });
+}
+
+var importProdsResult;
+var importProdsResultUrl;
+
+function importProductsConvert(e) {
+
+    importProdsResultUrl = e.uploadURL;
+
+    if (!$("#upload_imported_file").hasClass("button_disabled")) {
+
+        $("#upload_imported_file").addClass("button_disabled");
+        $("#upload_imported_file").text("Uploading");
+        $(".alert_import_products_dropzone").hide();
+
+        Papa.parse(e, {
+            config: {
+                header: true
+            },
+            before: function (file, inputElem) {
+
+            },
+            error: function (err, file, inputElem, reason) {
+                console.log(err);
+                $(".alert_import_products_dropzone").text("Sorry, there was an issue uploading your file. Please try again or contact support");
+                $(".alert_import_products_dropzone").show();
+                $("#upload_imported_file").text("Upload");
+                $("#upload_imported_file").removeClass("button_disabled");
+            },
+            complete: function (results, file) {
+
+                if (results.meta != null) {
+                    if (results.meta.delimiter == ",") {
+                        importProdsResult = results.data;
+                        myDropzone.removeAllFiles(true);
+                        console.log(importProdsResult);
+                        cleanImportProds();
+                    } else {
+                        $(".alert_import_products_dropzone").html("It looks like the file you're trying to upload is in the wrong format. Product Imports need to be comma delimited and this file doesn't meet that requirement. For more information <a class='link_color_dgrey' onclick='divFadeIn(\".modal_overlay\", \".modal_import_delimiter\")'>click here</a>");
+                        $(".alert_import_products_dropzone").show();
+                        $("#upload_imported_file").text("Upload");
+                        myDropzone.removeAllFiles(true);
+                    }
+
+                } else {
+                    importProdsResult = results.data;
+                    myDropzone.removeAllFiles(true);
+                    console.log(importProdsResult);
+                    cleanImportProds();
+                }
+
+                
+            }
+        });
+
+    } else {
+        console.log("button is disabled");
+    }
+}
+
+function cleanImportProds() {
+
+    // This removes any empty rows which should not be counted towards final count
+    $.each(importProdsResult, function (i) {
+        if (this == "") {
+            importProdsResult.splice(i, 1);
+        }
+    });
+
+    if (importProdsResult.length > 10000) {
+        $(".alert_import_products_dropzone").text("You can only upload a maximum of 10,000 products at a time");
+        $(".alert_import_products_dropzone").show();
+        $("#upload_imported_file").text("Upload");
+    } else if (importProdsResult.length <= 1 || importProdsResult[0] == "") {
+        $(".alert_import_products_dropzone").text("It looks like you have uploaded an empty import file. Please upload a CSV file with 1 or more products in it.");
+        $(".alert_import_products_dropzone").show();
+        $("#upload_imported_file").text("Upload");
+    } else {
+        buildImportProdsSelect();
+    }
+
+}
+
+
+var IPsection = [
+    {
+        "section": "Basic Details", "items": [
+            { "name": "Product Name", "match": ["Product Name", "ProductName", "Name"] },
+            { "name": "Product Code", "match": ["Product Code", "ProductCode", "Code", "Clients Code", "ClientsCode"] },
+            /*{ "name": "Category", "match": ["Product Category", "ProductCategory", "Category", "category_path", "CategoryPath", "CatPath", "Cat_Path", "CategoryId", "CatId"] },*/
+            { "name": "Category", "match": ["Product Category", "ProductCategory", "Category"] },
+            { "name": "Base Price", "match": ["BasePrice", "Price", "NUnitPrice", "Unit Price", "UnitPrice", "Cost", "Product Price", "ProductPrice"] },
+            { "name": "Description", "match": ["Description", "Desc", "Product Description", "ProductDescription"] },
+            { "name": "Image Filename(s)", "match": ["Image", "Images", "Image Filenames", "filenames", "Product Images", "Image URL", "ImageURL", "Image URLs", "productimageurl"] },
+        ]
+    },
+    {
+        "section": "Advanced Details", "items": [
+            { "name": "Fixed Shipping Cost", "match": ["Fixed Shipping", "FixedShipping", "Shipping Cost", "ShippingCost", "FixedShippingCost", "Postage", "Fixed Postage Cost", "Fixed Postage", "FixedPostage", "FixedPostageCost", "Shipping"] },
+            { "name": "Stock Quantity", "match": ["Stock", "Stock Quantity", "StockQuantity", "Product Stock"] },
+            { "name": "Weight", "match": ["Weight", "Product Weight", "ProductWeight"] },
+            { "name": "Tax Rate", "match": ["Tax Rate", "TaxRate", "Tax", "Product Tax Rate", "ProductTaxRate", "VAT", "Product Vat", "ProductVat", "Tax_Rate"] },
+            { "name": "Condition", "match": ["Condition", "Product Condition", "ProductCondition"] },
+            { "name": "Brand", "match": ["Brand", "Product Brand", "ProductBrands"] },
+            { "name": "Bulk Pricing", "match": ["Bulk Pricing", "BulkPricing", "Bulk_Pricing", "Bulk"] },
+            { "name": "Product Option List", "match": ["Product Option List", "ProductOptionList", "Option List", "OptionList", "Product_Option_List"] },
+            { "name": "Product Search Tags", "match": ["Product Search Tags", "ProductSearchTags", "Search Tags", "SearchTags", "Tags", "Product_Search_Tags"] },
+            { "name": "Product Offer Type", "match": ["Product Offer Type", "ProductOfferType", "Offer Type", "OfferType", "Product_Offer_Type"] },
+            { "name": "Product Offer Price", "match": ["Product Offer Price", "ProductOfferPrice", "Offer Price", "OfferPrice", "Product_Offer_Price"] },
+            { "name": "Product Offer Discount", "match": ["Product Offer Discount", "ProductOfferDiscount", "Offer Discount", "OfferDiscount", "Product_Offer_Discount"] },
+            { "name": "Additional Categories", "match": ["Additional Categories", "AdditionalCategories", "Additional_Categories"] },
+            { "name": "Related Products", "match": ["Related Products", "RelatedProducts", "Related", "Related_Products"] },
+            { "name": "Wholesale Price (internal use only)", "match": ["Wholesale Price", "WholesalePrice", "Wholesale_Price", "Wholesale"] },
+            { "name": "Supplier ID (if enabled)", "match": ["Supplier ID", "SupplierID", "Supplier_ID", "Supplier"] },
+            { "name": "Supplier SKU", "match": ["Supplier Code", "SupplierCode", "Supplier SKU", "SupplierSku"] },
+            { "name": "Minimum Order Quantity", "match": ["Minimum Order Quantity", "MinimumOrderQuantity", "Min Order Quantity", "MinOrderQuantity", "Min Quantity", "MinQuantity", "Min Qty", "MinQty"] },
+            { "name": "Maximum Order Quantity", "match": ["Maximum Order Quantity", "MaximumOrderQuantity", "Max Order Quantity", "MaxOrderQuantity", "Max Quantity", "MaxQuantity", "Max Qty", "MaxQty"] },
+            { "name": "Packsize", "match": ["Packsize", "Pack size"] },
+            { "name": "HS Code", "match": ["HS Code", "HSCode"] },
+            { "name": "Country Of Origin", "match": ["Country of Origin", "CountryOfOrigin"] }
+        ]
+    },
+    {
+        "section": "Search Engine Optimization", "items": [
+            { "name": "SEO Title", "match": ["SEO Title", "SEOTitle", "SEO_Title"] },
+            { "name": "SEO Description", "match": ["SEO Description", "SEODescription", "SEO_Description", "SEO Desc", "SEODesc", "SEO_Desc"] },
+            { "name": "SEO Keywords", "match": ["SEO Keywords", "SEOKeywords", "SEO_Keywords"] },
+            { "name": "SEO Custom URLs", "match": ["SEO Custom URLs", "SEOCustomURLs", "SEO_Custom_URLs", "Custom URLs", "CustomURLs", "SEO_Custom_URL", "SEOCustomURL", "SEO Custom URL"] },
+        ]
+    },
+    {
+        "section": "Unique Product Identifies", "items": [
+            { "name": "UPC", "match": ["UPC", "Unique Product Code", "UniqueProductCode", "Unique_Product_Code"] },
+            { "name": "EAN", "match": ["EAN", "European Article Number", "EuropeanArticleNumber", "European_Article_Number"] },
+            { "name": "ISBN", "match": ["ISBN", "International Standard Book Number", "InternationalStandardBookNumber", "International_Standard_Book_Number"] },
+            { "name": "MPN", "match": ["MPN", "Manufacturer Part Number", "Manufacturer_Part_Number", "ManufacturerPartNumber"] },
+        ]
+    },
+    {
+        "section": "Google Category &amp; Clothing Attributes", "items": [
+            { "name": "Google Category", "match": ["Google Category", "GoogleCategory", "Google_Category", "Google Product Category", "Google_Product_Category", "GoogleProductCategory"] },
+            { "name": "Google Attribute: Age Group", "match": ["Age Group", "AgeGroup", "Age_Group", "Google Age Group", "GoogleAgeGroup", "Google_Age_Group"] },
+            { "name": "Google Attribute: Gender", "match": ["Gender", "Google Gender", "Google_Gender", "GoogleGender"] },
+            { "name": "Google Attribute: Color", "match": ["Color", "Google Color", "Colour", "Google Colour", "GoogleColor", "GoogleColour", "Google_Color", "Google_Colour"] },
+            { "name": "Google Attribute: Size", "match": ["Size", "Google Size", "GoogleSize", "Google_Size"] },
+            { "name": "Google Attribute: Material", "match": ["Material", "Google Material", "GoogleMaterial", "Google_Material"] },
+            { "name": "Google Attribute: Pattern", "match": ["Pattern", "Google Pattern", "GooglePattern", "Google_Pattern"] },
+        ]
+    },
+]
+
+var IPfirstRow;
+function buildImportProdsSelect() {
+
+    IPfirstRow = importProdsResult[0];
+    console.log(IPfirstRow);
+
+    // First check to see if there is a catId column as this will override catName
+    var categoryIdFound = false;
+    var categoryIdName = "categoryid";
+    var categoryPathName = "category_path";
+    var categoryPathFound = false;
+    IPfirstRow.filter(function (obj) {
+        /*console.log(obj)*/
+        if (obj.toLowerCase() == "category_path" || obj.toLowerCase() == "categorypath" || obj.toLowerCase() == "catpath" || obj.toLowerCase() == "cat_path") {
+            categoryPathFound = true;
+            categoryPathName = obj;
+        }
+        if (obj.toLowerCase() == "categoryid" || obj.toLowerCase() == "catid") {
+            categoryIdFound = true;
+            categoryIdName = obj;
+        }
+    });
+
+    $.each(IPsection, function (i) {
+
+        var IpsectionItems = this.items;
+        var IPsectionContents = '';
+
+        $.each(IpsectionItems, function (e) {
+
+            var matchFound = false;
+            var buttonActive = '';
+            var matchFoundName;
+            var matches = this.match;
+            $.each(matches, function () {
+                var matchName = this;
+                $.each(IPfirstRow, function () {
+                    if (matchName.toLowerCase() == this.toLowerCase()) {
+                        matchFound = true;
+                        matchFoundName = this.toLowerCase();
+                        /*console.log(matchFoundName)*/
+                        return;
+                    }
+                });
+            });
+
+            var locked = false;
+            var lockedNames = ["product category", "productcategory", "category"];
+            var lockedNameCheck = lockedNames.indexOf(matchFoundName);
+            if (lockedNameCheck > -1 && (categoryIdFound == true || categoryPathFound == true)) {
+                locked = true;
+            }
+
+            if (matchFound == true) {
+                buttonActive = 'products_import_item_view_active';
+                var IPselectItems = '<option value="&lt;ignore&gt;">&lt;ignore&gt;</option>';
+                $.each(IPfirstRow, function () {
+                    if (this.toLowerCase() == matchFoundName) {
+                        if (locked == true) {
+                            IPselectItems += '<option value="' + this + '" selected>Category (auto)</option>';
+                        } else {
+                            IPselectItems += '<option value="' + this + '" selected>' + this + '</option>';
+                        }
+                    } else {
+                        IPselectItems += '<option value="' + this + '">' + this + '</option>';
+                    }
+                });
+            } else {
+
+                if (this.name == "Category") {
+                    if (categoryIdFound == true || categoryPathFound == true) {
+                        // Should be locked and mapped to catid
+                        buttonActive = 'products_import_item_view_active';
+
+                        if (categoryIdFound == true) {
+                            var optionValue = categoryIdName;
+                        } else {
+                            var optionValue = categoryPathName;
+                        }
+
+                        IPselectItems += '<option value="' + optionValue + '" selected>Category (auto)</option>';
+                    }
+                } else {
+
+                    var IPselectItems = '<option value="&lt;ignore&gt;" selected>&lt;ignore&gt;</option>';
+                    $.each(IPfirstRow, function () {
+                        IPselectItems += '<option value="' + this + '">' + this + '</option>';
+                    });
+                }
+            }
+
+            
+
+
+            if (locked == true || (this.name == "Category" && (categoryIdFound == true || categoryPathFound == true))) {
+                var IPselect = '<select class="products_import_item_select_input" onchange="importProductsSelectChange(this);" data-id="' + i + '-' + e + '" disabled>' + IPselectItems + '</select>';
+            } else {
+                var IPselect = '<select class="products_import_item_select_input" onchange="importProductsSelectChange(this);" data-id="' + i + '-' + e + '">' + IPselectItems + '</select>';
+            }
+            
+
+
+            var IPmain = '<div class="hide_overflow products_import_item" data-id="'+i+'-'+e+'">';
+                    IPmain += '<div class="products_import_item_name">' + this.name + '</div>';
+                    IPmain += '<div class="products_import_item_select">';
+                        IPmain += '<div class="input_container" data-id="'+i+'-'+e+'">';
+                            IPmain += IPselect;
+                        IPmain += '</div>';
+                    IPmain += '</div>';
+                    IPmain += '<div class="products_import_item_right">';
+                        IPmain += '<div onclick="importProductHelpColumns(\'' + this.name + '\')" class="question_mark_tool_tip_lgrey marginl5 right products_import_item_right_tooltip">?</div>';    
+                        IPmain += '<a class="button button_white right products_import_item_view '+buttonActive+'" data-id="'+i+'-'+e+'" onclick="viewData(this);">View Data</a>';
+                    IPmain += '</div>';
+                IPmain += '</div>';
+
+            IPsectionContents += IPmain;
+        });
+
+
+         var IPsectionContainer = '<div class="panel_section">';
+                IPsectionContainer += '<h3>'+this.section+'</h3>';
+                IPsectionContainer += '<div class="hide_overflow">';
+                    IPsectionContainer += IPsectionContents;
+                IPsectionContainer += '</div>';
+            IPsectionContainer += '</div>';
+
+
+        $("#product_import_2_container").append(IPsectionContainer);
+
+    });
+
+    $("#product_import_1").hide();
+    $("#product_import_2").show();
+
+
+    // Check "Fixed Shipping"
+    checkFixedShipping();
+    // Check "Fixed Tax"
+    checkFixedTax();
+    // Check "UPC Codes"
+    checkUpcCodes();
+
+}
+
+function checkFixedShipping() {
+
+    console.log("Check fixed shipping");
+
+    // After it's built we go and check to see if Fixed Shipping
+    // This is because we want to warn users that having fixed shipping isn't a good idea
+
+    var shippingDataFound = $(".products_import_item_view_active[data-id='1-0']").length;
+
+    if (shippingDataFound > 0) {
+        var selected = $(".products_import_item_select_input[data-id='1-0']").val();
+
+        var selectedItem;
+        $.each(IPfirstRow, function (i) {
+            if (this == selected) {
+                selectedItem = i;
+            }
+        });
+
+        var foundFixedShippingData = false;
+        $.each(importProdsResult, function (e) {
+
+            var theData = this[selectedItem];
+
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 0) {
+                    foundFixedShippingData = true;
+                }
+            }
+
+        });
+
+        if (foundFixedShippingData == true) {
+            $(".products_import_item_view[data-id='1-0']").html('<i class="fa fa-exclamation-triangle color_orange"></i> View Data');
+        } else {
+            $(".products_import_item_view[data-id='1-0']").html('View Data');
+        }
+
+    }
+
+
+
+}
+
+function checkFixedTax() {
+
+    console.log("Check fixed tax rate");
+
+    // After it's built we go and check to see if fixed Tax Rate
+    // This is because we want to warn users that having fixed tax rate isn't a good idea
+
+    var taxDataFound = $(".products_import_item_view_active[data-id='1-3']").length;
+
+    if (taxDataFound > 0) {
+        var selected = $(".products_import_item_select_input[data-id='1-3']").val();
+
+        var selectedItem;
+        $.each(IPfirstRow, function (i) {
+            if (this == selected) {
+                selectedItem = i;
+            }
+        });
+
+        var foundFixedTaxData = false;
+        $.each(importProdsResult, function (e) {
+
+            var theData = this[selectedItem];
+
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 0) {
+                    foundFixedTaxData = true;
+                }
+            }
+
+        });
+
+        if (foundFixedTaxData == true) {
+            $(".products_import_item_view[data-id='1-3']").html('<i class="fa fa-exclamation-triangle color_orange"></i> View Data');
+        } else {
+            $(".products_import_item_view[data-id='1-3']").html('View Data');
+        }
+
+    }
+
+}
+
+function checkUpcCodes() {
+
+    console.log("Check fixed tax rate");
+
+    // After it's built we go and check to see if UPC codes are correct
+
+    var upcDataFound = $(".products_import_item_view_active[data-id='3-0']").length;
+
+    if (upcDataFound > 0) {
+        var selected = $(".products_import_item_select_input[data-id='3-0']").val();
+
+        var selectedItem;
+        $.each(IPfirstRow, function (i) {
+            if (this == selected) {
+                selectedItem = i;
+            }
+        });
+
+        var foundUpcData = false;
+        $.each(importProdsResult, function (e) {
+
+            var theData = this[selectedItem];
+
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 12) {
+                    foundUpcData = true;
+                }
+            }
+
+        });
+
+        if (foundUpcData == true) {
+            $(".products_import_item_view[data-id='3-0']").html('<i class="fa fa-exclamation-triangle color_orange"></i> View Data');
+        } else {
+            $(".products_import_item_view[data-id='3-0']").html('View Data');
+        }
+
+    }
+
+}
+
+function changeImportProducts() {
+
+    $("#product_import_2_container").html("");
+    $("#upload_imported_file").text("Upload");
+    $("#product_import_1").show();
+    $("#product_import_2").hide();
+}
+
+
+function importProductsSelectChange(el) {
+
+    var selectOption = $(el).val();
+    var id = $(el).attr("data-id")
+
+    if (selectOption == "<ignore>") {
+        $(".products_import_item_view[data-id='" + id + "']").removeClass("products_import_item_view_active");
+    } else {
+        $(".products_import_item_view[data-id='" + id + "']").addClass("products_import_item_view_active");
+    }
+
+
+
+}
+var categoryId, FWSID;
+
+function viewData(el) {
+
+    $("#import_view_data_table tbody tr").remove();
+    hideById("modal_import_view_data_warning");
+
+    var id = $(el).attr("data-id");
+    var selected = $(".products_import_item_select_input[data-id='" + id + "']").val();
+
+    $("#import_view_data_table_title").text(selected);
+
+    var selectedItem;
+    $.each(IPfirstRow, function (i) {
+        if (this == selected) {
+            selectedItem = i;
+        }
+    });
+
+    console.log(selectedItem)
+
+    var isShipping = false;
+    if (id == "1-0") {
+        isShipping = true;
+    }
+    var isShippingData = false;
+
+    var isTax = false;
+    if (id == "1-3") {
+        isTax = true;
+    }
+    var isTaxData = false;
+
+    var isUPC = false;
+    if (id == "3-0") {
+        isUPC = true;
+    }
+    var isUPCData = false;
+
+    var dataRows;
+    $.each(importProdsResult, function (e) {
+
+        var theData = this[selectedItem];
+        console.log(theData);
+
+        if (isShipping == true) {
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 0) {
+                    isShippingData = true;
+                    theData = '<i class="fa fa-exclamation-triangle marginr5 color_orange"></i>' + theData;
+                }
+            }
+        }
+
+        if (isTax == true) {
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 0) {
+                    isTaxData = true;
+                    theData = '<i class="fa fa-exclamation-triangle marginr5 color_orange"></i>' + theData;
+                }
+            }
+        }
+
+        if (isUPC == true) {
+            if (theData != null && theData != "" && theData != "-1" && theData.length != 0 && e != 0) {
+                theData = theData.trim();
+                if (theData.length != 12) {
+                    isUPCData = true;
+                    theData = '<i class="fa fa-exclamation-triangle marginr5 color_orange"></i>' + theData;
+                }
+            }
+        }
+
+        dataRows += '<tr>';
+            dataRows += '<td>' + e + '</td>';
+            dataRows += '<td>' + theData + '</td>';
+        dataRows += '</tr>';
+
+    });
+
+    if (isShippingData == true) {
+        showById("modal_import_view_data_warning");
+
+        var html = '<p><i class="fa fa-exclamation-triangle marginr5 color_orange"></i><strong>Warning</strong></p>';
+            html += '<p>Some of your products have fixed shipping. This means that they will bypass any shipping rules you may have created.</p>';
+            html += '<p>If you didn\'t intend to do this, please stop this import, and change the data to blank for Fixed Shipping.</p>';
+
+        document.getElementById("modal_import_view_data_warning").innerHTML = html;
+    }
+
+    if (isTaxData == true) {
+        showById("modal_import_view_data_warning");
+
+        var html = '<p><i class="fa fa-exclamation-triangle marginr5 color_orange"></i><strong>Warning</strong></p>';
+        html += '<p>Some of your products have fixed tax rates. This means that they will bypass the default tax rate you have set on your store.</p>';
+        html += '<p>If you didn\'t intend to do this, please stop this import, and change the data to blank for Tax Rate.</p>';
+
+        document.getElementById("modal_import_view_data_warning").innerHTML = html;
+    }
+
+    if (isUPCData == true) {
+        showById("modal_import_view_data_warning");
+
+        var html = '<p><i class="fa fa-exclamation-triangle marginr5 color_orange"></i><strong>Warning</strong></p>';
+        html += '<p>Some of your products have incorrect UPC codes. This means that they will not be added/ updated.</p>';
+        html += '<p>UPC codes must be 12 digits long.</p>';
+
+        document.getElementById("modal_import_view_data_warning").innerHTML = html;
+
+    }
+    
+
+    $("#import_view_data_table tbody").append(dataRows);
+    $("#import_view_data_table tbody tr:first-child").remove();
+
+    $(".modal_overlay, .modal_import_view_data").fadeIn();
+}
+
+
+function continueImportProducts() {
+
+    $("#modal_import_finalize_import_complete").addClass("button_disabled");
+    $("#product_import_finalize").hide();
+    $(".busy_wait_product_import_finalize").show();
+    $(".busy_wait_product_import_finalize span").text("Importing Products");
+
+    $(".alert_import_products_missing_requirements, .alert_import_products_eror_upload").hide();
+    $(".products_import_item_select_input").removeClass("input_alert");
+
+    $(".products_import_item_select_input[data-id='0-0'], .products_import_item_select_input[data-id='0-1'], .products_import_item_select_input[data-id='0-2'], .products_import_item_select_input[data-id='0-3']").removeClass("input_alert");
+
+    // Check to see if min is met
+    var pName = $(".products_import_item_select_input[data-id='0-0']").val();
+    var pCode = $(".products_import_item_select_input[data-id='0-1']").val();
+    var pCat = $(".products_import_item_select_input[data-id='0-2']").val();
+    var pPrice = $(".products_import_item_select_input[data-id='0-3']").val();
+
+    if (pName == "<ignore>" || pCode == "<ignore>" || pCat == "<ignore>" || pPrice == "<ignore>") {
+        $(".alert_import_products_missing_requirements").show();
+
+        if (pName == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-0']").addClass("input_alert");
+        }
+        if (pCode == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-1']").addClass("input_alert");
+        }
+        if (pCat == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-2']").addClass("input_alert");
+        }
+        if (pPrice == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-3']").addClass("input_alert");
+        }
+
+        hideByClass("modal_import_finalize_import", "modal_overlay");
+        document.querySelector("body").classList.remove("body_modal_is_open");
+
+    } else {
+        $(".continue_import_products_button").text("Importing");
+        $(".continue_import_products_button").addClass("button_disabled");
+        $.each(IPfirstRow, function (i) {
+            if (this.toLowerCase() == "categoryid" || this.toLowerCase() == "catid") {
+                categoryId = this.toString();
+                return false;
+            }
+            else {
+                categoryId = "<ignore>";
+            }
+        });
+        $.each(IPfirstRow, function (i) {
+            if (this.toLowerCase() == "fwsid") {
+                console.log(this);
+                FWSID = this.toString();
+                return false;
+            }
+            else {
+                FWSID = "<ignore>";
+            }
+        });
+        runProductImport()
+    }
+}
+
+function runProductImport() {
+
+    console.log(importProdsResultUrl);
+
+    importProdsResultUrl = importProdsResultUrl.split("?")[0];
+
+    var struct = [];
+    struct.push({
+        url: importProdsResultUrl,
+        ddlCategoryID: categoryId,
+        ddlMerge: FWSID,
+        ddlProdName: $('.products_import_item_select_input[data-id="0-0"]').val(),
+        ddlProdCode: $('.products_import_item_select_input[data-id="0-1"]').val(),
+        ddlCategory: $('.products_import_item_select_input[data-id="0-2"]').val(),
+        ddlPrice: $('.products_import_item_select_input[data-id="0-3"]').val(),
+        ddlProductDesc: $('.products_import_item_select_input[data-id="0-4"]').val(),
+        ddlProdImageUrl: $('.products_import_item_select_input[data-id="0-5"]').val(),
+
+        ddlPostage: $('.products_import_item_select_input[data-id="1-0"]').val(),
+        ddlQty: $('.products_import_item_select_input[data-id="1-1"]').val(),
+        ddlWeight: $('.products_import_item_select_input[data-id="1-2"]').val(),
+        ddlTaxRate: $('.products_import_item_select_input[data-id="1-3"]').val(),
+        ddlCondition: $('.products_import_item_select_input[data-id="1-4"]').val(),
+        ddlBrand: $('.products_import_item_select_input[data-id="1-5"]').val(),
+        ddlBulk: $('.products_import_item_select_input[data-id="1-6"]').val(),
+        ddlOptions: $('.products_import_item_select_input[data-id="1-7"]').val(),
+        ddlProductSearchTags: $('.products_import_item_select_input[data-id="1-8"]').val(),
+        ddlProductOfferType: $('.products_import_item_select_input[data-id="1-9"]').val(),
+        ddlProductOfferPrice: $('.products_import_item_select_input[data-id="1-10"]').val(),
+        ddlProductOfferDiscount: $('.products_import_item_select_input[data-id="1-11"]').val(),
+        ddlAdditionalCategories: $('.products_import_item_select_input[data-id="1-12"]').val(),
+        ddlRelatedProducts: $('.products_import_item_select_input[data-id="1-13"]').val(),
+        ddlWholesalePrice: $('.products_import_item_select_input[data-id="1-14"]').val(),
+        ddlSupplierID: $('.products_import_item_select_input[data-id="1-15"]').val(),
+        ddlSupplierCode: $('.products_import_item_select_input[data-id="1-16"]').val(),
+        ddlMinQty: $('.products_import_item_select_input[data-id="1-17"]').val(),
+        ddlMaxQty: $('.products_import_item_select_input[data-id="1-18"]').val(),
+        ddlPacksize: $('.products_import_item_select_input[data-id="1-19"]').val(),
+        ddlHsCode: $('.products_import_item_select_input[data-id="1-20"]').val(),
+        ddlCountryOfOrigin: $('.products_import_item_select_input[data-id="1-21"]').val(),
+
+        ddlSEOTitle: $('.products_import_item_select_input[data-id="2-0"]').val(),
+        ddlSEODesc: $('.products_import_item_select_input[data-id="2-1"]').val(),
+        ddlSEOKeywords: $('.products_import_item_select_input[data-id="2-2"]').val(),
+        ddlSEOCustomURL: $('.products_import_item_select_input[data-id="2-3"]').val(),
+
+        ddlUPC: $('.products_import_item_select_input[data-id="3-0"]').val(),
+        ddlEAN: $('.products_import_item_select_input[data-id="3-1"]').val(),
+        ddlISBN: $('.products_import_item_select_input[data-id="3-2"]').val(),
+        ddlMPN: $('.products_import_item_select_input[data-id="3-3"]').val(),
+
+        ddlGoogleCategory: $('.products_import_item_select_input[data-id="4-0"]').val(),
+        ddlGoogleAgeGroup: $('.products_import_item_select_input[data-id="4-1"]').val(),
+        ddlGoogleGender: $('.products_import_item_select_input[data-id="4-2"]').val(),
+        ddlGoogleColour: $('.products_import_item_select_input[data-id="4-3"]').val(),
+        ddlGoogleSize: $('.products_import_item_select_input[data-id="4-4"]').val(),
+        ddlGoogleMaterial: $('.products_import_item_select_input[data-id="4-5"]').val(),
+        ddlGooglePattern: $('.products_import_item_select_input[data-id="4-6"]').val()
+    });
+    console.log(struct);
+    var path, count;
+    axiosGet('services/manage/products/importv2.svc/ConfigureCSV?storeId=' + storeId + '&structure=' + JSON.stringify(struct)).then(function (data) {
+        if (!data.d.error) {
+            $('.info').text(data.d.msg);
+            $('#product_import_2').hide();
+            console.log(path, count);
+            path = data.d.path;
+            count = data.d.count;
+
+            var info = [];
+            info.push({ path: path, count: count });
+            console.log(info);
+            $.ajax({
+                async: true,
+                url: '/services/manage/products/importv2.svc/ConfirmedImport?storeId=' + storeId + "&input=" + JSON.stringify(info),
+                success: function (data) {
+                    console.log(data);
+                    $('#product_import_pending').fadeIn();
+                    $('#product_import_2').hide();
+                    $('#import_export_history_body_items').html("");
+                    getImportHistory(storeId);
+
+                },
+                error: function (r, s, e) {
+                    console.log(r, e);
+                }
+            });
+
+        } else {
+            $('#product_import_error').fadeIn();
+            $('#product_import_error_message').html(data.d.msg);
+            $("#product_import_error_download").attr("href", data.d.path);
+            $('#product_import_2').hide();
+        }
+        struct = [];
+    }).catch(function (e) {
+        $(".continue_import_products_button").removeClass("button_disabled");
+        $(".continue_import_products_button").text("Import Products");
+        $('#product_import_2').show();
+        $(".alert_import_products_eror_upload").show();
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        document.querySelector("body").classList.remove("body_modal_is_open");
+        hideByClass("modal_import_finalize_import", "overlay_forced");
+    });
+};
+
+var previewProductsNum = 0;
+function previewProducts() {
+
+    $(".alert_import_products_missing_requirements, .alert_import_products_eror_upload").hide();
+    $(".products_import_item_select_input").removeClass("input_alert");
+
+    $(".products_import_item_select_input[data-id='0-0'], .products_import_item_select_input[data-id='0-1'], .products_import_item_select_input[data-id='0-2'], .products_import_item_select_input[data-id='0-3']").removeClass("input_alert");
+
+    // Check to see if min is met
+    var pName = $(".products_import_item_select_input[data-id='0-0']").val();
+    var pCode = $(".products_import_item_select_input[data-id='0-1']").val();
+    var pCat = $(".products_import_item_select_input[data-id='0-2']").val();
+    var pPrice = $(".products_import_item_select_input[data-id='0-3']").val();
+
+    if (pName == "<ignore>" || pCode == "<ignore>" || pCat == "<ignore>" || pPrice == "<ignore>") {
+        $(".alert_import_products_missing_requirements").show();
+
+        if (pName == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-0']").addClass("input_alert");
+        }
+        if (pCode == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-1']").addClass("input_alert");
+        }
+        if (pCat == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-2']").addClass("input_alert");
+        }
+        if (pPrice == "<ignore>") {
+            $(".products_import_item_select_input[data-id='0-3']").addClass("input_alert");
+        }
+
+    } else {
+
+        // Add import count
+        var importTotalCount = importProdsResult.length - 1;
+        if (importTotalCount > 5) {
+            document.getElementById("modal_import_view_products_count").innerHTML = "5";
+        } else {
+            document.getElementById("modal_import_view_products_count").innerHTML = importTotalCount;
+        }
+
+        divFadeIn(".overlay_forced, .modal_import_view_products");
+
+        previewProductsNum = 0;
+        getPreviewProduct(0);
+    }
+}
+
+function getPreviewProduct(i) {
+
+    //resets 
+    document.getElementById("modal_import_view_products_image2").innerHTML = "";
+
+    previewProductsNum++;
+    var productRow = i + 1;
+
+    // Previous Button
+    if (i == 0) {
+        document.getElementById("modal_import_view_products_previous").classList.add("button_disabled");
+    } else {
+        document.getElementById("modal_import_view_products_previous").classList.remove("button_disabled");
+    }
+
+    // Next Button
+    /*console.log(productRow);
+    console.log(importProdsResult.length - 1)*/
+    if (productRow == (importProdsResult.length - 1) || productRow == 5) {
+        document.getElementById("modal_import_view_products_next").innerText = "Finalize Import";
+        document.getElementById("modal_import_view_products_next").setAttribute("onclick", "finalizeProductImport();");
+    } else {
+        document.getElementById("modal_import_view_products_next").innerText = "Next Product";
+        document.getElementById("modal_import_view_products_next").setAttribute("onclick", "productPreviewNext();");
+    }
+
+
+    var name = $(".products_import_item_select_input[data-id='0-0']").val();
+    var namePos;
+
+    var code = $(".products_import_item_select_input[data-id='0-1']").val();
+    var codePos;
+
+    var category = $(".products_import_item_select_input[data-id='0-2']").val();
+    var categoryPos;
+
+    var price = $(".products_import_item_select_input[data-id='0-3']").val();
+    var pricePos;
+
+    var description = $(".products_import_item_select_input[data-id='0-4']").val();
+    var descriptionPos;
+
+    var images = $(".products_import_item_select_input[data-id='0-5']").val();
+    var imagesPos;
+
+    $.each(IPfirstRow, function (e) {
+        if (this == name) { namePos = e; }
+        if (this == code) { codePos = e; }
+        if (this == price) { pricePos = e; }
+        if (this == category) { categoryPos = e; }
+        if (this == description) { descriptionPos = e; }
+        if (this == images) { imagesPos = e; }
+    });
+
+    if (imagesPos != undefined) {
+        var allImages = [];
+        if (importProdsResult[productRow][imagesPos] != undefined) {
+            allImages = importProdsResult[productRow][imagesPos].split(";");
+        }
+        if (allImages.length > 0) {
+            for (var p = 0; p < allImages.length; p++) {
+
+                if (p == 0) {
+                    document.getElementById("modal_import_view_products_image1").innerHTML = '<img src="//d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + allImages[p].toLowerCase().trim() + '?v=' + new Date().getTime().toString() + '" onerror=\"this.src=\'/images/products/product-not-exist.jpg\';\" />';
+                } else {
+                    document.getElementById("modal_import_view_products_image2").innerHTML += '<img src="//d13z1xw8270sfc.cloudfront.net/origin/' + storeId + '/' + allImages[p].toLowerCase().trim() + '?v=' + new Date().getTime().toString() + '" onerror=\"this.src=\'/images/products/product-not-exist.jpg\';\" />';
+                }
+
+            }
+        } else {
+            document.getElementById("modal_import_view_products_image1").innerHTML = '<div class="color_red">Image Missing or Ignored</div>';
+        }
+    } else {
+        document.getElementById("modal_import_view_products_image1").innerHTML = '<div class="color_red">Image Missing or Ignored</div>';
+    }
+
+
+    var nameText = '<span class="color_red">Product Name Missing or Ignored</span>';
+    var codeText = '<span class="color_red">Missing or Ignored</span>';
+    var priceText = '<span class="color_red">Missing or Ignored</span>';
+    var categoryText = '<span class="color_red">Missing or Ignored</span>';
+    var descriptionText = '<span class="color_red">Description Missing or Ignored</span>';
+
+    if (importProdsResult[productRow][namePos] != undefined) {
+        nameText = importProdsResult[productRow][namePos];
+    }
+
+    if (importProdsResult[productRow][codePos] != undefined) {
+        codeText = importProdsResult[productRow][codePos];
+    }
+
+    if (importProdsResult[productRow][pricePos] != undefined) {
+        priceText = currency_options.symbol + importProdsResult[productRow][pricePos];
+    }
+
+    if (importProdsResult[productRow][categoryPos] != undefined) {
+        categoryText = importProdsResult[productRow][categoryPos];
+    }
+
+    if (importProdsResult[productRow][descriptionPos] != undefined) {
+        descriptionText = importProdsResult[productRow][descriptionPos];
+    }
+
+    document.getElementById("modal_import_view_products_name").innerHTML = nameText;
+    document.getElementById("modal_import_view_products_code").innerHTML = "<strong>Code: </strong>" + codeText;
+    document.getElementById("modal_import_view_products_price").innerHTML = "<strong>Base Price: </strong>" + priceText;
+    document.getElementById("modal_import_view_products_category").innerHTML = "<strong>Category: </strong>" + categoryText;
+    document.getElementById("modal_import_view_products_description").innerHTML = descriptionText;
+}
+
+
+
+function productPreviewNext() {
+    getPreviewProduct(previewProductsNum);
+}
+
+function productPreviewPrevious() {
+    previewProductsNum = previewProductsNum - 2;
+    getPreviewProduct(previewProductsNum);
+}
+
+
+
+function finalizeProductImport() {
+
+    hideByClass("modal_import_view_products");
+    showByClass("modal_import_finalize_import");
+    showByClass("busy_wait_product_import_finalize");
+
+    $("#product_import_finalize").hide();
+    $(".busy_wait_product_import_finalize span").text("Loading");
+
+
+    var fwsPos;
+    var category = $(".products_import_item_select_input[data-id='0-2']").val();
+    var categoryPos;
+    $.each(IPfirstRow, function (i) {
+        if (this.toLowerCase() == "fwsid") {
+            fwsPos = i;
+        }
+        if (this == category) { categoryPos = i; }
+    });
+
+    console.log(fwsPos)
+
+    var fwsCreateCount = 0;
+    var fwsUpdateCount = 0;
+
+    var importCategoryArray = [];
+    var importCategoryOther = 0;
+
+    $.each(importProdsResult, function (e){
+
+        if (e != 0) {
+            if (this[fwsPos] != undefined && this[fwsPos].length > 0) {
+                fwsUpdateCount++;
+            } else {
+                fwsCreateCount++;
+            }
+
+            if (this[categoryPos] != null && this[categoryPos].length > 0) {
+                if (importCategoryArray.indexOf(this[categoryPos]) === -1) {
+                    importCategoryArray.push(this[categoryPos]);
+                }
+            } else {
+                importCategoryOther++;
+            }
+            
+
+        }
+
+    });
+
+    console.log("Create Count: " + fwsCreateCount);
+    console.log("Update Count: " + fwsUpdateCount);
+    console.log(importCategoryArray);
+    console.log(importCategoryOther)
+
+    document.getElementById("product_import_finalize_inner").innerHTML = "";
+
+    if (fwsCreateCount > 0) {
+        document.getElementById("product_import_finalize_inner").innerHTML += '<li>Create <strong>' + fwsCreateCount + '</strong> New product(s).</li>';
+    }
+
+    if (fwsUpdateCount > 0) {
+        document.getElementById("product_import_finalize_inner").innerHTML += '<li>Update <strong>' + fwsUpdateCount + '</strong> existing product(s).</li>';
+    }
+
+    document.getElementById("product_import_finalize_inner").innerHTML += '<li>in a total of <strong>' + (importCategoryArray.length + importCategoryOther) + '</strong> different categories.</li>';
+
+
+
+    setTimeout(function () {
+        hideByClass("busy_wait_product_import_finalize");
+        showById("product_import_finalize");
+        document.getElementById("modal_import_finalize_import_complete").classList.remove("button_disabled");
+    }, 1500);
+
+}
+
+
+
+function importProductDownloadTemplate() {
+    showById("download_import_csv_template");
+    document.getElementById("download_import_csv_template_button").classList.add("button_disabled");
+    document.getElementById("download_import_csv_template_button").innerHTML = "<i class='fa fa-spinner fa-spin'></i> Downloading";
+    setTimeout(function () {
+        document.getElementById("download_import_csv_template_button").classList.remove("button_disabled");
+        document.getElementById("download_import_csv_template_button").innerHTML = "Download CSV Template";
+    }, 30000);
+}
+
+function importProductHelpColumns(name) {
+
+    console.log(name)
+
+    document.getElementById("modal_import_product_help2_title").innerText = name;
+
+    if (document.querySelector(".modal_import_product_help2_section_active") != null) {
+        document.querySelector(".modal_import_product_help2_section_active").classList.remove("modal_import_product_help2_section_active");
+    }
+    document.querySelector(".modal_import_product_help2_section[data-importHelpSection='" + name + "']").classList.add("modal_import_product_help2_section_active");
+
+    divFadeIn(".modal_import_product_help2", ".modal_overlay");
+
+}
+
+var guid = guid();
+var uploaded_files = [];
+var myDropzoneImportFileHelp;
+
+function openSupportImportFile() {
+
+    hideById("modal_import_send_file_sending", "modal_import_send_file_success", "modal_import_send_file_error");
+    showById("modal_import_send_file_zone")
+    document.getElementById("modal_import_send_file_button").classList.add("button_disabled");
+    document.getElementById("modal_import_send_file_button").innerHTML = 'Send';
+    divFadeIn(".modal_overlay", ".modal_import_send_file");
+
+    if (myDropzoneImportFileHelp != null && myDropzoneImportFileHelp != undefined) {
+        myDropzoneImportFileHelp.removeAllFiles();
+    } else {
+        myDropzoneImportFileHelp = new Dropzone("div#drop-target2",
+            {
+                url: "#",
+                maxFilesize: 250, //250Mb
+                autoProcessQueue: false,
+                acceptedFiles: "",
+                method: "put", //As this is S3, we'll use the PUT method,
+                maxFiles: 1,
+                headers: {
+                    "x-amz-acl": "public-read"
+                },
+                maxfilesexceeded: function (file) {
+
+                },
+                accept: function (file, done) {
+
+                    $("#modal_import_send_file_button").removeClass('button_disabled');
+
+                    manualSigningAttachmentsv2(storeId, file.name, guid, file.type, "", function (signedUrl) { file.uploadURL = signedUrl.url; console.log("Parsed:" + signedUrl.filename); uploadingFileName = signedUrl.filename; file.parsedname = signedUrl.filename; console.log("Filename:" + file.parsedname); console.log(file); done(); myDropzoneImportFileHelp.processQueue(); });
+                },
+                sending: function (file, xhr) {
+                    xhr.setRequestHeader("Content-Type", file.type);
+                    var _send = xhr.send
+                    xhr.send = function () {
+                        _send.call(xhr, file)
+                    }
+                },
+                init: function () {
+                    this.on("addedfile", function (file) {
+                        console.log("File Added: " + file.name);
+                        $("#modal_import_send_file_button").addClass('button_disabled');
+                    });
+                    this.on("success", function (file) {
+                        console.log("File uploaded successfully! Name:" + file.name + " Size:" + file.size);
+                        $("#modal_import_send_file_button").removeClass('button_disabled');
+                        if (!uploaded_files.includes(file.parsedname)) uploaded_files.push(file.parsedname);
+                    });
+                    this.on("dragenter", function (event) { console.log("Drag Enter"); $("#drop-target2").addClass("dragover"); });
+                    this.on("dragleave", function (event) { console.log("Drag Leave"); $("#drop-target2").removeClass("dragover"); });
+                    this.on("processing", function (file) {
+                        console.log("onProcessing to:" + file.uploadURL);
+                        this.options.url = file.uploadURL;
+                    });
+                    this.on("removedfile", function (file) {
+                        removeFile(file);
+                    });
+                    this.on("sending", function (file, xhr, formData) { console.log("onSending"); });
+                    this.on("error", function (file, error, xhr) { console.log("onERROR"); console.log(error); console.log(xhr); });
+                }
+            });
+    }
+
+}
+
+var threadID, messageID;
+
+function sendImportFileSupport() {
+
+    document.getElementById("modal_import_send_file_button").classList.add("button_disabled");
+    document.getElementById("modal_import_send_file_button").innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending';
+    hideById("modal_import_send_file_zone", "modal_import_send_file_success", "modal_import_send_file_error");
+    showById("modal_import_send_file_sending");
+
+    var ticket = {
+        threadID: threadID,
+        messageID: messageID,
+        message: "Hello, please can you review my import file.",
+        subject: "Import File Help",
+        type: "Question",
+        browser: "",
+        platform: "",
+        location: "",
+        uploaded_files: uploaded_files,
+        guid: guid
+    };
+
+    var data = JSON.stringify({
+        storeId: storeId,
+        info: ticket
+    });
+
+    axiosPost('/services/support/ticket.svc/updateTicket', data).then(function (data) {
+        console.log(data);
+
+        showById("modal_import_send_file_success");
+        document.getElementById("modal_import_send_file_button").innerHTML = '<i class="fa fa-check"></i> Sent';
+
+    }).catch(function (e) {
+        
+        showById("modal_import_send_file_error");
+        document.getElementById("modal_import_send_file_button").classList.remove("button_disabled");
+        document.getElementById("modal_import_send_file_button").innerHTML = 'Send';
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideById("modal_import_send_file_sending");
+    });
+}
+
+
+function removeFile(file) {
+
+    $("#modal_import_send_file_button").addClass('button_disabled');
+
+    var data = {
+        storeId: storeId,
+        guid: guid,
+        fileName: file.parsedname
+    };
+    axiosPost('/services/support/ticket.svc/removeAttachment', data).then(function (result) {
+        console.log(uploaded_files);
+        var index = uploaded_files.indexOf(file.parsedname);
+        if (index > -1) uploaded_files.splice(index, 1);
+        console.log(uploaded_files);
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        
+    });
+}
+
+
+
+var importToDelete = '';
+function deleteProductImport(importFile) {
+
+    document.getElementById("confirm_import_delete").classList.remove("button_disabled");
+    document.getElementById("confirm_import_delete").innerHTML = 'Confirm Delete';
+
+    importToDelete = importFile;
+
+    showById("modal_import_delete1");
+    hideById("modal_import_delete2", "modal_import_delete3")
+
+    divFadeIn(".modal_overlay", ".modal_import_delete");
+}
+
+
+function confirmDeleteProductImport() {
+
+    document.getElementById("confirm_import_delete").classList.add("button_disabled");
+    document.getElementById("confirm_import_delete").innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deleting';
+
+    /*var file = importToDelete;
+    file = file.split("/");
+    console.log(file);
+    file = file.slice(-1).pop();
+    console.log(file);
+
+    var logFile = importLogToDelete;
+    console.log(logFile);*/
+
+
+        axiosGet('/services/manage/products/import.svc/deleteProductImport?storeId=' + storeId + '&jobId=' + encodeURIComponent(importToDelete)).then(function (data) {
+
+            var success = data.d;
+            if (success != null && success == true) {
+
+                showById("modal_import_delete2");
+
+                document.querySelector(".import_export_history_item[data-file='" + importToDelete + "'] .import_export_history_item_status").classList.add("import_export_history_item_deleted");
+                document.querySelector(".import_export_history_item[data-file='" + importToDelete + "'] .import_export_history_item_status").classList.remove("import_export_history_item_completed");
+                document.querySelector(".import_export_history_item[data-file='" + importToDelete + "'] .import_export_history_item_status").innerText = "Deleted";
+                document.querySelector(".import_export_history_item[data-file='" + importToDelete + "'] .import_export_history_item_delete").remove();
+                document.querySelector(".import_export_history_item[data-file='" + importToDelete + "'] .import_export_history_item_exportlink").remove();
+
+                document.getElementById("confirm_import_delete").innerHTML = 'Deleted';
+
+            } else {
+                showById("modal_import_delete3");
+                document.getElementById("confirm_import_delete").classList.remove("button_disabled");
+                document.getElementById("confirm_import_delete").innerHTML = 'Confirm Delete';
+            }
+
+        }).catch(function (e) {
+
+            showById("modal_import_delete3");
+            document.getElementById("confirm_import_delete").classList.remove("button_disabled");
+            document.getElementById("confirm_import_delete").innerHTML = 'Confirm Delete';
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+
+        });
+
+    
+
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
