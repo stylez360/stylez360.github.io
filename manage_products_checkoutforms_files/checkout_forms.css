@@ -1,0 +1,203 @@
+﻿/* ======================= */
+/* Checkout Form Page ==== */
+/* ======================= */
+
+.pagination{
+    margin-top: 20px;
+}
+
+.busy_wait_checkout_forms, .busy_wait_checkout_forms_products, .busy_wait_checkout_forms_preview, .busy_wait_checkout_form_head{
+    display: block;
+}
+
+#checkout_forms_container, #zero_checkout_forms, #checkoutformsproducts_table_container, #checkoutforms_to_be_deleted, #checkout_forms_preview_container, #checkout_forms_preview_zero, #checkoutforms_table, 
+#checkout_form_head, #form_questions, #checkout_form_error, #checkoutforms_sort_container, #checkout_forms_preview_error{ 
+    display: none; 
+}
+
+.checkout_form_icon_delete{
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checkout_form_icon_delete:hover{
+    background-color: #bb112b;
+}
+
+.checkoutforms_table_date, .checkoutforms_table_prompt{ display: none; }
+
+@media only screen and (min-width:700px){ 
+    .checkoutforms_table_date, .checkoutforms_table_prompt{ display: table-cell; }
+}
+
+.checkoutforms_table_products{
+    text-align: center;
+}
+
+.checkout_form_icon_preview{
+    background-color: #20b7e6;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checkout_form_icon_preview:hover{
+    background-color: #228AAB;
+}
+
+.checkoutforms_to_be_deleted_item{
+    display: block;
+    margin-bottom: 5px;
+}
+
+.checkoutforms_to_be_deleted_item i{
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    background-color: #fff;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    margin-right: 5px;
+    width: 20px;
+    text-align: center;
+    position: relative;
+    top: 2px
+}
+
+.checkoutforms_to_be_deleted_item i:hover{
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+.checkout_forms_preview_questions_container_label{
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+@media only screen and (min-width:600px) {
+    .checkout_forms_preview_questions_container_label{
+        text-align: right;
+    }
+}
+
+/* ================================== */
+/* Individual Checkout Form Page ==== */
+/* ================================== */
+
+/* Add Question */
+
+.add_question_container{
+    display: none;
+    text-align: center;
+    position: relative;
+    margin-bottom: 100px;
+}
+
+.add_question_container::before{
+    content: '';
+    width: 1px;
+    background-color: #ddd;
+    height: 20px;
+    display: block;
+    margin: 0 auto;
+    position: absolute;
+    left: 0; right: 0;
+    top: -20px;
+}
+
+/* Questions */
+
+.form_questions_title{
+    margin-top:-10px;
+    color: #3bf10d;
+}
+
+.form_questions_delete{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form_questions_delete:hover{
+    background-color: #bb112b;
+}
+
+.checkoutforms_list_options_container{
+    display: none;
+}
+
+.add_option_button{
+    margin-left: 10px;
+}
+
+.checkoutforms_list_options_display_item{
+    margin-top: 10px;
+    display: block;
+    margin-right: 10px;
+    border-bottom: 1px solid #ddd;
+    line-height: 25px;
+    overflow: hidden;
+}
+
+.checkoutforms_list_options_display_item span{
+    float: left;
+    width: 80%;
+}
+
+.checkoutforms_list_options_display_item i{
+    background-color: #ea1636;
+    color: #FFF;
+    border-radius: 4px;
+    height: 20px;
+    line-height: 20px;
+    width: 20px;
+    text-align: center;
+    cursor: pointer;
+    float: right;
+}
+
+.checkoutforms_list_options_display_item i:hover{
+    background-color: #bb112b;
+}
+
+.checkoutforms_filetype_container{
+    display: none;
+}
+
+.checkoutforms_filetype_container_inner{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.checkoutforms_filetype_item{
+    display: inline-flex;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    align-items: center;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.checkoutforms_filetype_item_selected{
+    color: #FFF;
+}

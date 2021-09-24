@@ -1,0 +1,421 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "CHECKOUT-FORMS", uuid: beaverGuid });
+var checkoutforms;
+var startpg = 0;
+var limit = 10;
+var baseLimit = 10;
+
+var paginationTotalItems;
+var paginationPageItems;
+var paginationPageStart;
+var paginationShowAll;
+
+
+function getCheckoutForms() {
+
+    $("#checkout_forms_container, #checkoutforms_table").hide();
+    $(".pagination_number_results, .pagination_text_results").remove();
+    $(".busy_wait_checkout_forms").show();
+
+    axiosGet("/services/manage/products/checkout_forms.svc/getCheckoutFormsList?storeId=" + storeId).then(function (data) {
+        trace('loadCheckoutForms:success');
+        checkoutforms = data.d;
+        if (checkoutforms == null) {
+            $("#checkout_forms_container").show();
+            $("#zero_checkout_forms").show();
+            $(".busy_wait_checkout_forms").hide();
+        } else {
+            checkoutforms = JSON.parse(checkoutforms);
+            if (checkoutforms.length === 0 || checkoutforms.message) {
+                $("#zero_checkout_forms").show();
+            } else {
+                buildCheckoutFormsList(startpg, limit);
+                $("#checkoutforms_table").show();
+                showById("checkoutforms_sort_container");
+            }
+            $("#checkout_forms_container").show();
+            $(".busy_wait_checkout_forms").hide();
+        }
+    }).catch(function (e) {
+        trace('loadCheckoutForms:error');
+        $("#checkout_forms_container").show();
+        $("#zero_checkout_forms").show();
+        $(".busy_wait_checkout_forms").hide();
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        trace('loadCheckoutForms:complete');
+    });
+
+}
+
+function buildCheckoutFormsList(startpg, limit) {
+
+    $("#checkoutforms_table tbody").html("");
+
+    var sort = document.getElementById("checkoutforms_sort").value;
+    switch (sort) {
+        case "1":
+            checkoutforms = checkoutforms.sort(function (a, b) {
+                if (a.created > b.created) return -1;
+                if (a.created < b.created) return 1;
+                return 0;
+            });
+            break;
+        case "2":
+            checkoutforms = checkoutforms.sort(function (a, b) {
+                if (a.created < b.created) return -1;
+                if (a.created > b.created) return 1;
+                return 0;
+            });
+            break;
+        case "3":
+            checkoutforms = checkoutforms.sort(function (a, b) {
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                return 0;
+            });
+            break;
+        case "4":
+            checkoutforms = checkoutforms.sort(function (a, b) {
+                if (a.name > b.name) return -1;
+                if (a.name < b.name) return 1;
+                return 0;
+            });
+            break;
+        default:
+            checkoutforms = checkoutforms.sort(function (a, b) {
+                if (a.created > b.created) return -1;
+                if (a.created < b.created) return 1;
+                return 0;
+            });
+            break;
+    }
+
+    var checkoutFormsItems = checkoutforms.slice(startpg, limit);
+
+    $.each(checkoutFormsItems, function () {
+
+        var checkoutFormId = this.formId;
+        var dataDelete = false;
+        var iconDelete = "fa-times";
+        var titleDelete = "Delete";
+
+        if (tableRowDeleteArray.length > 0) {
+            $.each(tableRowDeleteArray, function () {
+                if (this.formId == checkoutFormId) {
+                    dataDelete = true;
+                    iconDelete = "fa-undo";
+                    titleDelete = "Undo Delete";
+                }
+            });
+        }
+
+        $("#checkoutforms_table tbody").append('<tr class="checkout_list_item" data-id="' + checkoutFormId + '" data-delete="' + dataDelete +'" data-checkoutform="' + checkoutFormId + '" data-checkoutformname="' + this.name + '">' +
+            '<td><a class="button button_primary" onclick="gotoCheckoutFormEdit(' + checkoutFormId + ')">Edit</a></td>' +
+            '<td class="checkoutforms_table_name_' + checkoutFormId + '" data-name="' + this.name + '">' + this.name + '</td>' +
+            '<td class="checkoutforms_table_prompt">' + this.prompt + '</td>' +
+            '<td class="checkoutforms_table_date">' + GetDateString(this.created) + '</td>' +
+            '<td class="checkoutforms_table_products" data-checkoutformsProduct="' + checkoutFormId +'">' +
+                '<span>' +
+                    '<span class="busy_wait_line">' +
+                        '<span class="busy_wait_line_item busy_wait_line1"></span>' +
+                        '<span class="busy_wait_line_item busy_wait_line2"></span>' +
+                        '<span class="busy_wait_line_item busy_wait_line3"></span>' +
+                    '</span>' +
+                '</span>' +
+            '</td>' +
+            '<td><i class="fa fa-search checkout_form_icon_preview" aria-hidden="true" title="Preview Form" onclick="checkoutFormsPreview(' + checkoutFormId + ')"></i></td>' +
+            '<td><i class="fa ' + iconDelete + ' checkout_form_icon_delete table_row_delete_icon" aria-hidden="true" title="' + titleDelete + '" onclick="tableRowDelete(\'checkout_list_item\', \'' + checkoutFormId + '\')"></i></td>' +
+            '</tr>');
+
+        getCheckoutFormProducts(this.formId);
+
+    });
+
+    paginationDataType = "form";
+    paginationTotalItems = checkoutforms.length;
+    paginationPageItems = baseLimit;
+    paginationPageStart = startpg / baseLimit;
+    paginationPageStart = Math.ceil(paginationPageStart);
+    paginationShowAll = true;
+
+    removeByQuerySelector(".pagination[data-type='form'] .pagination_number_results");
+    removeByQuerySelector(".pagination[data-type='form'] .pagination_text_results");
+
+    pagination(paginationTotalItems, paginationPageItems, paginationPageStart, paginationShowAll);
+
+    $("#checkoutforms_table").show();
+}
+
+function rebuildPaginationform(paginationRebuildNumber) {
+    var startpg = parseInt($(paginationRebuildNumber).attr("data-pagnum"));
+
+    var startpg = startpg * baseLimit;
+
+    limit = startpg + 10;
+
+    buildCheckoutFormsList(startpg, limit);
+}
+
+
+var tableRowDeleteArray = new Array();
+function tableRowDelete(className, id) {
+
+    var deleteStatus = $("." + className + "[data-id='" + id + "']").attr("data-delete");
+
+    if (deleteStatus == "false") {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "true");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").removeClass("fa-times").addClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Undo Delete");
+
+        tableRowDeleteArray.push(id);
+
+    } else {
+        $("." + className + "[data-id='" + id + "']").attr("data-delete", "false");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").addClass("fa-times").removeClass("fa-undo");
+        $("." + className + "[data-id='" + id + "'] .table_row_delete_icon").attr("title", "Delete");
+
+        var tableRowDeleteArrayIndex = tableRowDeleteArray.indexOf(id);
+        if (tableRowDeleteArrayIndex > -1) {
+            tableRowDeleteArray.splice(tableRowDeleteArrayIndex, 1);
+        }
+
+    }
+
+    if (tableRowDeleteArray.length > 0) {
+        save_changes_detected = true;
+        saveChangesDetected();
+    } else {
+        save_changes_detected = false;
+        saveChangesDetected();
+    }
+
+}
+
+
+var allCheckoutFormProducts = new Array();
+function getCheckoutFormProducts(id) {
+
+    var formId = id;
+
+    axiosGet("/services/manage/products/checkout_forms.svc/getCheckoutFormProducts?storeId=" + storeId + "&formId=" + formId).then(function (data) {
+        //trace('loadCheckoutFormsProduct:success');
+        var checkoutformsProducts = data.d;
+        //console.log(checkoutformsProducts);
+
+        if (checkoutformsProducts.length > 0) {
+            var checkoutFormProductsButton = '<a class="link_color_primary" onclick="showCheckoutFormProducts(' + formId + ')">' + checkoutformsProducts.length + ' View</a>';
+            allCheckoutFormProducts.push(checkoutformsProducts);
+        } else {
+            var checkoutFormProductsButton = '0';
+        }
+
+        $(".checkoutforms_table_products[data-checkoutformsProduct='" + formId + "']").html(checkoutFormProductsButton);
+
+    }).catch(function (e) {
+        $(".checkoutforms_table_products[data-checkoutformsProduct='" + formId + "']").html("");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+
+}
+
+function showCheckoutFormProducts(id) {
+
+    id = id.toString();
+
+    $(".busy_wait_checkout_forms_products").show();
+    $("#checkoutformsproducts_table_container").hide();
+
+    $("#checkoutformsproducts_table tbody tr").remove();
+
+    var formName = $(".checkoutforms_table_name_" + id).attr("data-name")
+    $(".modal_checkout_form_name").text(formName);
+    $(".modal_checkout_forms_products, .modal_overlay").fadeIn();
+    $("body").addClass("body_modal_is_open");
+
+
+    for (var i = 0; i < allCheckoutFormProducts.length; i++) {
+        for (var j = 0; j < allCheckoutFormProducts[i].length; j++) {
+
+            var item = allCheckoutFormProducts[i][j];
+            console.log(item);
+            if (allCheckoutFormProducts[i][j].formid === id) {
+
+
+
+                if (item.categoryname.length > 0) {
+                    var productCategoryName = item.categoryname[0].name;
+                } else {
+                    var productCategoryName = "";
+                }
+
+                var image = item.image;
+                var pattern = new RegExp('^(https?)://');
+                if (!pattern.test(image)) {
+                    image = 'https://d13z1xw8270sfc.cloudfront.net/resize/' + storeId + '/' + image + '/50/50/0/';
+                }
+
+                $("#checkoutformsproducts_table tbody").append('<tr>' +
+                                                                    '<td><a class="button button_primary" href="/manage_products_editv2.aspx?prodid=' + item.id + '" title="Edit Product">Edit</a></td>' +
+                                                                    '<td><img style="max-width: 50px;" src="' + image + '" onerror="this.src=\'/images/products/product-not-exist.jpg\';" /></td>' +
+                                                                    '<td>' + item.name + '</td>' +
+                                                                    '<td>' + accounting.formatMoney(item.price, currency_options) + '</td>' +
+                                                                    '<td>' + productCategoryName + '</td>' +
+                                                                    '<td>' + item.code + '</td>' +
+                                                                    '<td>' + item.created + '</td>' +
+                                                               '</tr>');
+
+            }
+            
+        }
+        
+    }
+
+
+    $(".busy_wait_checkout_forms_products").hide();
+    $("#checkoutformsproducts_table_container").show();
+
+}
+
+function gotoCheckoutFormEdit(id) {
+    window.location.replace("manage_products_checkoutforms_edit.aspx?formid=" + id);
+}
+
+function checkoutFormsPreview(id) {
+
+    showByClass("busy_wait_checkout_forms_preview");
+    hideById("checkout_forms_preview_container", "checkout_forms_preview_zero", "checkout_forms_preview_error");
+
+    divFadeIn(".modal_overlay", ".modal_checkout_forms_preview");
+
+    // Ajax call to get checkout form based on id
+    axiosGet('/services/manage/products/checkout_forms.svc/getFormData?storeId=' + storeId + '&formId=' + id).then(function (data) {
+        trace('loadCheckoutFormsPreview:success');
+        var checkoutFormsPreview = data.d;
+        console.log(checkoutFormsPreview);
+
+        if (checkoutFormsPreview != null) {
+            checkoutFormsPreview = JSON.parse(checkoutFormsPreview);
+            if (checkoutFormsPreview.questions != null) {
+                if (checkoutFormsPreview.questions.length > 0) {
+                    buildCheckoutFormsPreview(checkoutFormsPreview);
+                    $("#checkout_forms_preview_container").show();
+                } else {
+                    $("#checkout_forms_preview_zero").show();
+                }
+            } else {
+                showById("checkout_forms_preview_error");
+                $("#checkout_forms_preview_error_button").attr("onclick", "checkoutFormsPreview(" + id + ");");
+            }
+        } else {
+            showById("checkout_forms_preview_error");
+            $("#checkout_forms_preview_error_button").attr("onclick", "checkoutFormsPreview(" + id + ");");
+        }
+
+    }).catch(function (e) {
+        console.error(e);
+        trace('loadCheckoutFormsPreview:error');
+        showById("checkout_forms_preview_error");
+        $("#checkout_forms_preview_error_button").attr("onclick", "checkoutFormsPreview(" + id + ");");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        trace('loadCheckoutFormsPreview:complete');
+
+        $(".busy_wait_checkout_forms_preview").hide();
+    });
+
+
+}
+
+function buildCheckoutFormsPreview(preview) {
+
+    $("#checkout_forms_preview_questions_container").html("");
+    $("#checkout_forms_preview_title").text(preview.prompt);
+
+    $.each(preview.questions, function (i) {
+
+        var previewItem = "";
+
+        if (this.type === "BigText") {
+            previewItem = '<div class="input_container"><textarea></textarea></div>';
+        } else if (this.type === "CheckBox") {
+            previewItem = '<div class="checkbox_container  marginb10">' +
+                                '<input type="checkbox" id="checkout_forms_preview_checkbox_' + this.formId + '_'+i+'" name="checkout_forms_preview_checkbox_' + this.formId +'_'+i+'" />' +
+                                '<label for="checkout_forms_preview_checkbox_' + this.formId +'_'+i+'"><span></span></label>' +
+                            '</div>';
+        } else if (this.type === "List") {
+
+            previewItemList = "";
+            $.each(this.options, function () {
+                previewItemList += '<option>' + this + '</option>';
+            });
+
+            previewItem = '<div class="input_container"><select>' + previewItemList + '</select></div>';
+        } else {
+            previewItem = '<div class="input_container"><input type="text" /></div>';
+        }
+
+        $("#checkout_forms_preview_questions_container").append('<div class="hide_overflow">' +
+            '<div class="width_50 checkout_forms_preview_questions_container_label">' + this.prompt + '</div>' +
+            '<div class="width_50">' +
+                previewItem +
+            '</div>' +
+        '</div>');
+
+    });
+
+}
+
+function GetDateString(when) {
+    var then = moment(when, moment.ISO_8601);
+    var now = moment(new Date());
+
+    var duration = moment.duration(now.diff(then));
+    var days = duration.asDays();
+    var hours = duration.asHours();
+    var mins = duration.asMinutes();
+
+    var userDate = then.format("DD MMM YYYY");
+
+    return userDate;
+}
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+});
+
+
+function runSavePageLocal() {
+
+    var returningPageName = "Products";
+    var returningPageLink = "/manage_products.aspx";
+    var currentPageLink = "/manage_products_checkoutforms.aspx";
+    var saveType = "get";
+    var saveUrl = '/services/manage/products/checkout_forms.svc/deleteForm?storeId=' + storeId + "&ids=" + JSON.stringify(tableRowDeleteArray);
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
