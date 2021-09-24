@@ -1,0 +1,446 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "SM-ICONS", uuid: beaverGuid });
+ready(function () {
+    if (window.location.pathname != "/editor.aspx" && window.location.pathname != "/editor") {
+        loadSocialMediaIcons();
+    }
+});
+
+$(".social_media_icons_container input").on('input', 'change', 'keypress', function () {
+    if (window.location.href.indexOf("marketing_socialmediaicons") != -1) {
+        save_changes_detected = true;
+        saveChangesDetected();
+    } else if (window.location.href.indexOf("design_themeeditor") != -1) {
+        document.getElementById("theme_editor_modal_social_media_save_button").classList.remove("button_disabled");
+    } else {
+        editorSocialMediaIconsChanged();
+    }
+});
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+// chooses correct method & returns true of false
+var isValid = function isValid(str, id) {
+    var name = id.split('_')[1];
+
+    return validatorMethods[name](str);
+};
+
+// list of social networks & what regex method it uses
+var validatorMethods = {
+    twitter: function twitter(str) {
+        // returns true or false
+        updateSocialIconLink("socialmediaicons_twitter", str);
+        return checkUrl(str);
+    },
+    facebook: function facebook(str) {
+        updateSocialIconLink("socialmediaicons_facebook", str);
+        return checkUrl(str);
+    },
+    googleplus: function googleplus(str) {
+        updateSocialIconLink("socialmediaicons_googleplus", str);
+        return checkUrl(str);
+    },
+    instagram: function instagram(str) {
+        updateSocialIconLink("socialmediaicons_instagram", str);
+        return checkUrl(str);
+    },
+    pinterest: function pinterest(str) {
+        updateSocialIconLink("socialmediaicons_pinterest", str);
+        return checkUrl(str);
+    },
+    blogger: function blogger(str) {
+        updateSocialIconLink("socialmediaicons_blogger", str);
+        return checkUrl(str);
+    },
+    youtube: function youtube(str) {
+        updateSocialIconLink("socialmediaicons_youtube", str);
+        return checkUrl(str);
+    },
+    wordpress: function wordpress(str) {
+        updateSocialIconLink("socialmediaicons_wordpress", str);
+        return checkUrl(str);
+    },
+    skype: function skype(str) {
+        updateSocialIconLink("socialmediaicons_skype", str);
+        return str;
+    },
+    linkedin: function linkedin(str) {
+        updateSocialIconLink("socialmediaicons_linkedin", str);
+        return checkUrl(str);
+    },
+    tumblr: function tumblr(str) {
+        updateSocialIconLink("socialmediaicons_tumblr", str);
+        return checkUrl(str);
+    },
+    vimeo: function vimeo(str) {
+        updateSocialIconLink("socialmediaicons_vimeo", str);
+        return checkUrl(str);
+    },
+    email: function email(str) {
+        updateSocialIconLink("socialmediaicons_email", str);
+        return checkEmail(str)
+    }
+
+    // regex methods
+}; function numbersOnly(str) {
+    return (/^[0-9]{1,16}$/.test(str)
+    );
+}
+
+function username(str) {
+    return (/^[a-zA-Z0-9-_\.]+$/.test(str)
+    );
+}
+
+function gPlus(str) {
+    return (/^(\+)?[a-zA-Z0-9]+$/.test(str)
+    );
+}
+
+function checkUrl(str) {
+    return (/((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i.test(str)
+    );
+}
+
+function urlAndUsername(str) {
+    str = parseTextOnly(str);
+    return (/((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.))?([-a-z0-9]+.*)/i.test(str)
+    );
+}
+
+function isHandle(str) {
+    return (/^(?:@)([A-Za-z0-9_\.]){1,15}$/.test(str)
+    );
+}
+
+function isTwitter(str) {
+	return (/^([A-Za-z0-9_\.]){1,15}$/.test(str)
+    );
+}
+
+function checkEmail(str) {
+    return (/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(str)
+    );
+}
+
+// validates input value and returns isValid object
+var validateSocialUrl = function validateSocialUrl() {
+
+    // matches icondsIds with input id's and performs relative regex method
+    var id = this.id;
+    var url = this.value;
+
+    // if url is valid
+    if (isValid(url, id)) {
+        this.isValidSocialUrl = true;
+        this.style.borderColor = '#5DC548';
+        $(this).parent().find(".socialmediaicons_icon").removeClass("socialmediaicons_disabled");
+        $(this).parent().find(".socialmediaicons_icon").removeClass("socialmediaicons_warning");
+        $(this).parent().find(".social_icon_alert").removeClass("fa-times").addClass("fa-check").addClass("social_icon_alert_show");
+        // console.log('valid!');
+        // console.dir(this);
+    }
+
+    // if empty
+    else if (url === '') {
+        this.isValidSocialUrl = true;
+        this.style.borderColor = '#bbb';
+        $(this).parent().find(".socialmediaicons_icon").removeClass("socialmediaicons_warning");
+        $(this).parent().find(".social_icon_alert").removeClass("social_icon_alert_show");
+        $(this).parent().find(".socialmediaicons_icon").addClass("socialmediaicons_disabled");
+        // console.log('empty input but still valid!');
+        // console.dir(this);
+    }
+
+    // if invalid url
+    else {
+        this.isValidSocialUrl = false;
+        this.style.borderColor = '#ea1636';
+        $(this).parent().find(".socialmediaicons_icon").removeClass("socialmediaicons_disabled");
+        $(this).parent().find(".socialmediaicons_icon").addClass("socialmediaicons_warning");
+        $(this).parent().find(".social_icon_alert").addClass("fa-times").removeClass("fa-check").addClass("social_icon_alert_show");
+        // console.log('invalid!');
+        // console.dir(this);
+    }
+
+    if (window.location.href.indexOf("marketing_socialmediaicons") != -1) {
+        save_changes_detected = true;
+        saveChangesDetected();
+    } else if (window.location.href.indexOf("design_themeeditor") != -1) {
+        document.getElementById("theme_editor_modal_social_media_save_button").classList.remove("button_disabled");
+    } else {
+        editorSocialMediaIconsChanged();
+    }
+};
+
+$('.social_media_icons_input input').change(validateSocialUrl);
+$('.social_media_icons_input input').keypress(validateSocialUrl);
+$('.social_media_icons_input input').keyup(validateSocialUrl);
+
+
+// load & save social icons
+
+function loadSocialMediaIcons() {
+
+    $(".social_media_icons_container").hide();
+    $(".busy_wait_socialmediaicons").show();
+
+    // load social icons
+
+    axiosGet("/services/Store.svc/getSocialMediaIcons?storeId=" + storeId).then(function (data) {
+        var serverIcons = data;
+
+        console.log(serverIcons);
+        if (serverIcons != null) {
+            serverIcons = JSON.parse(serverIcons);
+            console.log(serverIcons);
+
+            for (var i = 0; i < serverIcons.length; i++) {
+
+                if (serverIcons[i].enabled == true) {
+                    var type = serverIcons[i].socialtype.toLowerCase();
+                    if (document.querySelector("#socialmediaicons_" + type) != null) {
+                        document.querySelector("#socialmediaicons_" + type).value = serverIcons[i].value;
+                        updateSocialIconLink("socialmediaicons_" + type, serverIcons[i].value);
+
+                        $("#socialmediaicons_" + type).parent().find("i").removeClass("socialmediaicons_disabled");
+                    }
+                }
+
+            }
+
+        }
+
+        /*var clientIconIds = []; // This arrays index will correlate to the media_type of the icon in the db
+        var iconSection = $('.social_media_icons_input input');
+
+        // create array of icon id's
+        for (var i = 0; i < iconSection.length; i++) {
+
+            var iconId = iconSection[i].id;
+
+            clientIconIds.push(iconId);
+        }
+
+        // Set icon type on each social input, starting the index at 0
+        for (var y = 0; y < iconSection.length; y++) {
+            iconSection[y].iconType = y + 1;
+        }
+
+        // checks client array against server object & adds value to relative input
+        for (var _i = 0; _i < serverIcons.length; _i++) {
+            var serverIconEnabled = serverIcons[_i].enabled;
+
+            var _iconId = clientIconIds[serverIcons[_i].type - 1];
+            var serverIconValue = serverIcons[_i].value;
+
+            // Update the href, activate and text value of the social icon
+            if (serverIconEnabled) {
+                serverIconValue = parseTextAndStrip(serverIconValue);
+                $('#' + _iconId).val(serverIconValue);
+                $('#' + _iconId).parent().find("i").removeClass("socialmediaicons_disabled");
+                updateSocialIconLink(_iconId, serverIconValue);
+            }
+        }*/
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        nextCall();
+    });
+
+    function nextCall() {
+        axiosGet("/services/marketing/social_media_icons.svc/checkIconStatus?storeId=" + storeId).then(function (data) {
+            if (!data.d) {
+                $('.social_media_icons_input').addClass('panel_red');
+                $('.social_media_icons_not_enabled_container').show();
+                $(".busy_wait_socialmediaicons").hide();
+            } else {
+                $('.social_media_icons_input').removeClass('panel_red');
+                $(".social_media_icons_container").show();
+                $(".busy_wait_socialmediaicons").hide();
+            }
+        }).catch(function (e) {
+            $('.social_media_icons_input').removeClass('panel_red');
+            $(".social_media_icons_container").show();
+            $(".busy_wait_socialmediaicons").hide();
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+
+        });
+    }
+}
+
+/**
+ * Updates the href of the corresponding social media component via the div Id
+ * @param {any} iconId
+ * @param {any} serverIconValue
+ */
+function updateSocialIconLink(iconId, serverIconValue) {
+    serverIconValue = parseTextAndStrip(serverIconValue);
+    if (serverIconValue.length > 0) {
+        switch (iconId) {
+            case "socialmediaicons_twitter":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_facebook":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_googleplus":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_instagram":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_pinterest":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_blogger":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_youtube":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_wordpress":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_skype":
+                $("#" + iconId + "_link").attr("href", "skype:" + serverIconValue + "?call");
+                break;
+            case "socialmediaicons_linkedin":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_tumblr":
+                $("#" + iconId + "_link").attr("href", "" + serverIconValue);
+                break;
+            case "socialmediaicons_vimeo":
+                $("#" + iconId + "_link").attr("href", serverIconValue);
+                break;
+            case "socialmediaicons_email":
+                $("#" + iconId + "_link").attr("href", "emailto:" + serverIconValue);
+                break;
+        }
+    } else {
+        $("#" + iconId + "_link").removeAttr("href");
+    }
+}
+
+/**
+ * Creates an array of icon objects ready to be shipped to the db
+ * @param {any} inputs
+ * @param {any} cb
+ */
+var createArrayOfIconObjs = function createArrayOfIconObjs(inputs, cb) {
+    var err = {};
+    storeId = storeId.toString().trim();
+
+    // setup
+    var arrayOfIconObjects = [];
+
+    // creating list of objects
+    console.log(inputs)
+    for (var i = 0; i < inputs.length; i++) {
+        // setup
+
+        
+
+        var obj = new Object();
+        var item = inputs[i];
+        var id = item.id;
+        var value = item.value;
+        var type = item.getAttribute("data-type");
+
+        // check if url is valid
+        if (item.isValidSocialUrl) {
+
+            // only valid urls get assign a value & id
+            obj.value = value;
+            //obj.id = id;
+
+            // if empty
+            if (value === '') {
+                obj.enabled = false;
+            } else {
+                obj.enabled = true;
+            }
+
+            // TODO: check if input has been altered
+
+            obj.type = type;
+
+            arrayOfIconObjects.push(obj);
+        }
+    }
+
+    cb(err, arrayOfIconObjects);
+};
+
+// save social icons
+function runSavePageLocal() {
+    var inputs = $('.social_media_icons_input input');
+
+    // creates objects $ returns with valid or not object
+    createArrayOfIconObjs(inputs, function (err, result) {
+
+        // post to db
+        console.log(inputs);
+        runSavePageLocalSecond(result);
+
+        console.log('result: ', result);
+        console.log('errors: ', err);
+    });
+
+}
+
+function runSavePageLocalSecond(data) {
+    var jsonList = JSON.stringify(data);
+    var dataSecond = '{"storeId":' + storeId + ',' + '"data":' + jsonList + '}';
+    giveAchievement('ACHIEVEMENT_ADD_SM_ICONS');
+
+    var returningPageName = "Social Media";
+    var returningPageLink = "/marketing_socialmedia.aspx";
+    var currentPageLink = "/marketing_socialmediaicons.aspx";
+    var saveType = "post";
+    var saveUrl = ['services/Store.svc/saveAjaxSocialIcons', dataSecond];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+}
+
+
+function saveSocialMediaIconsThemeEditor() {
+
+    document.getElementById("theme_editor_modal_social_media_save_button").classList.add("button_disabled");
+
+    var inputs = $('.social_media_icons_input input');
+
+    // creates objects $ returns with valid or not object
+    createArrayOfIconObjs(inputs, function (err, result) {
+
+        // post to db
+        console.log(inputs);
+
+        console.log('result: ', result);
+        console.log('errors: ', err);
+
+        var dataSecond = {
+            "storeId": storeId,
+            "data": result
+        }
+
+        dataSecond = JSON.stringify(dataSecond);
+
+        axiosPost("/services/Store.svc/saveAjaxSocialIcons", dataSecond).then(function () {
+
+        }).catch(function (e) {
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        }).then(function () {
+            $(".overlay_forced, .modal_social_media_icons").hide();
+            refreshIframe();
+        });
+    });
+}

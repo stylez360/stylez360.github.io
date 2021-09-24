@@ -1,0 +1,217 @@
+﻿
+/* Status button styles */
+#status {
+    margin-bottom: 40px;
+}
+
+#status input {
+    cursor: pointer;
+    visibility: hidden;
+    position: relative;
+}
+
+#status input:before, input:after {
+    content: " ";
+    display: block;
+    visibility: visible;
+    position: absolute;
+    -moz-transition: all 0.1s ease-in-out;
+    -o-transition: all 0.1s ease-in-out;
+    -webkit-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
+#status input:before {
+    background: #fff;
+    border: 1px solid #ccc;
+    -moz-border-radius: 100%;
+    -webkit-border-radius: 100%;
+    border-radius: 100%;
+    width: 28px;
+    height: 28px;
+    z-index: 10;
+    top: 1px;
+    left: 1px;
+    -moz-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+#status input:after {
+    background: #fff;
+    border: 2px solid #ccc;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+    width: 60px;
+    height: 30px;
+}
+
+#status input:hover:after {
+    background: #ccc;
+}
+
+#status input:checked:before {
+    border-color: #20b7e6;
+    left: 30px;
+}
+
+#status input:checked:after {
+    border-color: #20b7e6;
+    background-color: #20b7e6;
+}
+
+
+/* Add remove button on inputs with value */
+
+.remove {
+    position: absolute;
+    bottom: 13px;
+    right: 7px;
+}
+
+/* Connect with us Buttons */
+
+.connect_button{
+    display: inline-block;
+    padding: 0px 8px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    color: #FFF;
+    margin-top: 5px;
+}
+
+.connect_facebook { background-color: #3b5998; }
+.connect_twitter { background-color: #00aced; }
+.connect_linkedin {
+    background-color: #2867B2;
+}
+.connect_googleplus { background-color: #dd4b39; }
+.connect_instagram {
+    background-color: #3b3b3b;
+    padding: 5px 25px 5px 25px;
+    height: inherit!important;
+}
+.connect_button_connected{ cursor: text; }
+
+.button_size_fixed {
+    width: 90px !important;
+    text-align: center;
+}
+/* Marketing instagram icon fa */
+.marketing_instagram_icon_fa {
+    position: relative;
+    top: 5px;
+}
+
+.marketing_instagram_icon_content {
+    margin-left: 10px;
+}
+/* Social Media Icons */
+.social_media_icons_input .input_container {
+    position: relative;
+}
+
+.social_media_icons_input input{
+    padding-left: 40px;
+}
+
+.social_media_icons_input a{
+    position: absolute;
+    bottom: 3px;
+    left: 7px;
+}
+
+
+.social_media_icons_input .socialmediaicons_icon{
+    font-size: 1.5rem;
+    display: block !important;
+    position: relative;
+    top: -5px;
+}
+
+.social_media_icons_input i.fa-facebook-square{ color: #3b5998; }
+.social_media_icons_input i.fa-twitter-square{ color: #00aced; }
+.social_media_icons_input i.fa-google-plus-square{ color: #dd4b39; }
+.social_media_icons_input i.fa-instagram{ color: #517fa4; }
+.social_media_icons_input i.fa-pinterest-square{ color: #cb2027; }
+.social_media_icons_input i.fa-rss-square{ color: #fb8f3d; }
+.social_media_icons_input i.fa-youtube-square{ color: #bb0000; }
+.social_media_icons_input i.fa-wordpress{ color: #21759b; font-size: 1.8rem; bottom: 5px; }
+.social_media_icons_input i.fa-skype{ color: #12A5F4; }
+.social_media_icons_input i.fa-linkedin-square{ color: #007bb6; }
+.social_media_icons_input i.fa-tumblr-square{ color: #32506d; }
+.social_media_icons_input i.fa-vimeo-square{ color: #aad450; }
+.social_media_icons_input i.fa-envelope{ color: #dd4b39; }
+
+.social_media_icons_input i.socialmediaicons_disabled{ color: #b4b4b4; }
+.social_media_icons_input i.socialmediaicons_warning{ color: #ea1636; }
+
+.social_icon_alert{
+    position: absolute;
+    bottom: 10px;
+    right: 7px;
+    font-size: 1.2rem;
+    color: #ea1636;
+    font-weight: bold;
+    opacity: 0;
+    visibility: hidden;
+    -webkit-transition: all 0.4s ease;
+    -moz-transition: all 0.4s ease;
+    -ms-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.social_icon_alert.fa-check{
+    color: #5DC548;
+}
+
+.social_icon_alert_show{
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal_socialmedia_sharetwitter #chars{
+    width: 22px;
+    display: inline-block;
+}
+
+/* Social Share Icons Example */
+
+#social_share_status{
+    display: none;
+}
+
+.social_media_share_icons_example{
+    overflow: hidden;
+}
+
+.social_media_share_icons_example span{
+    float: left;
+    padding: 0px 10px;
+    line-height: 25px;
+    color: #FFF;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.social_media_share_icons_example span:nth-child(1){
+    background-color: #3B5998;
+}
+
+.social_media_share_icons_example span:nth-child(2){
+    background-color: #BD081C;
+}
+
+.social_media_share_icons_example span:nth-child(3){
+    background-color: #55ACEE;
+}
+
+.social_media_icons_not_enabled_container {
+    display: none;
+}

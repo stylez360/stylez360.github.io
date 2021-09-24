@@ -1,0 +1,308 @@
+﻿
+var metatags;
+var metatagsLoaded = false;
+loadSiteVerification();
+function loadSiteVerification() {
+
+    hideById("site_verification_failed");
+    showById("site_verification_container");
+
+    $(".site_verification_item_top_right i").addClass("fa-spin fa-spinner");
+    $(".site_verification_item_top_right i").removeClass("fa-angle-right");
+
+    setTimeout(function () {
+
+        axiosGet("/services/marketing/site_verification.svc/loadSiteVerification?storeId=" + storeId).then(function (data) {
+
+            metatags = data.d;
+            if (metatags != null && metatags != "null") {
+                metatags = JSON.parse(metatags);
+                console.log(metatags);
+                if (metatags.length > 0) {
+                    buildMetaTags(metatags);
+                } else {
+                    addSingleCustomTag();
+                    slideFirstSiteVerificationPanel();
+                }
+
+            } else {
+                addSingleCustomTag();
+                slideFirstSiteVerificationPanel();
+            }
+
+            metatagsLoaded = true;
+
+        }).catch(function () {
+            showById("site_verification_failed");
+            hideById("site_verification_container");
+
+        }).then(function () {
+
+            if (metatags == null || metatags == "null" || metatags.length == 0) {
+                $(".site_verification_item_top_right i").removeClass("fa-spin fa-spinner");
+                $(".site_verification_item_top_right i").addClass("fa-angle-right");
+            }
+
+        });
+
+    }, 1500);
+}
+
+function slideFirstSiteVerificationPanel() {
+    document.querySelector(".site_verification_item_body[data-type='google']").style.display = "block";
+    document.querySelector(".site_verification_item_top[data-type='google']").classList.add("site_verification_item_top_active");
+
+}
+
+function buildMetaTags(metaTags) {
+
+    var customCount = 0;
+
+    $(".site_verification_item_top_right i").removeClass("fa-spin fa-spinner");
+    $(".site_verification_item_top_right i").addClass("fa-angle-right");
+
+    for (var i = 0; i < metaTags.length; i++) {
+
+        if (metaTags[i].name == "google-site-verification") {
+
+            document.getElementById("site_verification_input_google").value = metaTags[i].content;
+            $(".site_verification_item_top[data-type='google'] .site_verification_item_top_right i").removeClass("fa-angle-right");
+            $(".site_verification_item_top[data-type='google'] .site_verification_item_top_right i").addClass("fa-check");
+
+        } else if (metaTags[i].name == "p:domain_verify") {
+
+            document.getElementById("site_verification_input_pinterest").value = metaTags[i].content;
+            $(".site_verification_item_top[data-type='pinterest'] .site_verification_item_top_right i").removeClass("fa-angle-right");
+            $(".site_verification_item_top[data-type='pinterest'] .site_verification_item_top_right i").addClass("fa-check");
+
+        } else if (metaTags[i].name == "msvalidate.01") {
+
+            document.getElementById("site_verification_input_bing").value = metaTags[i].content;
+            $(".site_verification_item_top[data-type='bing'] .site_verification_item_top_right i").removeClass("fa-angle-right");
+            $(".site_verification_item_top[data-type='bing'] .site_verification_item_top_right i").addClass("fa-check");
+
+        } else if (metaTags[i].name == "facebook-domain-verification") {
+
+            document.getElementById("site_verification_input_facebook").value = metaTags[i].content;
+            $(".site_verification_item_top[data-type='facebook'] .site_verification_item_top_right i").removeClass("fa-angle-right");
+            $(".site_verification_item_top[data-type='facebook'] .site_verification_item_top_right i").addClass("fa-check");
+
+        } else {
+
+            customCount++;
+            // Add custom
+
+            var customId = guid();
+
+            var custom = '<div class="site_verification_item_body_code site_verification_item_body_code_custom" data-id="' + customId + '">';
+                custom += '<div class="site_verification_item_body_code_custom_delete" onclick="deleteCustomCode(\'' + customId + '\')"><i class="fa fa-times"></i></div>';
+                custom += '<div class="site_verification_item_body_code_item">&lt;meta&nbsp</div>';
+                custom += '<div class="site_verification_item_body_code_item">name="<input type="text" maxlength="100" placeholder="XXXXXXX" class="site_verification_item_body_code_custom_name" value="' + metaTags[i].name + '" />"&nbsp</div>';
+                custom += '<div class="site_verification_item_body_code_item">content="<input type="text" maxlength="100" placeholder="XXXXXXX" class="site_verification_item_body_code_custom_content" value="' + metaTags[i].content + '" />"&nbsp</div>';
+                custom += '<div class="site_verification_item_body_code_item">/&gt;</div>';
+                custom += '</div>';
+
+            document.getElementById("site_verification_item_body_custom").innerHTML += custom;
+
+            countCustomTags();
+
+        }
+
+    }
+
+    if (customCount == 0) {
+        addSingleCustomTag();
+    } else {
+        bindInputChanges();
+    }
+
+}
+
+function addSingleCustomTag() {
+
+    var customId = guid();
+
+    var custom = '<div class="site_verification_item_body_code site_verification_item_body_code_custom" data-id="' + customId + '">';
+        custom += '<div class="site_verification_item_body_code_custom_delete" onclick="deleteCustomCode(\'' + customId + '\')"><i class="fa fa-times"></i></div>';
+        custom += '<div class="site_verification_item_body_code_item">&lt;meta&nbsp</div >';
+        custom += '<div class="site_verification_item_body_code_item">name="<input type="text" maxlength="100" placeholder="XXXXXXX" class="site_verification_item_body_code_custom_name" />"&nbsp</div>';
+        custom += '<div class="site_verification_item_body_code_item">content="<input type="text" maxlength="100" placeholder="XXXXXXX" class="site_verification_item_body_code_custom_content" />"&nbsp</div>';
+        custom += '<div class="site_verification_item_body_code_item">/&gt;</div>';
+        custom += '</div>';
+
+    $("#site_verification_item_body_custom").append(custom);
+    
+
+    countCustomTags();
+
+    bindInputChanges();
+}
+
+function deleteCustomCode(id) {
+
+    document.querySelector(".site_verification_item_body_code_custom[data-id='" + id + "']").remove();
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+    countCustomTags();
+
+}
+
+function countCustomTags() {
+
+    var count = document.querySelectorAll(".site_verification_item_body_code_custom").length;
+
+    document.getElementById("site_verification_add_custom_button_count").innerText = count;
+
+    if (count == 6) {
+        document.getElementById("site_verification_add_custom_button").classList.add("button_disabled");
+    } else {
+        document.getElementById("site_verification_add_custom_button").classList.remove("button_disabled");
+    }
+
+}
+
+$(document).ready(function () {
+
+    bindInputChanges();
+
+});
+
+function bindInputChanges() {
+    $(".site_verification_item_body_code_item input").on('input', function () {
+        save_changes_detected = true;
+        saveChangesDetected();
+    });
+}
+
+
+function runSavePageLocal() {
+
+    var tags = new Array();
+
+    // Defaults
+    var google = parseTextAndStripPost(document.getElementById("site_verification_input_google").value).trim();
+    var pinterest = parseTextAndStripPost(document.getElementById("site_verification_input_pinterest").value).trim();
+    var bing = parseTextAndStripPost(document.getElementById("site_verification_input_bing").value).trim();
+    var facebook = parseTextAndStripPost(document.getElementById("site_verification_input_facebook").value).trim();
+
+    if (google != null && google.length > 0) {
+        tags.push({ "name": "google-site-verification", "content": google });
+    }
+    if (pinterest != null && pinterest.length > 0) {
+        tags.push({ "name": "p:domain_verify", "content": pinterest });
+    }
+    if (facebook != null && facebook.length > 0) {
+        tags.push({ "name": "facebook-domain-verification", "content": facebook });
+    }
+    if (bing != null && bing.length > 0) {
+        tags.push({ "name": "msvalidate.01", "content": bing });
+    }
+
+    // Custom
+
+    $(".site_verification_item_body_code_custom").each(function () {
+
+        var name = parseTextAndStripPost($(this).find(".site_verification_item_body_code_custom_name").val()).trim();
+        var content = parseTextAndStripPost($(this).find(".site_verification_item_body_code_custom_content").val()).trim();
+
+        if ((name != null && name.length > 0) && (content != null && content.length > 0)) {
+            tags.push({ "name": name, "content": content });
+        }
+
+    });
+
+    console.log("Tags to save");
+    console.log(tags);
+
+    var data = {
+        "storeId": storeId,
+        "metatags": tags
+    }
+
+    data = JSON.stringify(data);
+
+    var returningPageName = "Marketing";
+    var returningPageLink = "/marketing.aspx";
+    var currentPageLink = "/marketing_siteverification.aspx";
+    var saveType = "post";
+    var saveUrl = ['services/marketing/site_verification.svc/saveSiteVerification', data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+
+
+}
+
+
+
+
+function toggleSiteVerification(which) {
+
+    if (metatagsLoaded == true) {
+
+        if (document.querySelector(".site_verification_item_top_active") != null) {
+
+            if (document.querySelector(".site_verification_item_top_active[data-type='" + which + "']") != null) {
+                document.querySelector(".site_verification_item_top_active").classList.remove("site_verification_item_top_active");
+            } else {
+                document.querySelector(".site_verification_item_top_active").classList.remove("site_verification_item_top_active");
+                document.querySelector(".site_verification_item_top[data-type='" + which + "']").classList.add("site_verification_item_top_active");
+            }
+
+        } else {
+            document.querySelector(".site_verification_item_top[data-type='" + which + "']").classList.add("site_verification_item_top_active");
+        }
+
+        $(".site_verification_item_body:not([data-type='" + which + "'])").slideUp();
+        $(".site_verification_item_body[data-type='" + which + "']").slideToggle();
+
+    }
+
+}
+
+
+function siteVerifyParse(which) {
+
+    var value = document.getElementById("site_verification_input_" + which).value.trim();
+
+    console.log(value);
+
+    if (value.startsWith("<meta")) {
+        var matches = matches = value.match(/\".+?\"/g);
+
+        if (matches != null) {
+            if (matches.length > 1) {
+                matches = matches[1].replace(/["]/g, '');
+                document.getElementById("site_verification_input_" + which).value = matches;
+            }
+        }
+
+    }
+
+    if (which == "google" && value.startsWith("google-site-verification")) {
+        var tweakedContent = value.replace("google-site-verification", "");
+        document.getElementById("site_verification_input_" + which).value = tweakedContent;
+    }
+
+    if (which == "pinterest" && value.startsWith("p:domain_verify")) {
+        var tweakedContent = value.replace("p:domain_verify", "");
+        document.getElementById("site_verification_input_" + which).value = tweakedContent;
+    }
+
+    if (which == "facebook" && value.startsWith("facebook-domain-verification")) {
+        var tweakedContent = value.replace("facebook-domain-verification", "");
+        document.getElementById("site_verification_input_" + which).value = tweakedContent;
+    }
+
+    if (which == "bing" && value.startsWith("msvalidate.01")) {
+        var tweakedContent = value.replace("msvalidate.01", "");
+        document.getElementById("site_verification_input_" + which).value = tweakedContent;
+    }
+
+    if (value.startsWith("=")) {
+        var tweakedContent = value.replace("=", "");
+        document.getElementById("site_verification_input_" + which).value = tweakedContent;
+    }
+
+}
