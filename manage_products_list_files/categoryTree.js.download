@@ -1,0 +1,187 @@
+﻿function CategoryTree(storeId, categoryTreeId, checkboxes) {
+    trace("Load Categories start");
+    $(".apply_filter_error").hide();  
+    $(".busy_wait_filter_categories").show();
+
+    jQuery.ajax({
+        async: true,
+        cache: false,
+        url: "../../services/Categories.svc/ListCategories?storeId=" + storeId,
+        dataType: "json",
+        success: function (data) {
+            trace('LoadCategories:success');
+
+            allCategories = data.d || data;
+                
+            //Find top level categories and add to array
+            $.each(allCategories.categories, function () {
+                if (this.parent == 0) {
+                    parentCategories.push(this);
+                }
+            });
+
+            categoryTreeBuild(categoryTreeId, checkboxes);
+
+        },
+        error: function (request, status, error) {
+            trace('LoadCategories:error');
+            formatErrorMessage(request, error);
+            $(".apply_filter_error").show();      
+            $(".busy_wait_filter_categories").hide();
+        },
+        complete: function () {
+            trace('LoadCategories:complete');
+            $(".busy_wait_filter_categories").hide();
+
+        }
+    });
+}
+
+
+var allCategories = [];
+var parentCategories = [];
+var subCategoryArray = [];
+
+function categoryTreeBuild(categoryTreeId, checkboxes) {
+
+    $("#category_tree_container").append('<ol id="category_tree"></ol>');
+
+    parentCategories.sort(function (a, b) {
+        return a.sequence - b.sequence;
+    });
+
+    $.each(parentCategories, function () {
+
+        var catCheckbox = "";
+        if (checkboxes != "undefined") {
+            if (checkboxes == true) {
+                catCheckbox = '<div class="category_tree_item_menu_checkbox" data-id="' + this.categoryid + '" onclick="categoryCheckboxSelect(' + this.categoryid + ')"></div>';
+            }
+        }
+
+        if (this.categoryid === categoryTreeId) {
+            $("#category_tree").append("<li id='" + this.categoryid + "'>" +
+                                           "<div class='category_tree_item_menu'>" +
+                                                catCheckbox +
+                                               "<div class='category_tree_item category_tree_item_selected' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                           "</div>" +
+                                    "</li>");
+        } else {
+            $("#category_tree").append("<li id='" + this.categoryid + "'>" +
+                                           "<div class='category_tree_item_menu'>" +
+                                                catCheckbox +
+                                               "<div class='category_tree_item' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                           "</div>" +
+                                    "</li>");
+        }
+        subCategoryTree(this.categoryid, categoryTreeId, checkboxes);
+    });
+}
+
+function subCategoryTree(higher, categoryTreeId, checkboxes) {
+
+    $.each(allCategories.categories, function () {
+        if (higher == this.parent) {
+            subCategoryArray.push(this);
+        }
+
+    });
+
+    if (subCategoryArray.length > 0) {
+        subcategorySort(higher, categoryTreeId, checkboxes);
+    }
+
+}
+
+// Sorts the array in order
+// appends it to the necessary list
+function subcategorySort(parent, categoryTreeId, checkboxes) {
+
+    subCategoryArray.sort(function (a, b) {
+        return a.sequence - b.sequence;
+    });
+
+
+    $.each(subCategoryArray, function () {
+
+        var catCheckbox = "";
+        if (checkboxes != "undefined") {
+            if (checkboxes == true) {
+                catCheckbox = '<div class="category_tree_item_menu_checkbox" data-id="' + this.categoryid + '" onclick="categoryCheckboxSelect(' + this.categoryid + ')"></div>';
+            }
+        }
+
+        if (this.categoryid === categoryTreeId) {
+            if ($("#category_tree li#" + parent).find("ol").length > 0) {
+
+                $("#category_tree li#" + parent + " > ol").append("<li id='" + this.categoryid + "'>" +
+                                                                      "<div class='category_tree_item_menu'>" +
+                                                                            catCheckbox +
+                                                                           "<div class='category_tree_item category_tree_item_selected' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                                                      "</div>" +
+                                                                  "</li>");
+
+            } else {
+
+                $("#category_tree li#" + parent).append("<li id='" + this.categoryid + "'>" +
+                                                            "<div class='category_tree_item_menu'>" +
+                                                                catCheckbox +
+                                                                "<div class='category_tree_item category_tree_item_selected' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                                            "</div>" +
+                                                        "</li>");
+                $("#" + this.categoryid).wrap("<ol>");
+                $("#category_tree li#" + parent + " > .category_tree_item_menu").append('<i class="category_toggle fa fa-plus" aria-hidden="true" onclick="category_tree_toggle(this);"></i>');
+
+            }
+        } else {
+            if ($("#category_tree li#" + parent).find("ol").length > 0) {
+
+                $("#category_tree li#" + parent + " > ol").append("<li id='" + this.categoryid + "'>" +
+                                                                      "<div class='category_tree_item_menu'>" +
+                                                                            catCheckbox +
+                                                                           "<div class='category_tree_item' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                                                      "</div>" +
+                                                                  "</li>");
+
+            } else {
+
+                $("#category_tree li#" + parent).append("<li id='" + this.categoryid + "'>" +
+                                                            "<div class='category_tree_item_menu'>" +
+                                                                catCheckbox +
+                                                                "<div class='category_tree_item' onclick='category_tree_select(this);' data-id='"+this.categoryid+"' data-name='"+this.name+"'>" + this.name + "</div>" +
+                                                            "</div>" +
+                                                        "</li>");
+                $("#" + this.categoryid).wrap("<ol>");
+                $("#category_tree li#" + parent + " > .category_tree_item_menu").append('<i class="category_toggle fa fa-plus" aria-hidden="true" onclick="category_tree_toggle(this);"></i>');
+
+            }
+        }
+
+        subCategoryArray = [];
+        subCategoryTree(this.categoryid, categoryTreeId, checkboxes);
+
+    });
+
+
+}
+
+function retry_filter_categories(storeId) {
+    alert("retry click");
+    CategoryTree(storeId);
+    
+}
+
+function category_tree_toggle(el) {
+    $(el).parent().parent().find("> ol").toggle();
+    $(el).toggleClass("fa-plus").toggleClass("fa-minus");
+}
+
+function category_tree_select(el) {
+    $(".category_tree_item").removeClass("category_tree_item_selected");
+    $(el).addClass("category_tree_item_selected");
+
+    // Info about selected category item
+    category_tree_item_selected_id = $(el).parent().parent().attr("id");
+    category_tree_item_selected_name = $(el).text();
+    
+}

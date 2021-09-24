@@ -1,0 +1,657 @@
+﻿
+function openProductFilterModal() {
+
+    divFadeIn(".modal_apply_filters", ".modal_overlay");
+
+    if ($('.category_tree_temp').length) {
+        $("#category_tree").remove();
+        CategoryTree(storeId, categoryTreeId);
+    }
+    if ($("input[id='apply_filter_item11']").is(":checked")) {
+        if ($("#lstSuppliers").val() == null) {
+            loadSuppliers();
+        }
+    }
+    if ($("input[id='apply_filter_item10']").is(":checked")) {
+        if ($("#lstBrands").val() == null) {
+            loadBrands();
+        }
+    }
+}
+
+$(document).ready(function () {
+
+    $("input[name='apply_filter_item']").click(function () {
+        if ($(this).is(":checked")) {
+            $(this).parent().parent().find(".apply_filters_section_main").slideDown();
+        } else {
+            $(this).parent().parent().find(".apply_filters_section_main").slideUp();
+        }
+    });
+
+    $("input[id='apply_filter_item2']").click(function () {
+        var category_tree_item_selected_id;
+        var category_tree_item_selected_name;
+        console.log(storeId)
+        if ($("#category_tree").length == 0) {
+            categoryTreeId = 0;
+            CategoryTree(storeId, categoryTreeId);
+        }
+    });
+
+    $("input[id='apply_filter_item10']").click(function () {
+        console.log("Brands checkbox clicked");
+        console.log($("#lstBrands").length);
+        if ($("#lstBrands").val() == null) {
+            loadBrands();
+        }
+    });
+
+
+    $("input[id='apply_filter_item11']").click(function () {
+        console.log("Suppliers checkbox clicked");
+        console.log($("#lstSuppliers").length);
+        if ($("#lstSuppliers").val() == null) {
+            loadSuppliers();
+        }
+    });
+
+    $("#apply_filter_item4_options").change(function () {
+        console.log("price comparison changed");
+        console.log($(this).val());
+
+        if ($(this).val() == "BETWEEN") {
+            $("#apply_filter_item4b_number").show();
+        } else {
+            $("#apply_filter_item4b_number").hide();
+        }
+    });
+
+    $("#apply_filter_item5_options").change(function () {
+        console.log("stock comparison changed");
+        console.log($(this).val());
+
+        if ($(this).val() == "BETWEEN") {
+            $("#apply_filter_item5b_number").show();
+        } else {
+            $("#apply_filter_item5b_number").hide();
+        }
+    });
+
+    $("#apply_filter_item12_options").change(function () {
+        console.log("weight comparison changed");
+        console.log($(this).val());
+
+        if ($(this).val() == "BETWEEN") {
+            $("#apply_filter_item12b_number").show();
+        } else {
+            $("#apply_filter_item12b_number").hide();
+        }
+    });
+
+});
+
+
+function productFilterApplyModal() {
+
+    hideByClass("modal_apply_filters", "modal_overlay");
+    document.querySelector("body").classList.remove("body_modal_is_open");
+
+    var filtersAppended = 0;
+
+    if ($("input[id='apply_filter_item1']").is(":checked") && $("#apply_filter_item1_text").val() != "") {
+
+        if ($("#remove_applied_filter_name").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_name' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Name</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item2']").is(":checked")) {
+
+        if ($("#remove_applied_filter_category").length == 0) {
+            var selected_category = $(".category_tree_item_selected").parent().parent().attr("id");
+            if (selected_category != undefined) {
+                $("#applied_filter").append("<a id='remove_applied_filter_category' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Category</a>");
+                filtersAppended++;
+            }
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item3']").is(":checked")) {
+
+        if ($("#remove_applied_filter_code").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_code' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Code</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item4']").is(":checked")) {
+
+        if ($("#remove_applied_filter_price").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_price' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Price</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item5']").is(":checked")) {
+
+        if ($("#remove_applied_filter_stock").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_stock' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Stock Level</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item6']").is(":checked")) {
+
+        if ($("#remove_applied_filter_shipping").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_shipping' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Shipping Price</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item7']").is(":checked")) {
+
+        if ($("#remove_applied_filter_featured").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_featured' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Featured Product</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item8']").is(":checked")) {
+
+        if ($("#remove_applied_filter_special").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_special' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Special Offer Products</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item9']").is(":checked")) {
+
+        if ($("#remove_applied_filter_display").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_displayed' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Display Status</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item10']").is(":checked")) {
+
+        if ($("#remove_applied_filter_brand").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_brand' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Brand Name</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item11']").is(":checked")) {
+
+        if ($("#remove_applied_filter_supplier").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_supplier' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Supplier Name</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    if ($("input[id='apply_filter_item12']").is(":checked")) {
+
+        if ($("#remove_applied_filter_weight").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_weight' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Weight</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    // Google Eligable
+    if ($("input[id='apply_filter_item13']").is(":checked")) {
+
+        if ($("#remove_applied_filter_google_eligable").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_google_eligable' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Google Eligible</a>");
+            filtersAppended++;
+        }
+
+    }
+
+    // Supplier SKU
+    if ($("input[id='apply_filter_item14']").is(":checked")) {
+
+        if ($("#remove_applied_filter_suppliersku").length == 0) {
+            $("#applied_filter").append("<a id='remove_applied_filter_suppliersku' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Supplier SKU</a>");
+            filtersAppended++;
+        }
+
+    }
+
+
+    if (filtersAppended > 0) {
+        $("#applied_filter").slideDown();
+    } else {
+        $("#applied_filter").slideUp();
+        $("#applied_filter a").remove();
+    }
+
+    // This function is a local function to the page
+    rebuildProductsFilters(0);
+
+}
+
+
+function getFilters() {
+
+    filters = new Array();
+    //product name
+    if ($("#apply_filter_item1").is(':checked') && $("#apply_filter_item1_text").val() != "") {
+
+        var name = $("#apply_filter_item1_text").val().trim();
+        name = name.replace(/'/g, "\\'");
+
+        var f = { field: "name", comparison: $("#apply_filter_item1_options").val(), type: $("#apply_filter_item1_options").attr("data-type"), values: [name] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_name").remove();
+    }
+
+    //product category
+    if ($("#apply_filter_item2").is(':checked') && $(".category_tree_item_selected") != null) {
+        var selected_category = $(".category_tree_item_selected").parent().parent().attr("id");
+        console.log(selected_category);
+        if (selected_category != undefined) {
+            var f = { field: "categoryid", comparison: "EQUALS", type: "STRING", values: [selected_category] };
+            filters.push(f);
+        }
+        
+    } else {
+        $("#remove_applied_filter_category").remove();
+    }
+
+    //product code
+    if ($("#apply_filter_item3").is(':checked') && $("#apply_filter_item3_text").val() != "") {
+        var f = { field: "sku", comparison: $("#apply_filter_item3_options").val(), type: $("#apply_filter_item3_options").attr("data-type"), values: [$("#apply_filter_item3_text").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_code").remove();
+    }
+
+    //price
+    if ($("#apply_filter_item4").is(':checked') && $("#apply_filter_item4a_number").val() != "") {
+        var f = { field: "price", comparison: $("#apply_filter_item4_options").val(), type: $("#apply_filter_item4_options").attr("data-type"), values: [$("#apply_filter_item4a_number").val(), $("#apply_filter_item4b_number").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_price").remove();
+    }
+
+    //stock
+    if ($("#apply_filter_item5").is(':checked') && $("#apply_filter_item5a_number").val() != "") {
+        var f = { field: "stock", comparison: $("#apply_filter_item5_options").val(), type: $("#apply_filter_item5_options").attr("data-type"), values: [$("#apply_filter_item5a_number").val(), $("#apply_filter_item5b_number").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_stock").remove();
+    }
+
+    //shipping
+    if ($("#apply_filter_item6").is(':checked')) {
+        if ($("#apply_filter_item6_options").val() == 0) {
+            //default shipping
+            var f = { field: "shipping", comparison: "EQUALS", type: "NUMBER", values: ["-1"] };
+            filters.push(f);
+        } else {
+            //fixed shipping
+            var f = { field: "shipping", comparison: "MORETHAN", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        }
+    } else {
+        $("#remove_applied_filter_shipping").remove();
+    }
+
+    //featured product
+    if ($("#apply_filter_item7").is(':checked')) {
+        if ($("#apply_filter_item7_options").val() == 0) {
+            //not featured
+            var f = { field: "featured", comparison: "EQUALS", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        } else {
+            //featured
+            var f = { field: "featured", comparison: "EQUALS", type: "NUMBER", values: ["1"] };
+            filters.push(f);
+        }
+    } else {
+        $("#remove_applied_filter_featured").remove();
+    }
+
+    //On Offer?
+    if ($("#apply_filter_item8").is(':checked')) {
+        if ($("#apply_filter_item8_options").val() == 0) {
+            //no offer
+            var f = { field: "offer", comparison: "EQUALS", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        } else if ($("#apply_filter_item8_options").val() == 1) {
+            //on offer Money off
+            var f = { field: "offer", comparison: "EQUALS", type: "NUMBER", values: ["1"] };
+            filters.push(f);
+        } else if ($("#apply_filter_item8_options").val() == 2) {
+            //on offer  % discount
+            var f = { field: "offer", comparison: "EQUALS", type: "NUMBER", values: ["2"] };
+            filters.push(f);
+        } else if ($("#apply_filter_item8_options").val() == 3) {
+            //on offer  % discount
+            var f = { field: "offer", comparison: "MORETHAN", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        }
+    } else {
+        $("#remove_applied_filter_special").remove();
+    }
+
+    //Hidden?
+    if ($("#apply_filter_item9").is(':checked')) {
+        if ($("#apply_filter_item9_options").val() == 0) {
+            //no offer
+            var f = { field: "hidden", comparison: "EQUALS", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        } else {
+            //on offer
+            var f = { field: "hidden", comparison: "EQUALS", type: "NUMBER", values: ["1"] };
+            filters.push(f);
+        }
+    } else {
+        $("#remove_applied_filter_displayed").remove();
+    }
+
+    //brand (10)
+    if ($("#apply_filter_item10").is(':checked') && $("#lstBrands").val() != null) {
+        var f = { field: "brandid", comparison: "EQUALS", type: "NUMBER", values: [$("#lstBrands").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_brand").remove();
+    }
+
+    //supplier (11)
+    if ($("#apply_filter_item11").is(':checked') && $("#lstSuppliers").val() != null) {
+        var f = { field: "supplierid", comparison: "EQUALS", type: "NUMBER", values: [$("#lstSuppliers").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_supplier").remove();
+    }
+
+    //weight (12)
+    if ($("#apply_filter_item12").is(':checked') && $("#apply_filter_item12a_number").val() != "") {
+        var f = { field: "weight", comparison: $("#apply_filter_item12_options").val(), type: $("#apply_filter_item12_options").attr("data-type"), values: [$("#apply_filter_item12a_number").val(), $("#apply_filter_item12b_number").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_weight").remove();
+    }
+
+    //google_online (13)
+    if ($("#apply_filter_item13").is(':checked')) {
+        if ($("#apply_filter_item13_options").val() == 0) {
+            //not featured
+            var f = { field: "google_online", comparison: "EQUALS", type: "NUMBER", values: ["0"] };
+            filters.push(f);
+        } else {
+            //featured
+            var f = { field: "google_online", comparison: "EQUALS", type: "NUMBER", values: ["1"] };
+            filters.push(f);
+        }
+    } else {
+        $("#remove_applied_filter_google_eligable").remove();
+    }
+
+
+
+    //product code
+    if ($("#apply_filter_item14").is(':checked') && $("#apply_filter_item14_text").val() != "") {
+        var f = { field: "suppliercode", comparison: $("#apply_filter_item14_options").val(), type: $("#apply_filter_item14_options").attr("data-type"), values: [$("#apply_filter_item14_text").val()] };
+        filters.push(f);
+    } else {
+        $("#remove_applied_filter_suppliersku").remove();
+    }
+
+
+    if (location.pathname.includes("manage_products_stock")) {
+        Cookies.set('fwsProductStockApplyFilters_' + storeId, filters);
+    }
+
+    if (location.pathname.includes("manage_products_list")) {
+        Cookies.set('fwsProductListApplyFilters_' + storeId, filters);
+    }
+
+    if ($("#applied_filter a").length == 0) {
+        $("#applied_filter").hide();
+    }
+    
+
+}
+
+
+
+
+function loadBrands() {
+
+    console.log("Load Brands");
+    $("#lstBrands").html("");
+    axiosGet("/services/Products.svc/getBrands?storeId=" + storeId).then(function (data) {
+        trace('loadBrands:success');
+        var brands = data.d || data;
+        $.each(brands, function () {
+            $("#lstBrands").append("<option value=\"" + this.id + "\">" + this.brand + "</option>");
+        });
+    }).catch(function (err) {
+        trace('loadBrands:error');
+        formatErrorMessageAxios(err.Message);
+        $("#error_panel").show();
+        $(".error_modal_issue1").html("Error Loading Brands. Please try again or contact our support team for help.");
+        $(".error_modal_issue2").html(err.Message);
+        if (err.Message == "Unauthorized") location - 'logout.aspx';
+    });
+}
+
+function loadSuppliers() {
+
+    console.log("Load Suppliers");
+
+    $("#lstSuppliers").html("");
+
+    axiosGet("/services/Products.svc/getSuppliers?storeId=" + storeId).then(function (data) {
+        trace('loadSuppliers:success');
+        var suppliers = data.d || data;
+        console.log(suppliers);
+        $.each(suppliers, function () {
+            $("#lstSuppliers").append("<option value=\"" + this.id + "\">" + this.supplier + "</option>");
+        });
+    }).catch(function (err) {
+        trace('loadSuppliers:error');
+        formatErrorMessageAxios(err.Message);
+        $("#error_panel").show();
+        $(".error_modal_issue1").html("Error Loading Brands. Please try again or contact our support team for help.");
+        $(".error_modal_issue2").html(err.Message);
+        if (err.Message == "Unauthorized") location - 'logout.aspx';
+    });
+}
+
+
+
+
+
+function LoadEnabledFilters(listPCPObj) {
+    $("#applied_filter").slideDown();
+
+    $(listPCPObj).each(function () {
+
+        if (this.field === "name") {
+            $('#apply_filter_item1').attr('checked', true);
+            $("#apply_filter_item1").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "NOTCONTAIN") { $("#apply_filter_item1_options").val("NOTCONTAIN"); }
+            $("#apply_filter_item1_text").val(this.values);
+            if ($("#remove_applied_filter_name").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_name' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Name</a>");
+            }
+        } else if (this.field === "categoryid") {
+            $('#apply_filter_item2').attr('checked', true);
+            $("#apply_filter_item2").parent().parent().find(".apply_filters_section_main").slideDown();
+            if ($("#remove_applied_filter_category").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_category' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Category</a>");
+            }
+            categoryTreeId = this.values[0];
+
+            if ($('.category_tree_temp').length) {
+                $(".category_tree_temp").find("li").attr("id", categoryTreeId);
+            } else {
+                if ($('#category_tree').length) {
+
+                } else {
+                    $("#category_tree_container").append("<ol id='category_tree' class='category_tree_temp'>" +
+                        "<li id='" + categoryTreeId + "'>" +
+                        "<div class='category_tree_item_menu'>" +
+                        "<div class='category_tree_item category_tree_item_selected' onclick='category_tree_select(this);'>Temp Category</div>" +
+                        "</div>" +
+                        "</li>" +
+                        "</ol>");
+                }
+            }
+
+        } else if (this.field === "sku") {
+            $('#apply_filter_item3').attr('checked', true);
+            $("#apply_filter_item3").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "NOTCONTAIN") { $("#apply_filter_item3_options").val("NOTCONTAIN"); }
+            $("#apply_filter_item3_text").val(this.values);
+            if ($("#remove_applied_filter_code").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_code' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Code</a>");
+            }
+        } else if (this.field === "price") {
+            $('#apply_filter_item4').attr('checked', true);
+            $("#apply_filter_item4").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "LESSTHAN") { $("#apply_filter_item4_options").val("LESSTHAN"); }
+            if (this.comparison === "MORETHAN") { $("#apply_filter_item4_options").val("MORETHAN"); }
+            if (this.comparison === "BETWEEN") { $("#apply_filter_item4_options").val("BETWEEN"); $("#apply_filter_item4b_number").val(this.values[1]); $("#apply_filter_item4b_number").show(); }
+            $("#apply_filter_item4a_number").val(this.values[0]);
+            if ($("#remove_applied_filter_price").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_price' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Price</a>");
+            }
+        } else if (this.field === "stock") {
+            $('#apply_filter_item5').attr('checked', true);
+            $("#apply_filter_item5").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "LESSTHAN") { $("#apply_filter_item5_options").val("LESSTHAN"); }
+            if (this.comparison === "MORETHAN") { $("#apply_filter_item5_options").val("MORETHAN"); }
+            if (this.comparison === "BETWEEN") { $("#apply_filter_item5_options").val("BETWEEN"); $("#apply_filter_item5b_number").val(this.values[1]); $("#apply_filter_item5b_number").show(); }
+            $("#apply_filter_item5a_number").val(this.values[0]);
+            if ($("#remove_applied_filter_stock").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_stock' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Product Stock</a>");
+            }
+        } else if (this.field === "shipping") {
+            $('#apply_filter_item6').attr('checked', true);
+            $("#apply_filter_item6").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "MORETHAN") { $("#apply_filter_item6_options").val("1"); }
+            if ($("#remove_applied_filter_shipping").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_shipping' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Shipping Prices</a>");
+            }
+        } else if (this.field === "featured") {
+            $('#apply_filter_item7').attr('checked', true);
+            $("#apply_filter_item7").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.values[0] === "1") { $("#apply_filter_item7_options").val("1"); }
+            if ($("#remove_applied_filter_featured").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_featured' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Featured Product</a>");
+            }
+        } else if (this.field === "offer") {
+            $('#apply_filter_item8').attr('checked', true);
+            $("#apply_filter_item8").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.values[0] === "3") { $("#apply_filter_item8_options").val("3"); }
+            if (this.values[0] === "2") { $("#apply_filter_item8_options").val("2"); }
+            if (this.values[0] === "1") { $("#apply_filter_item8_options").val("1"); }
+            if ($("#remove_applied_filter_special").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_special' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Special Offer Product</a>");
+            }
+        } else if (this.field === "hidden") {
+            $('#apply_filter_item9').attr('checked', true);
+            $("#apply_filter_item9").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.values[0] === "1") { $("#apply_filter_item9_options").val("1"); }
+            if ($("#remove_applied_filter_displayed").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_displayed' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Display Status</a>");
+            }
+        } else if (this.field === "brandid") {
+            $('#apply_filter_item10').attr('checked', true);
+            $("#apply_filter_item10").parent().parent().find(".apply_filters_section_main").slideDown();
+            if ($("#remove_applied_filter_brand").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_brand' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Brand Name</a>");
+            }
+        } else if (this.field === "supplierid") {
+            $('#apply_filter_item11').attr('checked', true);
+            $("#apply_filter_item11").parent().parent().find(".apply_filters_section_main").slideDown();
+            if ($("#remove_applied_filter_supplier").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_supplier' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Supplier Name</a>");
+            }
+        } else if (this.field === "weight") {
+            $('#apply_filter_item12').attr('checked', true);
+            $("#apply_filter_item12").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "LESSTHAN") { $("#apply_filter_item12_options").val("LESSTHAN"); }
+            if (this.comparison === "MORETHAN") { $("#apply_filter_item12_options").val("MORETHAN"); }
+            if (this.comparison === "BETWEEN") { $("#apply_filter_item12_options").val("BETWEEN"); $("#apply_filter_item12b_number").val(this.values[1]); $("#apply_filter_item12b_number").show(); }
+            $("#apply_filter_item12a_number").val(this.values[0]);
+            if ($("#remove_applied_filter_weight").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_weight' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Weight</a>");
+            }
+        } else if (this.field === "google_eligable") {
+            $('#apply_filter_item13').attr('checked', true);
+            $("#apply_filter_item13").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.values[0] === "1") { $("#apply_filter_item13_options").val("1"); }
+            if ($("#remove_applied_filter_google_eligable").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_google_eligable' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Google Eligible</a>");
+            }
+        } else if (this.field === "suppliercode") {
+            $('#apply_filter_item14').attr('checked', true);
+            $("#apply_filter_item14").parent().parent().find(".apply_filters_section_main").slideDown();
+            if (this.comparison === "NOTCONTAIN") { $("#apply_filter_item14_options").val("NOTCONTAIN"); }
+            $("#apply_filter_item14_text").val(this.values);
+            if ($("#remove_applied_filter_suppliersku").length == 0) {
+                $("#applied_filter").append("<a id='remove_applied_filter_suppliersku' class='button button_white' onclick='removeFilter(this);'><i class='fa fa-trash-o' aria-hidden='true'></i>Supplier SKU</a>");
+            }
+        }
+
+    });
+
+}
+
+
+
+
+
+
+// Remove Filters
+function removeFilter(el) {
+    $(el).remove();
+
+    if ($(el).attr("id") === "remove_applied_filter_name") { $('#apply_filter_item1').attr('checked', false); $("#apply_filter_item1").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_category") { $('#apply_filter_item2').attr('checked', false); $("#apply_filter_item2").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_code") { $('#apply_filter_item3').attr('checked', false); $("#apply_filter_item3").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_price") { $('#apply_filter_item4').attr('checked', false); $("#apply_filter_item4").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_stock") { $('#apply_filter_item5').attr('checked', false); $("#apply_filter_item5").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_shipping") { $('#apply_filter_item6').attr('checked', false); $("#apply_filter_item6").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_featured") { $('#apply_filter_item7').attr('checked', false); $("#apply_filter_item7").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_special") { $('#apply_filter_item8').attr('checked', false); $("#apply_filter_item8").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_displayed") { $('#apply_filter_item9').attr('checked', false); $("#apply_filter_item9").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_brand") { $('#apply_filter_item10').attr('checked', false); $("#apply_filter_item10").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_supplier") { $('#apply_filter_item11').attr('checked', false); $("#apply_filter_item11").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_weight") { $('#apply_filter_item12').attr('checked', false); $("#apply_filter_item12").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_google_eligable") { $('#apply_filter_item13').attr('checked', false); $("#apply_filter_item13").parent().parent().find(".apply_filters_section_main").slideUp(); }
+    if ($(el).attr("id") === "remove_applied_filter_suppliersku") { $('#apply_filter_item14').attr('checked', false); $("#apply_filter_item14").parent().parent().find(".apply_filters_section_main").slideUp(); }
+
+    if ($("#applied_filter a").length == 0) {
+        $("#applied_filter").slideUp();
+    }
+    getFilters();
+
+    if (location.pathname.includes("manage_products_stock")) {
+        getStock(0);
+    }
+
+    if (location.pathname.includes("manage_products_list")) {
+        LoadProducts(0);
+    }
+    
+};

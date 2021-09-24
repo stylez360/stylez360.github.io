@@ -1,0 +1,170 @@
+﻿var searchAddSequence = 0;
+var subs;
+
+function buildCategorySearchAdd(storeId, buildCategorySearchAddRetry) {
+    $(".category_search_container_error").hide();
+    $(".busy_wait_category_search_add").show();
+
+    jQuery.ajax({
+        async: true,
+        cache: false,
+        url: "../../services/Categories.svc/ListCategories?storeId=" + storeId,
+        dataType: "json",
+        success: function (data) {
+            trace('LoadCategories:success');
+
+            allCategories = data.d || data;
+
+            //Find top level categories and add to array
+            $.each(allCategories.categories, function () {
+
+                if (this.parent == 0) {
+
+                    subs = "<a>Top Root</a><a>"+ this.name +"</a>";
+
+                    if (this.sequence > searchAddSequence) {
+                        searchAddSequence = Number(this.sequence);
+                    }
+                } else {
+                    var subParent = this.parent;
+                    var subParentName = this.name;
+                    getSubs(subParent, subParentName);
+                }
+
+                $(".category_search_container").append('<li data-catsearchaddParent="' + this.parent + '" data-catsearchaddID="' + this.categoryid + '" data-catsearchaddName="' + this.name + '" onclick="getCategorySearchAdd(this)" data-catsearchaddSequence="' + this.sequence + '">' +
+                                                       '<span class="category_search_container_subs">' + subs + '</span>' +
+                                                       '<span class="category_search_container_item">' + this.name + '</span>' +
+                                                       '</li>');
+            });
+
+            searchAddSequence = searchAddSequence + 1;
+
+        },
+        error: function (request, status, error) {
+            trace('LoadCategories:error');
+            formatErrorMessage(request, error);
+            $(".category_search_container_error").show();
+            $(".busy_wait_category_search_add").hide();
+        },
+        complete: function () {
+            trace('LoadCategories:complete');
+            $(".busy_wait_category_search_add").hide();
+
+        }
+    });
+}
+
+function getSubs(subParent, subParentName) {
+    $.each(allCategories.categories, function () {
+        if (this.categoryid === subParent) {
+            subs = "<a>" + this.name + "</a><a>" + subParentName + "</a>";
+            return false;
+        } else {
+            subs = "<a>hello</a>";
+        }
+    });
+}
+
+var categoryNewCatCreate;
+var categorySearchArray = [];
+
+function getCategorySearchAdd(el) {
+    var getCategorySearchAddName = $(el).attr("data-catsearchaddName");
+    var getCategorySearchAddId = $(el).attr("data-catsearchaddID");
+
+    if ($.inArray(getCategorySearchAddId, categorySearchArray) != -1) {
+        alert('Category already added');
+    } else {
+        categorySearchArray.push(getCategorySearchAddId);
+        $(".category_search_selected_container").append('<div class="category_search_selected" data-categoryid="' + getCategorySearchAddId + '" data-categoryname="' + getCategorySearchAddName + '"><span>' + getCategorySearchAddName + '</span><i class="fa fa-times" aria-hidden="true" onclick="getCategorySearchAddRemove(this)"></i></div>');
+    }
+
+    $(".category_search_selected_container").fadeIn();
+    $("#category_search").hide();
+    $("#category_search").val("");
+    $(".category_search_container li").each(function (index) {
+        $(this).show();
+    });
+    $(".category_search_container_addnew").hide();
+    $(".category_search_container_addnew span").text("");
+    
+    categoryNewCatCreate = false;
+    
+}
+
+$("#category_search").on("input", function () {
+
+    var text = $(this).val().toLowerCase();
+
+    $(".category_search_container li").each(function (index) {
+        divText = $(this).text().toLowerCase();
+
+        if (divText.match(text)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+
+    if ($(this).val().length > 0) {
+        $(".category_search_container_addnew").show();
+        $(".category_search_container_addnew span").text($(this).val());
+    } else {
+        $(".category_search_container_addnew").hide();
+    }
+
+});
+
+function getCategorySearchAddNew(el) {
+    var getCategorySearchAddName = $(el).find("span").text();
+
+    $(".category_search_selected_container").fadeIn();
+    $(".category_search_selected_container").append('<div class="category_search_selected" data-categoryname="' + getCategorySearchAddName + '"><span class="category_search_selected_new_cat">' + getCategorySearchAddName + '</span><i class="fa fa-times" aria-hidden="true" onclick="getCategorySearchAddRemove(this)"></i></div>');
+    categoryNewCatCreate = true;
+    $("#category_search").val("");
+    $(".category_search_container li").each(function (index) {
+        $(this).show();
+    });
+    $(".category_search_container_addnew").hide();
+    $(".category_search_container_addnew span").text("");
+    $("#category_search").hide();
+}
+
+function getCategorySearchAddRemove(el) {
+    var removeCatItem = categorySearchArray.indexOf($(el).parent().attr("data-categoryid"));
+    if (removeCatItem >= 0) {
+        categorySearchArray.splice(removeCatItem, 1);
+    }
+    $(el).parent().remove();
+    $("#category_search").slideDown();
+}
+
+function addNewCategory(quickCategory, storeId, callback) {
+    
+    console.log('addNewCategory');
+    
+    jQuery.ajax({
+        async: false,
+        cache: false,
+        contentType: 'application/json',
+        url: '/services/Categories.svc/AddCategory?storeID=' + storeId + '&categoryname=' + JSON.stringify(quickCategory) + '&parent='+0+'&sequence=' + searchAddSequence,    
+        success: function (data) {
+            trace('SaveCategories:success');
+            var categoryID = data.d || data;
+            console.log('Category Added. ID=' + categoryID);
+            callback(categoryID);
+
+        },
+        error: function (request, status, error) {
+            console.log('addNewCategory call failed');
+            formatErrorMessage(request, error);
+            callback(null);
+            $(".busy_wait_quick_create_product, .busy_wait_quick_create_product1").hide();
+            $(".quick_create_product_error1").show();
+        },
+        complete: function () {            
+            console.log("AddNewCategory complete");
+        }
+    });
+
+}

@@ -1,0 +1,1304 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "PRODUCTS-LIST", uuid: beaverGuid });
+
+function cs_url(file) {
+    if (file != null) {
+        file = file.toLowerCase();
+        if (!file.startsWith("http://") && !file.startsWith("https://")) {
+            return "//d13z1xw8270sfc.cloudfront.net/resize/" + storeId + "/" + file + "/250/250/0/";
+        } else {
+            return file;
+        }
+    } else {
+        return "/images/products/product-not-exist.jpg";
+    }
+}
+
+var productsSelected = new Array();
+
+function LoadProductList() {
+
+    //Clear any rows from last load.
+    $("tr.lists_table_items").remove();
+
+    // First we need to check what filters are checked
+    // If a filter is not checked then we do not include this into the build
+    var listShowName = false;
+    var listShowImage = false;
+    var listShowCategory = false;
+    var listShowPrice = false;
+    var listShowCode = false;
+    var product_list_filter_item5 = false;
+    var listShowStock = false;
+    var listShowShipping = false;
+    var listShowWeight = false;
+    var listShowRating = false;
+    var listShowBrand = false;
+    var listShowStars = false;
+    var listShowAvailability = false;
+
+    $(".table_header_titles_name").hide();
+    $(".table_header_titles_image").hide();
+    $(".table_header_titles_category").hide();
+    $(".table_header_titles_price").hide();
+    $(".table_header_titles_code").hide();
+    $(".table_header_titles_stock").hide();
+    $(".table_header_titles_weight").hide();
+    $(".table_header_titles_brand").hide();
+    $(".table_header_titles_stars").hide();
+    $(".table_header_titles_rating").hide();
+    $(".table_header_titles_shipping").hide();
+    $(".table_header_titles_availability").hide();
+
+    if ($("input[id='product_list_filter_item0']").is(":checked")) {
+        listShowName = true;
+        $(".table_header_titles_name").show();
+    }
+    if ($("input[id='product_list_filter_item1']").is(":checked")) {
+        listShowImage = true;
+        $(".table_header_titles_image").show();
+    }
+    if ($("input[id='product_list_filter_item2']").is(":checked")) {
+        listShowCategory = true;
+        $(".table_header_titles_category").show();
+    }
+    if ($("input[id='product_list_filter_item3']").is(":checked")) {
+        listShowPrice = true;
+        $(".table_header_titles_price").show();
+    }
+    if ($("input[id='product_list_filter_item4']").is(":checked")) {
+        listShowCode = true;
+        $(".table_header_titles_code").show();
+    }
+    if ($("input[id='product_list_filter_item5']").is(":checked")) {
+        product_list_filter_item5 = true;
+    }
+    if ($("input[id='product_list_filter_item6']").is(":checked")) {
+        listShowStock = true;
+        $(".table_header_titles_stock").show();
+    }
+    if ($("input[id='product_list_filter_item9']").is(":checked")) {
+        listShowShipping = true;
+        $(".table_header_titles_shipping").show();
+    }
+    if ($("input[id='product_list_filter_item10']").is(":checked")) {
+        listShowWeight = true;
+        $(".table_header_titles_weight").show();
+    }
+    if ($("input[id='product_list_filter_item11']").is(":checked")) {
+        listShowRating = true;
+        $(".table_header_titles_rating").show();
+    }
+    if ($("input[id='product_list_filter_item12']").is(":checked")) {
+        listShowBrand = true;
+        $(".table_header_titles_brand").show();
+    }
+    if ($("input[id='product_list_filter_item13']").is(":checked")) {
+        listShowStars = true;
+        $(".table_header_titles_stars").show();
+    }
+    if ($("input[id='product_list_filter_item14']").is(":checked")) {
+        listShowAvailability = true;
+        $(".table_header_titles_availability").show();
+    }
+
+    var productsSelectedCount = 0;
+    $("#lists_selectall").prop("checked", false);
+
+    $.each(allProducts.products, function () {
+
+        var id = this.id;
+        var name = this.name;
+        var dataDelete = false;
+        var iconDelete = "fa-times";
+        var titleDelete = "Delete";
+
+        if (tableRowDeleteArray.length > 0) {
+            if (tableRowDeleteArray.indexOf(id) > -1) {
+                dataDelete = true;
+                iconDelete = "fa-undo";
+                titleDelete = "Undo Delete";
+            }
+        }
+
+        var pendingDeleteText = '';
+        var currentlyDeleting = 'false';
+        if (this.flux != null) {
+            if (this.flux.inFlux == true && this.flux.action == "DELETE") {
+                dataDelete = true;
+                iconDelete = "fa-spinner fa-spin";
+                titleDelete = "Pending Delete";
+                pendingDeleteText = '<div class="table_pending_delete_text">Delete In Progress</div>';
+                currentlyDeleting = 'true';
+            }
+        }
+
+
+        var nameAppend = "<td class='lists_table_name' data-id='" + this.id + "' data-show='" + listShowName + "'><a href='manage_products_editv2.aspx?prodid=" + this.id + "' class='link_color_primary'>" + this.name + "</a></td>";
+
+        var imageAppend = "<td class='lists_table_image' data-id='" + this.id + "' data-show='" + listShowImage + "'><a href='manage_products_editv2.aspx?prodid=" + this.id + "'><img data-src='" + cs_url(this.image) + "' onerror=\"this.src=\'/images/products/product-not-exist.jpg\';\" class='lazyload' /></a></td>";
+
+
+        var category_name = "";
+
+        try {
+            category_name = this.category[0];
+        } catch (e) {
+
+        }
+
+        var categoryAppend = "<td class='lists_table_category color_primary' data-id='" + this.id + "' data-show='" + listShowCategory + "'>" + category_name + "</td>";
+
+        var priceAppend = "<td class='lists_table_price' data-id='" + this.id + "' data-show='" + listShowPrice + "'>" + accounting.formatMoney(this.price, currency_options) + "</td>";
+
+        var codeAppend = "<td class='lists_table_code' data-id='" + this.id + "' data-show='" + listShowCode + "'>" + this.sku + "</td>";
+
+        if (product_list_filter_item5 == true) {
+            var dateAppend = "<td class='lists_table_date'>" + GetDateString(this.created) + "</td>";
+            $(".table_header_titles_date").show();
+        } else {
+            var dateAppend = "<td class='lists_table_date' style='display: none;'>" + GetDateString(this.created) + "</td>";
+            $(".table_header_titles_date").hide();
+        }
+
+        var stockAppend = "<td class='lists_table_stock' data-id='" + this.id + "' data-show='" + listShowStock + "'>" + this.stock + "</td>";
+
+        var prodShipping = parseInt(this.shipping);
+
+        if (prodShipping == -1) {
+            var prodShippingFinal = "Shipping Rules";
+        } else if (prodShipping == 0) {
+            var prodShippingFinal = "Free";
+        } else {
+            var prodShippingFinal = currency_options.symbol + this.shipping;
+        }
+
+        var shippingAppend = "<td class='lists_table_shipping' data-id='" + this.id + "' data-show='" + listShowShipping + "'>" + prodShippingFinal + "</td>";
+
+        var weightAppend = "<td class='lists_table_weight' data-id='" + this.id + "' data-show='" + listShowWeight + "'>" + this.weight + "</td>";
+
+        if (this.rating <= 15) {
+            ratingLetter = "E";
+        } else if ((this.rating > 15) && (this.rating <= 25)) {
+            ratingLetter = "D";
+        } else if ((this.rating > 25) && (this.rating <= 49)) {
+            ratingLetter = "C";
+        } else if ((this.rating > 49) && (this.rating <= 65)) {
+            ratingLetter = "B";
+        } else if ((this.rating > 65) && (this.rating <= 85)) {
+            ratingLetter = "A";
+        } else {
+            ratingLetter = "A+";
+        }
+
+        var ratingAppend = "<td class='lists_table_rating' data-rating='" + ratingLetter + "' data-id='" + this.id + "' data-show='" + listShowRating + "'><span>" + ratingLetter + "</span></td>";
+
+        var prodBrand = "";
+        if (this.brandName != null && this.brandName != undefined && this.brandName.length != 0) {
+            prodBrand = this.brandName;
+        }
+
+        var brandAppend = "<td class='lists_table_brand' data-id='" + this.id + "' data-show='" + listShowBrand + "'>" + prodBrand + "</td>";
+
+
+        var prodStars = parseInt(this.stars);
+
+        var numberStars = "<i class='fa fa-star' aria-hidden='true'></i><span><span>" + prodStars + "</span>";
+        var starsAppend = "<td class='lists_table_stars' data-stars='" + prodStars + "' data-id='" + this.id + "' data-show='" + listShowStars + "'>" + numberStars + "</td>";
+
+        var availabilityButtonDisabled = "";
+        if (this.flux != null) {
+            if (this.flux.inFlux == true && this.flux.action == "UPDATE") {
+                availabilityButtonDisabled = "prod_availability_button_disabled";
+            }
+        }
+
+        if (this.featured == true) {
+            var prodFeatured = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetFeatured(' + this.id + ', false)" data-featured="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will appear in the Featured Products section on your webstore.</span><i class="fa fa-heart" aria-hidden="true"></i></div>';
+        } else {
+            var prodFeatured = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetFeatured(' + this.id + ', true)" data-featured="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will not appear in the Featured Products section on your webstore.</span><i class="fa fa-heart-o" aria-hidden="true"></i></div>';
+        }
+
+        if (this.hidden == false) {
+            var prodHidden = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetHidden(' + this.id + ', true)" data-hidden="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product is visible and will appear on your store</span><i class="fa fa-eye" aria-hidden="true"></i></div>';
+        } else {
+            var prodHidden = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetHidden(' + this.id + ', false)" data-hidden="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product is hidden and will not appear on your store</span><i class="fa fa-eye-slash" aria-hidden="true"></i></div>';
+        }
+
+        if (this.disabled == false) {
+            var prodDisabled = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetDisabled(' + this.id + ', false)" data-disabled="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product can be purchased as normal</span><i class="fa fa-unlock-alt" aria-hidden="true"></i></div>';
+        } else {
+            var prodDisabled = '<div class="prod_availability_button has_tool_tip ' + availabilityButtonDisabled + '" onclick="prodListSetDisabled(' + this.id + ', true)" data-disabled="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will appear on your store but cannot be purchased</span><i class="fa fa-lock" aria-hidden="true"></i></div>';
+        }
+
+        var availabilityAppend = "<td class='lists_table_availability' data-id='" + this.id + "' data-id='" + this.id + "' data-show='" + listShowAvailability + "'>";
+            availabilityAppend += prodFeatured;
+            availabilityAppend += prodHidden;
+            availabilityAppend += prodDisabled;
+            availabilityAppend += "</td>";
+
+        var checked = '';
+        $.each(productsSelected, function () {
+            if (id == this) {
+                productsSelectedCount++;
+                checked = 'checked';
+                return;
+            }
+        });
+
+        var productEditButton = "<td class='list_table_url'>" +
+                                    "<a href='manage_products_editv2.aspx?prodid=" + this.id + "' class='button button_primary'>Edit</a>" +
+                                    "<div class='list_table_url_updating has_tool_tip' data-id='" + this.id + "' style='display: none;'><span class='tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small tool_tip_left'>Updating Product ~ 1min</span><i class='fa fa-spinner fa-spin'></i></div>" +
+                                "</td>";
+        if (this.flux != null) {
+            if (this.flux.inFlux == true && this.flux.action == "UPDATE") {
+                productEditButton = "<td class='list_table_url'>" +
+                                        "<a href='manage_products_editv2.aspx?prodid=" + this.id + "' class='button button_primary'>Edit</a>" +
+                                        "<div class='list_table_url_updating has_tool_tip' data-id='"+this.id+"'><span class='tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small tool_tip_left'>Updating Product ~ 1min</span><i class='fa fa-spinner fa-spin'></i></div>" +
+                                    "</td>";
+            }
+        }
+
+        $("#lists_table tbody").append("<tr class='lists_table_items' data-name='" + this.name + "' data-id='" + this.id + "' data-delete='" + dataDelete + "' data-deleting='" + currentlyDeleting + "'>" +
+                                            "<td class='table_checkbox_small'>" +
+                                                "<div class='checkbox_container'>" +
+                                                    "<input type='checkbox' onclick='product_list_check(this);' data-id='"+this.id+"' class='lists_checkbox' id='lists_select" + this.id + "' "+checked+" />" +
+                                                    "<label for='lists_select"+ this.id +"'></label>" +
+                                                "</div>" +
+                                            "</td>" +
+                                            productEditButton +
+                                            imageAppend +
+                                            nameAppend +
+                                            availabilityAppend +
+                                            categoryAppend +
+                                            priceAppend +
+                                            codeAppend +
+                                            dateAppend +
+                                            stockAppend +
+                                            shippingAppend +
+                                            weightAppend +
+                                            ratingAppend +
+                                            brandAppend +
+                                            starsAppend +
+                                            '<td class="align_center table_row_delete" data-id="'+this.id+'"><i class="fa ' + iconDelete + ' table_row_delete_icon product_option_icon_delete" data-id="'+this.id+'" aria-hidden="true" title="' + titleDelete + '" onclick="tableRowDelete(\'lists_table_items\', \'' + id + '\')"></i>'+pendingDeleteText+'</td>' +
+                                        "</tr>");
+                                    
+        
+    });
+
+    if (productsSelectedCount == document.getElementById("dlPageSize").value) {
+        $("#lists_selectall").prop("checked", true);
+        $(".table_hidden_buttons_section").show();
+    }
+
+    if (productsSelected.length > 0) {
+        $(".table_hidden_buttons_section").show();
+    }
+
+    if (productsSelected.length > 1) {
+        hideById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    } else {
+        showById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    }
+
+}
+
+function UpdatePriceStrings() {
+    var elements = jQuery('*').filter(function () { return jQuery(this).data('currency') !== undefined; });
+
+    jQuery(elements).each(function (index) {
+        if (jQuery(this).is("input"))
+            jQuery(this).val(accounting.formatMoney(jQuery(this).val(), currency_options));
+        else
+            jQuery(this).html(accounting.formatMoney(jQuery(this).html(), currency_options));
+    });
+
+}
+
+$('#lists_selectall').click(function () {
+    if (this.checked) {
+        $('.lists_checkbox:checkbox').each(function () {
+            this.checked = true;
+            var productId = $(this).attr("data-id");
+            var productCount = 0;
+            $.each(productsSelected, function (i) {
+                if (this == productId) {
+                    productCount++;
+                    return;
+                }
+            });
+            if (productCount == 0) {
+                productsSelected.push(productId);
+            }
+        });
+    }
+    else {
+        $('.lists_checkbox:checkbox').each(function () {
+            this.checked = false;
+
+            var productId = $(this).attr("data-id");
+            $.each(productsSelected, function (i) {
+                if (this == productId) {
+                    productsSelected.splice(i, 1);
+                }
+            });
+
+        });
+    }
+
+    if (productsSelected.length >= 1) {
+        $(".table_hidden_buttons_section").show();
+    } else {
+        $(".table_hidden_buttons_section").hide();
+    }
+    $(".table_button_number").text(productsSelected.length);
+
+    if (productsSelected.length > 1) {
+        hideById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    } else {
+        showById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    }
+
+});
+
+function product_list_check(plc) {
+    if ($(plc).is(':checked')) {
+        if ($('.lists_checkbox:checked').length == $('.lists_checkbox').length) {
+            $("#lists_selectall").prop('checked', true);
+        }
+        var productId = $(plc).attr("data-id");
+        var productCount = 0;
+        $.each(productsSelected, function (i) {
+            if (this == productId) {
+                productCount++;
+                return;
+            }
+        });
+        if (productCount == 0) {
+            productsSelected.push(productId);
+        }
+    }
+    else {
+        if ($("#lists_selectall").is(':checked')) {
+            $("#lists_selectall").prop('checked', false);
+        }
+        var productId = $(plc).attr("data-id");
+        $.each(productsSelected, function (i) {
+            if (this == productId) {
+                productsSelected.splice(i, 1);
+            }
+        });
+    }
+    if (productsSelected.length >= 1) {
+        $(".table_hidden_buttons_section").show();
+    } else {
+        $(".table_hidden_buttons_section").hide();
+    }
+    $(".table_button_number").text(productsSelected.length);
+
+    if (productsSelected.length > 1) {
+        hideById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    } else {
+        showById("dropdown_menu_edit_single", "dropdown_menu_copy_single");
+    }
+}
+
+$("input[id='product_list_filter_item0']").click(function () {
+    if ($("input[id='product_list_filter_item0']").is(":checked")) {
+        $(".table_header_titles_name").show();
+        $(".lists_table_name").attr("data-show", "true");
+    } else {
+        $(".table_header_titles_name").hide();
+        $(".lists_table_name").attr("data-show", "false");
+    }
+});
+
+$("input[id='product_list_filter_item1']").click(function () {
+    if ($("input[id='product_list_filter_item1']").is(":checked")) {
+        $(".table_header_titles_image, .lists_table_image").show();
+    } else {
+        $(".table_header_titles_image, .lists_table_image").hide();
+    }
+});
+
+$("input[id='product_list_filter_item2']").click(function () {
+    if ($("input[id='product_list_filter_item2']").is(":checked")) {
+        $(".table_header_titles_category, .lists_table_category").show();
+    } else {
+        $(".table_header_titles_category, .lists_table_category").hide();
+    }
+});
+
+$("input[id='product_list_filter_item3']").click(function () {
+    if ($("input[id='product_list_filter_item3']").is(":checked")) {
+        $(".table_header_titles_price, .lists_table_price").show();
+    } else {
+        $(".table_header_titles_price, .lists_table_price").hide();
+    }
+});
+
+$("input[id='product_list_filter_item4']").click(function () {
+    if ($("input[id='product_list_filter_item4']").is(":checked")) {
+        $(".table_header_titles_code, .lists_table_code").show();
+    } else {
+        $(".table_header_titles_code, .lists_table_code").hide();
+    }
+});
+
+$("input[id='product_list_filter_item5']").click(function () {
+    if ($("input[id='product_list_filter_item5']").is(":checked")) {
+        $(".table_header_titles_date, .lists_table_date").show();
+    } else {
+        $(".table_header_titles_date, .lists_table_date").hide();
+    }
+});
+
+$("input[id='product_list_filter_item6']").click(function () {
+    if ($("input[id='product_list_filter_item6']").is(":checked")) {
+        $(".table_header_titles_stock, .lists_table_stock").show();
+    } else {
+        $(".table_header_titles_stock, .lists_table_stock").hide();
+    }
+});
+
+$("input[id='product_list_filter_item9']").click(function () {
+    if ($("input[id='product_list_filter_item9']").is(":checked")) {
+        $(".table_header_titles_shipping, .lists_table_shipping").show();
+    } else {
+        $(".table_header_titles_shipping, .lists_table_shipping").hide();
+    }
+});
+
+$("input[id='product_list_filter_item10']").click(function () {
+    if ($("input[id='product_list_filter_item10']").is(":checked")) {
+        $(".table_header_titles_weight, .lists_table_weight").show();
+    } else {
+        $(".table_header_titles_weight, .lists_table_weight").hide();
+    }
+});
+
+$("input[id='product_list_filter_item11']").click(function () {
+    if ($("input[id='product_list_filter_item11']").is(":checked")) {
+        $(".table_header_titles_rating, .lists_table_rating").show();
+    } else {
+        $(".table_header_titles_rating, .lists_table_rating").hide();
+    }
+});
+
+$("input[id='product_list_filter_item12']").click(function () {
+    if ($("input[id='product_list_filter_item12']").is(":checked")) {
+        $(".table_header_titles_brand, .lists_table_brand").show();
+    } else {
+        $(".table_header_titles_brand, .lists_table_brand").hide();
+    }
+});
+
+$("input[id='product_list_filter_item13']").click(function () {
+    if ($("input[id='product_list_filter_item13']").is(":checked")) {
+        $(".table_header_titles_stars, .lists_table_stars").show();
+    } else {
+        $(".table_header_titles_stars, .lists_table_stars").hide();
+    }
+});
+
+$("input[id='product_list_filter_item14']").click(function () {
+    if ($("input[id='product_list_filter_item14']").is(":checked")) {
+        $(".table_header_titles_availability, .lists_table_availability").show();
+    } else {
+        $(".table_header_titles_availability, .lists_table_availability").hide();
+    }
+});
+
+
+
+var tableRowDeleteArray = new Array();
+function tableRowDelete(className, id) {
+
+    var deleteStatus = document.querySelector("." + className + "[data-id='" + id + "']").getAttribute("data-delete");
+
+    if (deleteStatus == "false") {
+        document.querySelector("." + className + "[data-id='" + id + "']").setAttribute("data-delete", "true")
+        var deleteIcon = document.querySelector("." + className + "[data-id='" + id + "'] .table_row_delete_icon");
+        deleteIcon.classList.remove("fa-times");
+        deleteIcon.classList.add("fa-undo");
+        deleteIcon.setAttribute("title", "Undo Delete")
+
+        tableRowDeleteArray.push(id);
+
+    } else {
+        document.querySelector("." + className + "[data-id='" + id + "']").setAttribute("data-delete", "false")
+        var deleteIcon = document.querySelector("." + className + "[data-id='" + id + "'] .table_row_delete_icon");
+        deleteIcon.classList.add("fa-times");
+        deleteIcon.classList.remove("fa-undo");
+        deleteIcon.setAttribute("title", "Delete")
+
+        var tableRowDeleteArrayIndex = tableRowDeleteArray.indexOf(id);
+        if (tableRowDeleteArrayIndex > -1) {
+            tableRowDeleteArray.splice(tableRowDeleteArrayIndex, 1);
+        }
+
+    }
+
+    console.log(tableRowDeleteArray);
+
+    if (tableRowDeleteArray.length > 0) {
+        save_changes_detected = true;
+        saveChangesDetected();
+    } else {
+        save_changes_detected = false;
+        saveChangesDetected();
+    }
+
+}
+
+
+function runSavePageLocal() {
+
+
+    var data = {
+        products: [],
+        storeId: storeId
+    };
+
+    // Convert to array of objects
+    tableRowDeleteArray.forEach(function (id) {
+        data.products.push({
+            id: id
+        })
+    });
+
+    var url = '/services/Products.svc/DeleteProduct?storeId=' + storeId;
+
+    console.log('Data to be sent', data)
+    data = JSON.stringify(data);
+
+    var returningPageName = "Products";
+    var returningPageLink = "/manage_products.aspx";
+    var currentPageLink = "/manage_products_list.aspx";
+    var saveType = "post";
+    var saveUrl = [url, data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+
+}
+
+function copyProduct(id) {
+
+    $(".modal_copy_product, .overlay_forced").fadeIn();
+    $("#modal_copy_product1, .busy_wait_copying_product").show();
+    $("#modal_copy_product2, #modal_copy_product3, #modal_copy_product4").hide();
+    $("#modal_copy_product_close").addClass("button_disabled");
+    axiosGet('/services/Products.svc/CopyProduct?shopkeeper=' + storeId + '&productId=' + id).then(function (data) {
+        var copyProduct = data.d;
+        if (copyProduct !== null) {
+            copyProduct = JSON.parse(copyProduct);
+            copyProductId = copyProduct;
+
+            $("#modal_copy_product1, .busy_wait_copying_product").hide();
+
+            showById("modal_copy_product2");
+
+            setTimeout(function () {
+                document.getElementById("modal_copy_product2_success_text").innerText = "Loading Product";
+            }, 1500);
+
+            location.href = "/manage_products_editv2.aspx?prodid=" + copyProductId
+
+        } else {
+            $("#modal_copy_product1, .busy_wait_copying_product").hide();
+            $("#modal_copy_product4").show();
+            $("#modal_copy_product_close").removeClass("button_disabled");
+        }
+    }).catch(function (e) {
+        $("#modal_copy_product1, .busy_wait_copying_product").hide();
+        $("#modal_copy_product_close").removeClass("button_disabled");
+        $("#modal_copy_product4").show();
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function copyProductClose() {
+    location.reload();
+}
+
+function createGroupWithProds(groupName, productsList) {
+
+    setTimeout(function () {
+
+        var output = {
+            'storeId': storeId,
+            'groupName': groupName,
+            'products': productsList
+        };
+
+        var url = "/services/Products.svc/createGroupWithProds";
+        var data = JSON.stringify(output);
+        axiosPost(url, data).then(function (res) {
+            if (res.d) {
+                $('.errorgroup, #modal_create_group_button, #modal_create_group_creating, .busy_wait_creating_product_group').hide();
+                $("#modal_create_group2").show();
+
+            } else {
+                $('.errorgroup').show();
+                $("#modal_create_group_creating, .busy_wait_creating_product_group").hide();
+                $("#modal_create_group1").show();
+                $("#modal_create_group_button").removeClass("button_disabled");
+            }
+        }).catch(function (e) {
+
+            $('.errorgroup, #modal_create_group_creating, .busy_wait_creating_product_group').hide();
+            showById("modal_create_group3");
+            typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+        });
+
+    }, 1500);
+}
+
+var DeleteList = [];
+
+var groupType = 0;
+function createGroupNum(groupNum) {
+    groupType = groupNum;
+
+    document.getElementById("create_group").value = "";
+    document.getElementById("modal_create_group_button").classList.remove("button_disabled");
+
+    $("#modal_create_group2, .alert_create_group_noname, #modal_create_group_zeroproducts, #modal_create_group1, #modal_create_group_button, #modal_create_group_toomanyproducts").hide();
+    if (groupType == 2) {
+        if (productsSelected.length > 0) {
+            if (productsSelected.length > 500) {
+                showById("modal_create_group_toomanyproducts");
+            } else {
+                showById("modal_create_group1", "modal_create_group_button");
+            }
+        } else {
+            showById("modal_create_group_zeroproducts");
+        }
+    } else {
+        if (allProducts.found > 0) {
+            if (allProducts.found > 500) {
+                showById("modal_create_group_toomanyproducts");
+            } else {
+                showById("modal_create_group1", "modal_create_group_button");
+            }
+        } else {
+            showById("modal_create_group_zeroproducts");
+        }
+    }
+
+    divFadeIn(".modal_overlay", ".modal_create_group");
+
+}
+
+function createGroup() {
+
+    $("#modal_create_group3").hide();
+
+    var name = stripHTML($('#create_group').val());
+    if (name.length == 0) {
+        $(".alert_create_group_noname").show();
+    } else {
+        $("#modal_create_group_button").addClass("button_disabled");
+        $("#modal_create_group1").hide();
+        $("#modal_create_group_creating, .busy_wait_creating_product_group").show();
+        if (groupType == 2) {
+            createGroupWithProds(name, productsSelected);
+        } else {
+            createGroupGetProducts(name);
+        }
+    }    
+}
+
+function createGroupGetProducts(name) {
+
+    var createGroupGetProductsArray = new Array();
+    axiosGet("/services/Products.svc/listProducts?storeId=" + storeId + "&limit=10000&start=0&sort=name&ascending=true&filters=" + JSON.stringify(filters)).then(function (data) {
+        createGroupGetProductsArray = data.d || data;
+
+        createGroupGetProductsArray = createGroupGetProductsArray.products;
+
+        var createGroupGetProductsArrayId = new Array();
+        $.each(createGroupGetProductsArray, function () {
+            createGroupGetProductsArrayId.push(this.id);
+        });
+
+        createGroupWithProds(name, createGroupGetProductsArrayId);
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+function deleteSeleted() {
+
+    $(".lists_checkbox:checked").each(function () {
+
+        var id = $(this).attr("data-id");
+        $(".lists_table_items[data-id='" + id + "']").attr("data-delete", "true");
+        $(".product_option_icon_delete[data-id='" + id + "']").attr("title", "Undo Delete");
+        $(".product_option_icon_delete[data-id='" + id + "']").removeClass("fa-times").addClass("fa-undo");
+
+    });
+
+    $.each(productsSelected, function () {
+        var id = this;
+        var existsInDelete = false;
+        $.each(tableRowDeleteArray, function () {
+            if (this == id) {
+                existsInDelete = true;
+                return;
+            }
+        });
+
+        if (existsInDelete == false) {
+            tableRowDeleteArray.push(id);
+        }
+
+        save_changes_detected = true;
+        saveChangesDetected();
+
+    });
+
+}
+
+var checkFluxChangeCount = 0;
+var checkFluxChangeTime = 10000;
+var checkFlux;
+
+function checkFluxChange() {
+
+    var sort = $("#dlSort").val();
+
+    switch ($("#dlSort").find(":selected").attr("data-sort")) {
+        case "asc":
+            var ascending = true;
+            break;
+        case "dsc":
+            var ascending = false;
+            break;
+    }
+    axiosGet("/services/Products.svc/listProducts?storeId=" + storeId + "&limit=" + limit + "&start=" + startpg + "&sort=" + sort + "&ascending=" + ascending + "&filters=" + JSON.stringify(filters)).then(function (data) {
+        checkFlux = data.d || data;
+        console.log("CHECKING FLUX");
+        console.log(checkFlux);
+        productsInFlux(checkFlux)
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+        if (checkFluxChangeCount > 9) {
+            checkFluxChangeTime = 60000;
+        } else if (checkFluxChangeCount > 5) {
+            checkFluxChangeTime = 30000;
+        } else if (checkFluxChangeCount > 2) {
+            checkFluxChangeTime = 20000;
+        }
+
+        console.log("Flux Time: " + checkFluxChangeTime);
+        console.log("Flux Count: " + checkFluxChangeCount);
+
+        if (checkFluxChangeCount < 19) {
+            checkFluxChangeCall(checkFluxChangeTime);
+        }
+
+
+    });
+}
+
+function checkFluxChangeCall(checkFluxChangeTime) {
+    setTimeout(function () {
+        checkFluxChangeCount++;
+        checkFluxChange();
+    }, checkFluxChangeTime);
+}
+
+var productsInFluxDelete = new Array();
+var productsInFluxUpdate = new Array();
+var productsinFluxCreate = false;
+var productsinFluxCreateCount = 0;
+
+function productsInFlux(products) {
+
+    // Created Flux
+    if (products.flux != null) {
+        if (products.flux.total > 0) {
+            document.getElementById("products_being_created").style.display = "block";
+            document.getElementById("products_being_created_count").innerText = products.flux.total;
+            if (productsinFluxCreateCount != products.flux.total) {
+                if (allProducts.found < document.getElementById("dlPageSize").value) {
+                    console.log("Multiple rebuild")
+                    BuildProductList(startpg);
+                }
+            }
+            productsinFluxCreateCount = products.flux.total;
+
+            $("#products_being_created").insertBefore(".panel_table_list");
+            productsinFluxCreate = true;
+
+            
+
+        } else {
+            document.getElementById("products_being_created").style.display = "none";
+            if (productsinFluxCreate) {
+                productsinFluxCreate = false;
+                if (allProducts.found < document.getElementById("dlPageSize").value) {
+                    BuildProductList(startpg);
+                } else {
+                    fluxRebuildPagination(products);
+                }
+            }
+        }
+
+    } else {
+        document.getElementById("products_being_created").style.display = "none";
+        if (productsinFluxCreate) {
+            productsinFluxCreate = false;
+            if (allProducts.found < document.getElementById("dlPageSize").value) {
+                BuildProductList(startpg);
+            } else {
+                fluxRebuildPagination(products);
+            }
+        }
+    }
+
+
+    // Updating Flux
+    if (products.products.length > 0) {
+        $.each(products.products, function () {
+            if (this.flux == null) {
+
+                // Changes state of "Deleting" to "Deleted"
+                if (productsInFluxDelete.indexOf(this.id) >= 0) {
+
+                    $(".lists_table_items[data-id='" + this.id + "'] td:not(.table_row_delete)").addClass("lists_table_items_fully_deleted");
+                    $(".table_row_delete[data-id='" + this.id + "']").html('<div class="table_pending_delete_text table_pending_delete_text_finished">Deleted</div>');
+                    var productsInFluxDeleteIndex = productsInFluxDelete.indexOf(this.id);
+                    if (productsInFluxDeleteIndex > -1) {
+                        productsInFluxDelete.splice(productsInFluxDeleteIndex, 1);
+                    }
+                }
+
+                // Changes state of "Updating" to "Updated"
+                // We then update the row
+                if (productsInFluxUpdate.indexOf(this.id) >= 0) {
+
+                    $(".list_table_url_updating[data-id='" + this.id + "']").hide();
+                    $(".lists_table_availability[data-id='" + this.id + "'] .prod_availability_button").removeClass("prod_availability_button_disabled");
+
+                    var productsInFluxUpdateIndex = productsInFluxUpdate.indexOf(this.id);
+                    if (productsInFluxUpdateIndex > -1) {
+                        productsInFluxUpdate.splice(productsInFluxUpdateIndex, 1);
+                    }
+                    productFluxUpdateCompleted(this);
+                }
+
+            } else {
+                if (this.flux.action == "DELETE") {
+                    if (productsInFluxDelete.indexOf(this.id) === -1) {
+                        productsInFluxDelete.push(this.id);
+                    }
+                } else {
+                    if (productsInFluxUpdate.indexOf(this.id) === -1) {
+                        productsInFluxUpdate.push(this.id);
+                    }
+                    $(".list_table_url_updating[data-id='" + this.id + "']").show();
+                    $(".lists_table_availability[data-id='" + this.id + "'] .prod_availability_button").addClass("prod_availability_button_disabled");
+                }
+            }
+        });
+    }
+
+    // Deleted
+    if (productsInFluxDelete.length > 0) {
+        for (var i = 0; i < productsInFluxDelete.length; i++) {
+
+            var product = products.products.filter(function (obj) {
+                return obj.id === productsInFluxDelete[i];
+            })
+
+            if (product.length === 0){
+                $(".lists_table_items[data-id='" + productsInFluxDelete[i] + "'] td:not(.table_row_delete)").addClass("lists_table_items_fully_deleted");
+                $(".table_row_delete[data-id='" + productsInFluxDelete[i] + "']").html('<div class="table_pending_delete_text table_pending_delete_text_finished">Deleted</div>');
+                var productsInFluxDeleteIndex = productsInFluxDelete.indexOf(productsInFluxDelete[i]);
+                if (productsInFluxDeleteIndex > -1) {
+                    productsInFluxDelete.splice(productsInFluxDeleteIndex, 1);
+                }
+            }
+
+        }
+    }
+    
+}
+
+function fluxRebuildPagination(products) {
+    $(".pagination_text_results[data-type='product'], .pagination_number_results[data-type='product']").remove();
+    paginationPageStart = startpg / limit;
+    paginationPageStart = Math.ceil(paginationPageStart);
+    pagination(products.found, document.getElementById("dlPageSize").value, paginationPageStart, false);
+}
+
+function productFluxUpdateCompleted(product) {
+
+    var id = product.id;
+
+    var image = cs_url(product.image);
+
+    // Image
+    $(".lists_table_image[data-id='" + id + "'] a img").attr("src", image);
+    // Name
+    $(".lists_table_name[data-id='" + id + "'] a").text(product.name);
+    // Available
+    if (product.featured == true) {
+        var prodFeatured = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetFeatured(' + product.id + ', false)" data-featured="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will appear in the Featured Products section on your webstore.</span><i class="fa fa-heart" aria-hidden="true"></i></div>';
+    } else {
+        var prodFeatured = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetFeatured(' + product.id + ', true)" data-featured="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will not appear in the Featured Products section on your webstore.</span><i class="fa fa-heart-o" aria-hidden="true"></i></div>';
+    }
+
+    if (product.hidden == false) {
+        var prodHidden = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetHidden(' + product.id + ', true)" data-hidden="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product is visible and will appear on your store</span><i class="fa fa-eye" aria-hidden="true"></i></div>';
+    } else {
+        var prodHidden = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetHidden(' + product.id + ', false)" data-hidden="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product is hidden and will not appear on your store</span><i class="fa fa-eye-slash" aria-hidden="true"></i></div>';
+    }
+
+    if (product.disabled == false) {
+        var prodDisabled = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetDisabled(' + product.id + ', false)" data-disabled="true"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product can be purchased as normal</span><i class="fa fa-unlock-alt" aria-hidden="true"></i></div>';
+    } else {
+        var prodDisabled = '<div class="prod_availability_button has_tool_tip" onclick="prodListSetDisabled(' + product.id + ', true)" data-disabled="false"><span class="tool_tip tool_tip_top tool_tip_dgrey tool_tip_top_small">This product will appear on your store but cannot be purchased</span><i class="fa fa-lock" aria-hidden="true"></i></div>';
+    }
+
+    $(".lists_table_availability[data-id='" + product.id + "']").html(prodFeatured + prodHidden + prodDisabled);
+
+    // Category
+    var category_name = "";
+    try {
+        category_name = product.category[0];
+    } catch (e) {
+
+    }
+    $(".lists_table_category[data-id='" + id + "']").text(category_name);
+    // Price
+    $(".lists_table_price[data-id='" + id + "']").html(accounting.formatMoney(product.price, currency_options));
+    // Code
+    $(".lists_table_code[data-id='" + id + "']").text(product.sku);
+    // Stock
+    $(".lists_table_stock[data-id='" + id + "']").text(product.stock);
+    // Shipping
+    var prodShipping = parseInt(product.shipping);
+
+    if (prodShipping == -1) {
+        var prodShippingFinal = "Shipping Rules";
+    } else if (prodShipping == 0) {
+        var prodShippingFinal = "Free";
+    } else {
+        var prodShippingFinal = currency_options.symbol + prodShipping;
+    }
+
+    $(".lists_table_shipping[data-id='" + id + "']").text(prodShippingFinal);
+
+    // Weight
+    $(".lists_table_weight[data-id='" + id + "']").text(product.weight);
+    // Rating
+    var rating = product.rating;
+
+    if (rating <= 15) {
+        ratingLetter = "E";
+    } else if ((rating > 15) && (rating <= 25)) {
+        ratingLetter = "D";
+    } else if ((rating > 25) && (rating <= 49)) {
+        ratingLetter = "C";
+    } else if ((rating > 49) && (rating <= 65)) {
+        ratingLetter = "B";
+    } else if ((rating > 65) && (rating <= 85)) {
+        ratingLetter = "A";
+    } else {
+        ratingLetter = "A+";
+    }
+
+    $(".lists_table_rating[data-id='" + id + "']").attr("data-rating", ratingLetter);
+    $(".lists_table_rating[data-id='" + id + "']").html("<span>" + ratingLetter + "</span>");
+
+    // Brand
+    var prodBrand = "";
+    if (product.brandName != null && product.brandName != undefined && product.brandName.length != 0) {
+        prodBrand = this.brandName;
+    }
+    $(".lists_table_brand[data-id='" + id + "']").text(prodBrand);
+    // Stars
+    var prodStars = parseInt(product.stars);
+    var numberStars = "<i class='fa fa-star' aria-hidden='true'></i><span><span>" + prodStars + "</span>";
+    $(".lists_table_stars[data-id='" + id + "']").attr("data-stars", prodStars);
+    $(".lists_table_stars[data-id='" + id + "']").html(numberStars);
+
+}
+
+
+
+/* Availability */
+
+/* Featured */
+
+function prodListSetFeatured(id, set) {
+
+    $(".save_process2, .save_process1_saved1").hide();
+    $(".save_modal, .save_process1, .save_process_main").fadeIn();
+
+    var theProduct = allProducts.products.filter(function (obj) {
+        return obj.id == id;
+    });
+
+    var prodDisabled = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-disabled]").getAttribute("data-disabled");
+    var prodHidden = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-hidden]").getAttribute("data-hidden");
+
+    var product = {
+        "code": theProduct[0].sku,
+        "featured": set,
+        "active": prodDisabled,
+        "hidden": prodHidden
+    }
+
+    var obj = {
+        "storeId": storeId,
+        "productId": id,
+        "product": JSON.stringify(product),
+        "is_new": false,
+        "reqInfo": true
+    }
+
+    obj = JSON.stringify(obj);
+
+    console.log(obj);
+
+    var returningPageName = "Products";
+    var returningPageLink = "/manage_products.aspx";
+    var currentPageLink = location.href;
+    var saveType = "post";
+    var saveUrl = ['./services/manage/products/edit.svc/SaveProduct', obj];
+
+    try {
+        runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+    } catch (err) {
+        console.error('Failed to save product', err);
+    }
+
+}
+
+function prodListSetHidden(id, set) {
+
+    $(".save_process2, .save_process1_saved1").hide();
+    $(".save_modal, .save_process1, .save_process_main").fadeIn();
+
+    var theProduct = allProducts.products.filter(function (obj) {
+        return obj.id == id;
+    });
+
+    var prodFeatured = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-featured]").getAttribute("data-featured");
+    var prodDisabled = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-disabled]").getAttribute("data-disabled");
+
+    var product = {
+        "code": theProduct[0].sku,
+        "hidden": set,
+        "featured": prodFeatured,
+        "active": prodDisabled
+    }
+
+    console.log("----------");
+    console.log(product);
+    console.log("----------");
+
+    var obj = {
+        "storeId": storeId,
+        "productId": id,
+        "product": JSON.stringify(product),
+        "is_new": false,
+        "reqInfo": true
+    }
+
+    obj = JSON.stringify(obj);
+
+    console.log(obj);
+
+    var returningPageName = "Products";
+    var returningPageLink = "/manage_products.aspx";
+    var currentPageLink = location.href;
+    var saveType = "post";
+    var saveUrl = ['./services/manage/products/edit.svc/SaveProduct', obj];
+
+    try {
+        runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+    } catch (err) {
+        console.error('Failed to save product', err);
+    }
+
+}
+
+function prodListSetDisabled(id, set) {
+
+    $(".save_process2, .save_process1_saved1").hide();
+    $(".save_modal, .save_process1, .save_process_main").fadeIn();
+
+    var theProduct = allProducts.products.filter(function (obj) {
+        return obj.id == id;
+    });
+
+    var prodFeatured = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-featured]").getAttribute("data-featured");
+    var prodHidden = document.querySelector(".lists_table_availability[data-id='" + id + "'] .prod_availability_button[data-hidden]").getAttribute("data-hidden");
+
+    var product = {
+        "code": theProduct[0].sku,
+        "active": set,
+        "hidden": prodHidden,
+        "featured": prodFeatured
+    }
+
+    var obj = {
+        "storeId": storeId,
+        "productId": id,
+        "product": JSON.stringify(product),
+        "is_new": false,
+        "reqInfo": true
+    }
+
+    obj = JSON.stringify(obj);
+
+    console.log(obj);
+
+    var returningPageName = "Products";
+    var returningPageLink = "/manage_products.aspx";
+    var currentPageLink = location.href;
+    var saveType = "post";
+    var saveUrl = ['./services/manage/products/edit.svc/SaveProduct', obj];
+
+    try {
+        runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+    } catch (err) {
+        console.error('Failed to save product', err);
+    }
+
+}
+
+function deselectAllSelectedProducts() {
+    productsSelected = [];
+    $(".table_hidden_buttons_section").hide();
+    $("#lists_selectall").prop('checked', false);
+    $('.lists_checkbox:checkbox').each(function () {
+        this.checked = false;
+    });
+}
+
+function openAddNewProductModal() {
+    divFadeIn(".modal_doverlay", ".modal_x_button", ".add_new_product_modal");
+}
+
+getRestoreProductsCount();
+function getRestoreProductsCount() {
+
+    axiosGet('./services/Products.svc/GetRestoreProductsCount?shopkeeper=' + storeId).then(function (data) {
+
+        var productsToRestore = data.d;
+        console.log(productsToRestore);
+        if (productsToRestore != null) {
+
+            if (productsToRestore > 0) {
+                var productsToRestoreText = "1 Deleted Product is";
+
+                if (productsToRestore > 1) {
+                    productsToRestoreText = productsToRestore + " Deleted Products are";
+                }
+
+                document.getElementById("restore_products_warning_number").innerText = productsToRestoreText;
+                showById("restore_products_warning");
+            }
+
+        }
+
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+
+}
+
+function editTab() {
+    if (productsSelected.length > 0) {
+        for (var i = 0; i < productsSelected.length; i++) {
+            var url = "manage_products_editv2.aspx?prodid=" + productsSelected[i];
+            window.open(url, "_blank");
+        }
+    }
+}
+
+function editSingle() {
+    if (productsSelected.length > 0) {
+        var url = "manage_products_editv2.aspx?prodid=" + productsSelected[0];
+        window.open(url, "_self");
+    }
+}
+
+function copySingle() {
+    if (productsSelected.length > 0) {
+        copyProduct(productsSelected[0]);
+    }
+}
+
+function previewProducts() {
+
+    if (productsSelected.length > 0) {
+        for (var i = 0; i < productsSelected.length; i++) {
+            var url = "https://" + storeUrl + "/product_preview/p" + productPageId + "_" + productsSelected[i] + ".aspx";
+            window.open(url, "_blank");
+        }
+    }
+}
+
+
+
+/*let dragTable = document.querySelector(".lists_table_container");
+let dragTableX = 0, dragTableY = 0, dragTableTop = 0, dragTableLeft = 0;
+
+let draggingFunction = (e) => {
+    document.addEventListener('mouseup', () => {
+        document.body.style.cursor = "default";
+        document.removeEventListener("mousemove", draggingFunction);
+    });
+
+    dragTable.scrollLeft = dragTableLeft - e.pageX + dragTableX;
+    dragTable.scrollTop = dragTableTop - e.pageY + dragTableY;
+};
+
+dragTable.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    document.body.style.cursor = "e-resize";
+    dragTableY = e.pageY;
+    dragTableX = e.pageX;
+    dragTableTop = dragTable.scrollTop;
+    dragTableLeft = dragTable.scrollLeft;
+
+    document.addEventListener('mousemove', draggingFunction);
+});*/
+
+
+
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
+
+
