@@ -1,0 +1,58 @@
+﻿#seo_container{
+    display: none;
+}
+
+.busy_wait_seo_example{
+    display: block;
+}
+
+.seo_example{
+    border: 1px solid #ddd;
+    padding: 10px;
+    max-width: 640px;
+    font-family: arial,sans-serif;
+    letter-spacing: inherit;
+    display: none;
+}
+
+.seo_blur{
+    filter: blur(2px);
+}
+
+.seo_example_title{
+    color: #1a0dab;
+    font-size: 18px;
+    word-break: break-word;
+}
+.seo_example_url{
+    color: #006621;
+    font-size: 14px;
+    line-height: 16px;
+    margin-bottom: 2px;
+    word-break: break-word;
+}
+.seo_example_url::after{
+    content: '';
+    display: inline-block;
+    width: 0; 
+    height: 0;
+    border-color: #006621 transparent;
+    border-style: solid;
+    border-width: 5px 4px 0 4px;
+    margin-left: 4px;
+    position: relative;
+    top: -2px;
+}
+.seo_example_description{
+    color: #545454;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.seo_count{
+    float: right;
+}
+
+.seo_count_alert{
+    color: #ea1636;
+}

@@ -1,0 +1,175 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "SEO", uuid: beaverGuid });
+var busyWaitSeo = document.querySelector(".busy_wait_seo");
+var seoContainer = document.getElementById("seo_container");
+
+var seoTitle = document.getElementById("seo_title");
+var seoDescription = document.getElementById("seo_description");
+var seoKeywords = document.getElementById("seo_keywords");
+
+function loadSeoExample() {
+    setTimeout(function () {
+        document.querySelector(".seo_example_url").innerText = storeUrl;
+        runMetaTitle();
+        runMetaDescription();
+        document.querySelector(".busy_wait_seo_example").style.display = "none";
+        document.querySelector(".seo_example").style.display = "block";
+    }, 1000);
+}
+
+function metaTitleFocus() {
+    document.querySelector(".seo_example_url").classList.add("seo_blur");
+    document.querySelector(".seo_example_description").classList.add("seo_blur");
+}
+
+function metaDescriptionFocus() {
+    document.querySelector(".seo_example_title").classList.add("seo_blur");
+    document.querySelector(".seo_example_url").classList.add("seo_blur");
+}
+
+function seoBlur() {
+    document.querySelector(".seo_example_title").classList.remove("seo_blur");
+    document.querySelector(".seo_example_url").classList.remove("seo_blur");
+    document.querySelector(".seo_example_description").classList.remove("seo_blur");
+}
+
+function runMetaTitle() {
+    var seoTitleValue = seoTitle.value;
+    var seoTitleLength = seoTitleValue.length;
+
+    document.getElementById("seo_count_title_number").innerText = seoTitleLength;
+
+    var seoExampleTitle = document.querySelector(".seo_example_title");
+    var alertMetaTitle = document.querySelector(".alert_meta_title");
+    var seoCountTitle = document.querySelector(".seo_count_title");
+
+    if (seoTitleLength == 0) {
+        seoExampleTitle.innerText = "Your Meta Title";
+        alertMetaTitle.classList.remove("alert_show");
+        seoTitle.classList.remove("input_alert");
+        seoCountTitle.classList.remove("seo_count_alert");
+    } else if (seoTitleLength < 61) {
+        seoExampleTitle.innerText = seoTitleValue;
+        alertMetaTitle.classList.remove("alert_show");
+        seoTitle.classList.remove("input_alert");
+        seoCountTitle.classList.remove("seo_count_alert");
+    } else {
+        seoExampleTitle.innerText = seoTitleValue.substring(0, 60) + "...";
+        alertMetaTitle.classList.add("alert_show");
+        seoTitle.classList.add("input_alert");
+        seoCountTitle.classList.add("seo_count_alert");
+    }
+}
+
+function runMetaDescription() {
+    var seoDescriptionValue = seoDescription.value;
+    var seoDescriptionLength = seoDescriptionValue.length;
+
+    document.getElementById("seo_count_description_number").innerText = seoDescriptionLength;
+
+    var seoExampleDescription = document.querySelector(".seo_example_description");
+    var alertMetaDescription = document.querySelector(".alert_meta_description");
+    var seoCountDescription = document.querySelector(".seo_count_description");
+
+    if (seoDescriptionLength == 0) {
+        seoExampleDescription.innerText = "Your Meta Description";
+        alertMetaDescription.classList.remove("alert_show");
+        seoDescription.classList.remove("input_alert");
+        seoCountDescription.classList.remove("seo_count_alert");
+    } else if (seoDescriptionLength < 159) {
+        seoExampleDescription.innerText = seoDescriptionValue;
+        alertMetaDescription.classList.remove("alert_show");
+        seoDescription.classList.remove("input_alert");
+        seoCountDescription.classList.remove("seo_count_alert");
+    } else {
+        seoExampleDescription.innerText = seoDescriptionValue.substring(0, 158) + "...";
+        alertMetaDescription.classList.add("alert_show");
+        seoDescription.classList.add("input_alert");
+        seoCountDescription.classList.add("seo_count_alert");
+    }
+}
+
+function seoHelpButton(el) {
+    divFadeIn(modalOverlay, ".modal_seo_help_" + el);
+}
+
+
+function loadSEO() {
+
+    busyWaitSeo.style.display = "block";
+    seoContainer.style.display = "none";
+
+    axiosGet('services/marketing/seo.svc/LoadSEO?storeId=' + storeId).then(function (data) {
+        var seo = data.d;
+        seoTitle.value = seo[0].title;
+        seoDescription.value = seo[0].description;
+        seoKeywords.value = seo[0].keywords;
+        loadSeoExample();
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        trace('loadSEO:complete');
+        seoContainer.style.display = "block";
+        busyWaitSeo.style.display = "none";
+    });
+
+
+}
+
+function ChangeDetectedSEO() {
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+String.prototype.replaceAll = function (search, replacement) {
+	var target = this;
+	return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+var body = [];
+function runSavePageLocal() {
+
+    giveAchievement('ACHIEVEMENT_ADD_SEO');
+	var titleContent = stripHTML(seoTitle.value.trim());
+	/*titleContent = titleContent.replaceAll("'", "''");*/
+    var descriptionContent = stripHTML(seoDescription.value.trim());
+    var keywordsContent = stripHTML(seoKeywords.value.trim());
+
+    body.push({ title: titleContent, description: descriptionContent, keywords: keywordsContent });
+
+    var data = JSON.stringify({ 'storeId': storeId, 'seo': body });
+
+
+    var returningPageName = "Marketing";
+    var returningPageLink = "/marketing.aspx";
+    var currentPageLink = "/marketing_searchengineoptimization.aspx";
+    var saveType = "post";
+    var saveUrl = ['/services/marketing/seo.svc/saveSEO', data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
