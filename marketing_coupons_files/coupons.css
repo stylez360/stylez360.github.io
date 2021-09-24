@@ -1,0 +1,196 @@
+﻿
+
+#coupon_table, #zero_coupons_calls, #coupons_container, #coupon_status_container, #coupon_edit_date_container,
+#coupon_status_error, #error_coupons_call, #zero_coupons_calls_filters, #zero_coupons_calls_normal{
+    display: none;
+}
+
+.busy_wait_coupons, .busy_wait_coupon_status{
+    display: block;
+}
+
+.pagination{
+    margin-top: 20px;
+}
+
+.coupon_icon_delete{
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.coupon_icon_delete:hover{
+    background-color: #bb112b;
+}
+
+
+/* Search */
+
+.marketing_coupons_list_top{
+    border-bottom: 5px solid #3bf10d;
+}
+
+
+/* Add/ Edit Coupon */
+
+#edit_coupon_container{
+    margin-top: 20px;
+}
+
+.question_mark_tool_tip_coupon {
+    top: -1px;
+    margin-left: 25px;
+    background-color: #ddd;
+    color: #404041;
+}
+
+.question_mark_tool_tip_coupon:hover{
+    color: #FFF;
+}
+
+#coupon_edit_discount_type2_container{
+    display: none;
+}
+
+#coupon_group_list{
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 20px 0 0 5px;
+}
+
+#coupon_edit_date1_container{
+    margin-bottom: 5px;
+}
+
+#coupon_edit_date_container strong{
+    width: 50px;
+    display: inline;
+}
+
+#coupon_edit_date_calender{
+    position: absolute;
+    bottom: 10px;
+}
+
+#coupon_edit_date_time_container{
+    display: none;
+    position: absolute;
+    height: 170px;
+    bottom: 10px;
+    margin-right: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+#coupon_edit_date_time_container.coupon_edit_date_time_container_show{
+    display: block;
+}
+
+.coupon_edit_date_time_container_top{
+    height: 20px;
+    line-height: 20px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.coupon_edit_date_time_container_column_title{
+    height: 20px;
+    line-height: 20px;
+    border-bottom: 1px solid #ddd;
+    background-color: #e7e7e8;
+    font-weight: bold;
+    width: 100%;
+    text-align: center;
+    width: 50%;
+    display: inline-block;
+    float: left;
+}
+
+.coupon_edit_date_time_container_column{
+    max-height: 130px;
+    width: 50%;
+    display: inline-block;
+    float: left;
+    overflow-y: auto;
+}
+
+.coupon_edit_date_time_container_column a{
+    display: inline-block;
+    width: 33.33%;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    height: 25px;
+    line-height: 25px;
+    cursor: pointer;
+}
+
+.coupon_edit_date_time_container_column a:nth-last-child(-n+3) {
+    border-bottom: none;
+}
+
+.coupon_edit_date_time_container_column a:hover{
+    background-color: #e7e7e8;
+}
+
+.coupon_edit_date_time_container_column a.coupon_edit_date_time_selected{
+    color: #fff !important;
+    background-color: #20b7e6 !important;
+    border-right-color: #20b7e6;
+    border-bottom-color: #20b7e6;
+}
+
+
+
+/* Coupons to be added */
+
+#coupons_to_be_added{
+    display: none;
+}
+
+.coupons_to_be_added_item{
+    display: block;
+    margin-bottom: 5px;
+}
+
+.coupons_to_be_added_item i {
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    background-color: #fff;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    margin-right: 5px;
+    width: 20px;
+    text-align: center;
+    position: relative;
+    top: 2px;
+}
+
+.coupons_to_be_added_item i:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+
+.coupon_list_item_pill{
+    color: #FFF;
+    background-color: #20b7e6;
+    display: inline-block;
+    padding: 0px 5px;
+    line-height: 20px;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.coupon_list_item_pill_active{ background-color: #5DC548; }
+.coupon_list_item_pill_expired{ background-color: #ea1636; }
+.coupon_list_item_pill_disabled{ background-color: #212121; }

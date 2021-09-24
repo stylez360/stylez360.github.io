@@ -1,0 +1,556 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "COUPONS", uuid: beaverGuid });
+
+function getCouponStatus() {
+
+    showByClass("busy_wait_coupon_status");
+    hideById("coupon_status_container");
+    hideById("coupon_status_error");
+
+    axiosGet("/services/marketing/coupons.svc/getCouponStatus?storeId=" + storeId).then(function (data) {
+
+        couponStatus = data.d || data;
+
+        if (couponStatus.couponEnabled) {
+            document.getElementById("coupon_published").checked = true;
+            document.getElementById("coupon_notpublished").checked = false;
+        } else {
+            document.getElementById("coupon_published").checked = false;
+            document.getElementById("coupon_notpublished").checked = true;
+        }
+
+        showById("coupon_status_container");
+
+    }).catch(function (e) {
+        showById("coupon_status_error");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_coupon_status");
+    });
+}
+
+
+var coupons;
+var allCoupons;
+
+var startpg = 0;
+var limit = 10;
+var baseLimit = 10;
+
+var paginationTotalItems;
+var paginationPageItems;
+var paginationPageStart;
+var paginationShowAll;
+
+function getAllCoupons() {
+
+    showByClass("busy_wait_coupons");
+    hideById("zero_coupons_calls", "coupon_table", "coupons_container", "error_coupons_call", "zero_coupons_calls_normal", "zero_coupons_calls_filters");
+
+    axiosGet("/services/marketing/coupons.svc/getAllCouponsv2?storeId=" + storeId).then(function (data) {
+        coupons = data.d || data;
+        allCoupons = coupons;
+        if (coupons.length > 0) {
+            buildCouponList(startpg, limit);
+            showByIdTable("coupon_table");
+            showById("coupons_filters_panel");
+        } else {
+            showById("zero_coupons_calls");
+            showById("zero_coupons_calls_normal");
+            hideById("coupons_filters_panel");
+            hideByClass("pagination");
+        }
+    }).catch(function (err) {
+        showById("error_coupons_call");
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_coupons");
+        showById("coupons_container");
+    });
+}
+
+
+
+function couponFilterChange(filter) {
+    filter = filter.toLowerCase();
+    switch (filter) {
+        case "active":
+            document.getElementById("coupon_filters_2").checked = true;
+            break;
+        case "expired":
+            document.getElementById("coupon_filters_3").checked = true;
+            break;
+        case "disabled":
+            document.getElementById("coupon_filters_4").checked = true;
+            break;
+        default:
+            document.getElementById("coupon_filters_1").checked = true;
+            break;
+    }
+
+    couponFilterChangeRun();
+}
+
+function couponFilterChangeRun() {
+    var startpg = 0;
+    var startpg = startpg * baseLimit;
+    limit = startpg + 10;
+    buildCouponList(startpg, limit);
+}
+
+
+function buildCouponList(startpg, limit) {
+
+    /* Sort */
+    var sort = document.getElementById("coupon_sort").value;
+    switch (sort) {
+        case "1":
+            coupons = allCoupons.sort(function (a, b) {
+                if (a.code < b.code) return -1;
+                if (a.code > b.code) return 1;
+                return 0;
+            });
+            break;
+        case "2":
+            coupons = allCoupons.sort(function (a, b) {
+                if (a.code > b.code) return -1;
+                if (a.code < b.code) return 1;
+                return 0;
+            });
+            break;
+        case "3":
+            coupons = allCoupons.sort(function (a, b) {
+                if (a.minimum_spend < b.minimum_spend) return -1;
+                if (a.minimum_spend > b.minimum_spend) return 1;
+                return 0;
+            });
+            break;
+        case "4":
+            coupons = allCoupons.sort(function (a, b) {
+                if (a.minimum_spend > b.minimum_spend) return -1;
+                if (a.minimum_spend < b.minimum_spend) return 1;
+                return 0;
+            });
+            break;
+        default:
+            coupons = allCoupons.sort(function (a, b) {
+                if (a.code < b.code) return -1;
+                if (a.code > b.code) return 1;
+                return 0;
+            });
+            break;
+    }
+
+    $("#coupon_table tbody tr:not(.table_header_titles)").remove();
+
+    var whichType = document.querySelector("input[name='coupon_filters']:checked").getAttribute("data-type");
+
+    var couponWhich = [];
+
+    if (whichType === "All") {
+        couponWhich = coupons;
+    } else {
+
+        $.each(coupons, function () {
+
+            if (this.status == whichType) {
+                couponWhich.push(this);
+            }
+
+        });
+
+    }
+
+    var couponItems = couponWhich.slice(startpg, limit);
+    console.log(couponItems);
+
+    var couponHtml = "";
+
+    var couponCheckedCount = 0;
+    $.each(couponItems, function () {
+
+        var expiry = this.expiry_date;
+        if (expiry === "-1") {
+            expiry = "Never";
+        }
+
+        var active = this.status;
+
+        var useOnce = "True";
+        if (this.useOnce === false) {
+            useOnce = "False";
+        }
+
+        var discount = "";
+        if (this.discount_percent > 0) {
+            discount = '<td>' + this.discount_percent + '% off</td>';
+        } else {
+            discount = '<td data-currency="true">' + this.discount_amount + '</td>';
+        }
+
+
+
+        var id = this.id;
+        var dataDelete = false;
+        var iconDelete = "fa-times";
+        var titleDelete = "Delete";
+
+        if (tableRowDeleteArray.length > 0) {
+            $.each(tableRowDeleteArray, function () {
+                if (this == id) {
+                    dataDelete = true;
+                    iconDelete = "fa-undo";
+                    titleDelete = "Undo Delete";
+                }
+            });
+        }
+
+        var couponChecked = "";
+        var couponsSelectedArrayIndex = couponsSelected.indexOf(id);
+        if (couponsSelectedArrayIndex > -1) {
+            couponChecked = "checked";
+            couponCheckedCount++;
+        }
+
+        var couponItemHtml = '<tr class="coupon_list_item" data-id="' + id + '" data-delete="' + dataDelete + '">';
+            couponItemHtml += '<td class="table_checkbox_small">';
+                couponItemHtml += '<div class="checkbox_container">';
+                    couponItemHtml += '<input type="checkbox" onclick="couponCheckbox(\''+id+'\')" data-id="' + id + '" class="lists_checkbox" id="lists_select' + id + '" ' + couponChecked + ' />';
+                    couponItemHtml += '<label for="lists_select'+ id +'"></label>';
+                couponItemHtml += '</div>';
+            couponItemHtml += '</td>';
+            couponItemHtml += '<td><a class="button button_primary" href="marketing_coupons_edit?cid=' + id +'" title="Edit Coupon">Edit</a></td>';
+            couponItemHtml += '<td>' + this.code + '</td>';
+            couponItemHtml += '<td><span class="coupon_list_item_pill coupon_list_item_pill_' + active.toLowerCase() + '" onclick="couponFilterChange(\'' + active + '\');">' + active + '</span></td>';
+            couponItemHtml += discount;
+            couponItemHtml += '<td>' + useOnce + '</td>';
+            couponItemHtml += '<td>' + expiry + '</td>';
+            couponItemHtml += '<td><i class="fa ' + iconDelete + ' table_row_delete_icon coupon_icon_delete" aria-hidden="true" title="' + titleDelete + '" onclick="tableRowDelete(\'coupon_list_item\', \'' + id + '\')"></i></td>';
+            couponItemHtml += '</tr>';
+
+        couponHtml += couponItemHtml;
+
+    });
+
+    console.log("Count: " + couponCheckedCount)
+    if (couponCheckedCount == 10) {
+        $("#lists_selectall").prop("checked", true);
+    }
+
+    document.querySelector("#coupon_table tbody").innerHTML += couponHtml;
+
+    if (couponItems.length == 0) {
+        showById("zero_coupons_calls");
+        showById("zero_coupons_calls_filters");
+        hideById("coupon_table");
+    } else {
+        showByIdTable("coupon_table");
+        hideById("zero_coupons_calls");
+        hideById("zero_coupons_calls_filters");
+    }
+
+    UpdatePriceStrings();
+
+    paginationDataType = "Coupon";
+    paginationTotalItems = couponWhich.length;
+    paginationPageItems = baseLimit;
+    paginationPageStart = startpg / baseLimit;
+    paginationPageStart = Math.ceil(paginationPageStart);
+    paginationShowAll = true;
+
+    removeByQuerySelector(".pagination[data-type='Coupon'] .pagination_number_results");
+    removeByQuerySelector(".pagination[data-type='Coupon'] .pagination_text_results");
+    pagination(paginationTotalItems, paginationPageItems, paginationPageStart, paginationShowAll);
+
+}
+
+var couponsSelected = new Array();
+function couponCheckbox(id) {
+
+    if (document.querySelector("#lists_select" + id).checked) {
+
+        if ($('.lists_checkbox:checked').length == $('.lists_checkbox').length) {
+            $("#lists_selectall").prop('checked', true);
+        }
+
+        couponsSelected.push(id);
+
+    } else {
+        $("#lists_selectall").prop('checked', false);
+
+        var couponsSelectedArrayIndex = couponsSelected.indexOf(id);
+        if (couponsSelectedArrayIndex > -1) {
+            couponsSelected.splice(couponsSelectedArrayIndex, 1);
+        }
+    }
+
+    if (couponsSelected.length >= 1) {
+        $(".table_hidden_buttons_section").show();
+    } else {
+        $(".table_hidden_buttons_section").hide();
+    }
+    $(".table_button_number").text(couponsSelected.length);
+
+}
+
+function couponCheckboxAll() {
+
+    if (document.querySelector("#lists_selectall").checked) {
+        $(".lists_checkbox").each(function () {
+            this.checked = true;
+            var id = $(this).attr("data-id");
+            var couponsSelectedArrayIndex = couponsSelected.indexOf(id);
+            if (couponsSelectedArrayIndex == -1) {
+                couponsSelected.push(id);
+            }
+        });
+    } else {
+        $(".lists_checkbox").each(function () {
+            this.checked = false;
+            var id = $(this).attr("data-id");
+
+            var couponsSelectedArrayIndex = couponsSelected.indexOf(id);
+            if (couponsSelectedArrayIndex > -1) {
+                couponsSelected.splice(couponsSelectedArrayIndex, 1);
+            }
+
+        });
+    }
+
+    if (couponsSelected.length >= 1) {
+        $(".table_hidden_buttons_section").show();
+    } else {
+        $(".table_hidden_buttons_section").hide();
+    }
+    $(".table_button_number").text(couponsSelected.length);
+
+}
+
+function deselectAllSelectedCoupons() {
+    couponsSelected = [];
+    $(".table_hidden_buttons_section").hide();
+    $("#lists_selectall").prop('checked', false);
+    $('.lists_checkbox:checkbox').each(function () {
+        this.checked = false;
+    });
+}
+
+function UpdatePriceStrings() {
+    var elements = jQuery('*').filter(function () { return jQuery(this).data('currency') !== undefined; });
+
+    jQuery(elements).each(function (index) {
+        if (jQuery(this).is("input"))
+            jQuery(this).val(accounting.formatMoney(jQuery(this).val(), currency_options));
+        else
+            jQuery(this).html(accounting.formatMoney(jQuery(this).html(), currency_options));
+    });
+}
+
+function rebuildPaginationCoupon(paginationRebuildNumber) {
+    var startpg = parseInt(paginationRebuildNumber.getAttribute("data-pagnum"));
+
+    var startpg = startpg * baseLimit;
+    limit = startpg + 10;
+
+    $("#lists_selectall").attr("checked", false);
+
+    buildCouponList(startpg, limit);
+}
+
+
+
+var tableRowDeleteArray = new Array();
+function tableRowDelete(className, id) {
+
+    var deleteStatus = document.querySelector("." + className + "[data-id='" + id + "']").getAttribute("data-delete");
+
+    if (deleteStatus == "false") {
+        document.querySelector("." + className + "[data-id='" + id + "']").setAttribute("data-delete", "true")
+        var deleteIcon = document.querySelector("." + className + "[data-id='" + id + "'] .table_row_delete_icon");
+        deleteIcon.classList.remove("fa-times");
+        deleteIcon.classList.add("fa-undo");
+        deleteIcon.setAttribute("title", "Undo Delete")
+
+        tableRowDeleteArray.push(id);
+
+    } else {
+        document.querySelector("." + className + "[data-id='" + id + "']").setAttribute("data-delete", "false")
+        var deleteIcon = document.querySelector("." + className + "[data-id='" + id + "'] .table_row_delete_icon");
+        deleteIcon.classList.add("fa-times");
+        deleteIcon.classList.remove("fa-undo");
+        deleteIcon.setAttribute("title", "Delete")
+
+        var tableRowDeleteArrayIndex = tableRowDeleteArray.indexOf(id);
+        if (tableRowDeleteArrayIndex > -1) {
+            tableRowDeleteArray.splice(tableRowDeleteArrayIndex, 1);
+        }
+
+    }
+
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+function deleteSeletedCoupons() {
+
+    for (var i = 0; i < couponsSelected.length; i++) {
+
+        var tableRowDeleteArrayIndex = tableRowDeleteArray.indexOf(couponsSelected[i]);
+        if (tableRowDeleteArrayIndex == -1) {
+            tableRowDeleteArray.push(couponsSelected[i]);
+        }
+        if (document.querySelector(".coupon_list_item[data-id='" + couponsSelected[i] + "']") != null) {
+            document.querySelector(".coupon_list_item[data-id='" + couponsSelected[i] + "']").setAttribute("data-delete", "true")
+            var deleteIcon = document.querySelector(".coupon_list_item[data-id='" + couponsSelected[i] + "'] .table_row_delete_icon");
+            deleteIcon.classList.remove("fa-times");
+            deleteIcon.classList.add("fa-undo");
+            deleteIcon.setAttribute("title", "Undo Delete");
+        }
+
+    }
+    save_changes_detected = true;
+    saveChangesDetected();
+
+}
+
+function couponPublishChange() {
+    save_changes_detected = true;
+    saveChangesDetected();
+}
+
+
+window.addEventListener("beforeunload", function (e) {
+    if (save_changes_detected == false) {
+        return;
+    }
+    (e || window.event).returnValue = null;
+    return null;
+}); 
+
+
+function runSavePageLocal() {
+
+    var couponsSave = new Array();
+    var status = document.getElementById("coupon_published").checked;
+
+    couponsSave.push({ "delete": tableRowDeleteArray, "status": status });
+
+    
+
+    var url = '/services/marketing/coupons.svc/saveCouponStatus';
+    var data = {
+        "storeId": storeId,
+        "save": couponsSave
+    }
+    data = JSON.stringify(data);
+
+    var returningPageName = "Marketing";
+    var returningPageLink = "/marketing.aspx";
+    var currentPageLink = "/marketing_coupons.aspx";
+    var saveType = "post";
+    var saveUrl = [url, data];
+
+    runFinalSave(returningPageName, returningPageLink, currentPageLink, saveType, saveUrl);
+
+}
+
+
+
+/* Coupons Search */
+
+$("#txtQuickSearch").keyup(function () {
+    txtQuickSearch();
+});
+$("#txtQuickSearch").click(function () {
+    txtQuickSearch();
+});
+
+function txtQuickSearch() {
+
+    delay(function () {
+        var q = $("#txtQuickSearch").val();
+        q = stripHTML(q);
+        $("#quicksearch_results").addClass("quicksearch_results_active");
+        $('#quicksearch_need_more_chars').hide();
+        if (q.length < 3) {
+            $("#quicksearch_results").removeClass("quicksearch_results_active");
+            $('#quicksearch_need_more_chars').show();
+            if (q.length == 0) { $('#quicksearch_need_more_chars').hide(); }
+            return;
+        } else {
+            QuickProductSearch(q);
+        }
+
+    }, 400);
+}
+
+var delay = (function () {
+    var timer = 0;
+    return function (callback, ms) {
+        clearTimeout(timer);
+        timer = setTimeout(callback, ms);
+    };
+})();
+
+function QuickProductSearch(q) {
+    $(".quicksearch_results_item, .quicksearch_results_message").remove();
+    $(".busy_wait_coupons_list_search").show();
+
+    q = q.toLowerCase();
+    var couponSearchCount = 0;
+
+    $.each(allCoupons, function () {
+        var code = this.code.toLowerCase();
+        if (code.match(q)) {
+            couponSearchCount++;
+
+            var searchAmount = '';
+            var isCurrency = '';
+            if (this.discount_percent > 0) {
+                searchAmount = this.discount_percent + "% off"
+            } else {
+                searchAmount = this.discount_amount;
+                isCurrency = "data-currency='true'"
+            }
+
+            $("#quicksearch_results").append("<li class='quicksearch_results_item'>" +
+                                                "<a href=\"marketing_coupons_edit?cid=" + this.id + "\" class='hide_overflow'>" +
+                                                "<div class='quicksearch_results_item_text'>" +
+                                                "<div class='quicksearch_results_item_text1'>" + this.code + "</div>" +
+                                                "<div class='quicksearch_results_item_text2' "+isCurrency+">" + searchAmount + "</div>" +
+                                                "</div>" +
+                                                "</a>" +
+                                            "</li>");
+        }
+
+    });
+
+    UpdatePriceStrings();
+
+    $("#quicksearch_results").prepend("<div class='quicksearch_results_message quicksearch_results_message_number'>Found: <strong>" + couponSearchCount + " results for \"<strong>" + q + "</strong>\"</div>");
+    
+    $(".busy_wait_coupons_list_search").hide();
+}
+
+
+function addNewCouponModal() {
+    divFadeIn(".modal_doverlay, .modal_x_button, .add_new_coupon_modal");
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
