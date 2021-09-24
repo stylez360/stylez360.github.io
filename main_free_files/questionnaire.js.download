@@ -1,0 +1,567 @@
+﻿var questionnaireMessage = "Please rate us on how we are doing in each of these categories:";
+var questionnaireQuestions = [
+    {
+        "question": "Store Themes & Customization Options",
+        "type": "radio",
+        "saveName": "design",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "Apps & Integrations",
+        "type": "radio",
+        "saveName": "features",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "How well your store is performing",
+        "type": "radio",
+        "saveName": "performance",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "Ease Of Use",
+        "type": "radio",
+        "saveName": "ease",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "Value For Money",
+        "type": "radio",
+        "saveName": "value",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "Support Team",
+        "type": "radio",
+        "saveName": "support",
+        "answers": [
+            {
+                "answer": "Great",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Good",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "OK",
+                "score": 3,
+                "showText": true,
+                "showTextLabel": "That's great, but we'd love to do better. Any suggestions?"
+            },
+            {
+                "answer": "Poor",
+                "score": 2,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            },
+            {
+                "answer": "Very Poor",
+                "score": 1,
+                "showText": true,
+                "showTextLabel": "Oh no! How can we improve?"
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "How likely are you to refer a friend to Freewebstore?",
+        "type": "radio",
+        "saveName": "refer",
+        "answers": [
+            {
+                "answer": "Very Likely",
+                "score": 5,
+                "showText": false
+            },
+            {
+                "answer": "Likely",
+                "score": 4,
+                "showText": false
+            },
+            {
+                "answer": "Maybe",
+                "score": 3,
+                "showText": false
+            },
+            {
+                "answer": "Unlikely",
+                "score": 2,
+                "showText": false
+            },
+            {
+                "answer": "Not At All",
+                "score": 1,
+                "showText": false
+            }
+        ],
+        "textbox": true,
+        "required": true
+    },
+    {
+        "question": "We would love to know what we could do better. Please let us know what you want us to build or improve in the coming months. Your feedback makes a difference!",
+        "type": "textbox",
+        "textbox": false,
+        "required": false,
+        "saveName": "notes",
+    }
+];
+
+
+
+function setQuestionnaireCookie() {
+    hideByClass("overlay_forced", "modal_questionnaire");
+}
+
+function openQuestionnaire() {
+    if (trialExists != undefined) {
+        if (trialExists != "True") {
+            divFadeIn(".overlay_forced, .modal_questionnaire");
+            buildQuestionnaire();
+        }
+    } else {
+        divFadeIn(".overlay_forced, .modal_questionnaire");
+        buildQuestionnaire();
+    }
+}
+
+function openQuestionnaireForce() {
+    divFadeIn(".overlay_forced, .modal_questionnaire");
+    buildQuestionnaire();
+}
+
+function buildQuestionnaire() {
+
+    $("#modal_questionnaire_message").text(questionnaireMessage);
+
+    var allQuestions = "";
+    
+    for (var i = 0; i < questionnaireQuestions.length; i++) {
+
+        var allAnswers = "";
+
+        var textbox = "";
+        if (questionnaireQuestions[i].textbox) {
+            textbox = '<div class="input_container modal_questionnaire_question_textarea_container" data-textarea="'+i+'">';
+                textbox += '<label class="modal_questionnaire_question_textarea_label" data-textarea="'+i+'">How can we improve?</label>';
+                textbox += '<textarea placeholder="Enter any additional information here" maxlength="800"></textarea>';
+            textbox += '</div>';
+        }
+
+        switch (questionnaireQuestions[i].type) {
+            case "radio":
+                allAnswers += '<div class="input_container inline_checkboxes">';
+                for (var a = 0; a < questionnaireQuestions[i].answers.length; a++){
+
+                    var answer = '<div class="checkbox_container">';
+                    answer += '<input type="radio" id="questionnaire' + i + a + '" name="questionnaire' + i + '" onclick="questionnaireCheckAnswers();" data-question="' + i + '" data-showText="' + questionnaireQuestions[i].answers[a].showText + '" data-answer="' + questionnaireQuestions[i].answers[a].score + '" data-answerNo="' + a + '" />';
+                            answer += '<label for="questionnaire'+i+a+'"><span>'+questionnaireQuestions[i].answers[a].answer+'</span></label>';
+                       answer += '</div>';
+
+                    allAnswers += answer;
+
+                }
+                allAnswers += '</div>';
+                break;
+            case "textbox":
+                allAnswers += '<div class="input_container">';
+                    allAnswers += '<textarea class="margint10" placeholder="Enter your text here" data-question="'+i+'" onchange="questionnaireCheckAnswers();" onkeyup="questionnaireCheckAnswers();" maxlength="800"></textarea>';
+                allAnswers += '</div>';
+                break;
+            case "dropdown":
+                allAnswers += '<div class="hide_overflow margint10">';
+                    allAnswers += '<div class="input_container input_container_50">';
+                        allAnswers += '<select data-question="' + i +'" onchange="questionnaireCheckAnswers();">';
+                            allAnswers += '<option value="-1">Please Select</option>';
+                            for (var a = 0; a < questionnaireQuestions[i].answers.length; a++) {
+                                allAnswers += '<option value="' + questionnaireQuestions[i].answers[a].answer + '"  data-showText="' + questionnaireQuestions[i].answers[a].showText + '" data-answerNo="' + a + '">' + questionnaireQuestions[i].answers[a].score + '</option>';
+                    
+                            }
+                        allAnswers += '</select>';
+                    allAnswers += '</div>';
+                allAnswers += '</div>';
+                break;
+        }
+
+        var required = "";
+        if (questionnaireQuestions[i].required) {
+            required = '<span class="modal_questionnaire_title_required color_red">*</span>';
+        }
+
+        var question = '<div class="modal_questionnaire_question" data-question="' + i + '" data-required="' + questionnaireQuestions[i].required + '" data-type="' + questionnaireQuestions[i].type + '">';
+        question += '<div class="modal_questionnaire_title"><span class="modal_questionnaire_title_number color_white">' + (i + 1) +'</span><span class="modal_questionnaire_title_text">' + questionnaireQuestions[i].question + required + '</span></div>';
+                question += allAnswers;
+                question += textbox;
+           question += '</div>';
+
+        allQuestions += question;
+
+    }
+
+    document.getElementById("modal_questionnaire_inner").innerHTML = allQuestions;
+
+}
+
+function questionnaireCheckAnswers() {
+
+    var questionsAnswered = 0;
+    var questionsRequired = $(".modal_questionnaire_question[data-required='true']").length;
+
+    $(".modal_questionnaire_question[data-required='true']").each(function () {
+
+        var question = $(this).attr("data-question");
+        var type = $(this).attr("data-type");
+
+        if (type == "radio") {
+            if ($("input[type='radio'][data-question='" + question + "']:checked").length) {
+                questionsAnswered++;
+            }
+        }
+
+        if (type == "textbox") {
+			if (stripHTML($("textarea[data-question='" + question + "']").val().trim()).length) {
+                questionsAnswered++;
+            }
+        }
+
+        if (type == "dropdown") {
+            if ($("select[data-question='" + question + "']").val() != "-1") {
+                questionsAnswered++;
+            }
+        }
+
+
+        /* Show Textbox? */
+        var showTextbox = false;
+
+        if (type == "radio") {
+            if ($("input[data-question='" + question + "']:checked").attr("data-showtext") == "true") {
+                showTextbox = true;
+                var answerLabel = $("input[type='radio'][data-question='" + question + "']:checked").attr("data-answerNo");
+                $(".modal_questionnaire_question_textarea_label[data-textarea='" + question + "']").text(questionnaireQuestions[question].answers[answerLabel].showTextLabel);
+            }
+        }
+
+        if (type == "dropdown") {
+            console.log($("select[data-question='" + question + "'] option:selected").val())
+            if ($("select[data-question='" + question + "'] option:selected").attr("data-showtext") == "true") {
+                showTextbox = true;
+                var answerLabel = $("select[data-question='" + question + "'] option:selected").attr("data-answerNo");
+                $(".modal_questionnaire_question_textarea_label[data-textarea='" + question + "']").text(questionnaireQuestions[question].answers[answerLabel].showTextLabel);
+            }
+        }
+
+        
+
+        if (showTextbox) {
+            $(".modal_questionnaire_question_textarea_container[data-textarea='" + question + "']").show();
+        } else {
+            if ($(".modal_questionnaire_question_textarea_container[data-textarea='" + question + "'] textarea").val().trim().length == 0) {
+                $(".modal_questionnaire_question_textarea_container[data-textarea='" + question + "']").hide();
+            }
+        }
+
+
+    });
+
+    if (questionsAnswered == questionsRequired) {
+        document.getElementById("modal_questionnaire_send").classList.remove("button_disabled");
+    } else {
+        document.getElementById("modal_questionnaire_send").classList.add("button_disabled");
+    }
+
+}
+
+function modalQuestionnaireSend() {
+
+    setQuestionnaireCookie();
+
+    document.getElementById("modal_questionnaire_send").classList.add("button_disabled");
+
+    hideById("questionnaire_panel");
+    hideById("modal_questionnaire_container1");
+    showById("modal_questionnaire_container2");
+    showByClass("busy_wait_modal_questionnaire_sending");
+
+
+    var refer_friend = 0;
+    var support_comment = "";
+    var support_score = 0;
+    var value_comment = "";
+    var value_score = 0;
+    var ease_comment = "";
+    var ease_score = 0;
+    var performance_comment = "";
+    var performance_score = 0;
+    var features_comment = "";
+    var features_score = 0;
+    var design_comment = "";
+    var design_score = 0;
+    var notes = "";
+
+    for (var i = 0; i < questionnaireQuestions.length; i++) {
+
+        var type = questionnaireQuestions[i].type;
+        var additionalTextBool = questionnaireQuestions[i].textbox;
+
+        var answer = 0;
+        var additionalText = "";
+
+        if (type == "radio") {
+            if ($("input[type='radio'][data-question='" + i + "']:checked")) {
+                answer = $("input[type='radio'][data-question='" + i + "']:checked").attr("data-answer");
+            }
+        }
+
+        if (type == "textbox") {
+			answer = stripHTML($("textarea[data-question='" + i + "']").val().trim());
+            answer = answer.substring(0, 2000);
+        }
+
+        if (type == "dropdown") {
+			answer = stripHTML($("select[data-question='" + i + "']").val().trim());
+        }
+
+        if (additionalTextBool) {
+
+			var additionalTextAnswer = stripHTML($(".modal_questionnaire_question_textarea_container[data-textarea='" + i + "'] textarea").val()).trim();
+
+            if (additionalTextAnswer.length > 0) {
+                additionalText = additionalTextAnswer;
+            }
+        }
+
+        var question = questionnaireQuestions[i].question;
+        if (question.length > 35) {
+            question = question.substring(0, 30).trim() + "...";
+        }
+
+        if (questionnaireQuestions[i].saveName == "refer") {
+            refer_friend = answer;
+        }
+        if (questionnaireQuestions[i].saveName == "support") {
+            support_score = answer
+            support_comment = parseTextAndStripPost(additionalText).substring(0, 800);
+        }
+        if (questionnaireQuestions[i].saveName == "value") {
+            value_score = answer
+            value_comment = parseTextAndStripPost(additionalText).substring(0, 800);
+        }
+        if (questionnaireQuestions[i].saveName == "ease") {
+            ease_score = answer
+            ease_comment = parseTextAndStripPost(additionalText);
+        }
+        if (questionnaireQuestions[i].saveName == "performance") {
+            performance_score = answer;
+            performance_comment = parseTextAndStripPost(additionalText).substring(0, 800);
+        }
+        if (questionnaireQuestions[i].saveName == "design") {
+            design_score = answer
+            design_comment = parseTextAndStripPost(additionalText).substring(0, 800);
+        }
+        if (questionnaireQuestions[i].saveName == "features") {
+            features_score = answer
+            features_comment = parseTextAndStripPost(additionalText).substring(0, 800);
+        }
+        if (questionnaireQuestions[i].saveName == "notes") {
+            notes = parseTextAndStripPost(answer).substring(0, 800);
+        }
+        
+
+    }
+
+    var theSource = "DASHBOARD";
+    if (location.href.includes("/account_subscription_cancel")) {
+        theSource = "CANCELSUB";
+    }
+
+
+	var data = {
+		storeId: storeId,
+        response: {
+            "refer_friend": refer_friend,
+            "support_score": support_score,
+            "support_comment": support_comment,
+            "value_score": value_score,
+            "value_comment": value_comment,
+            "ease_score": ease_score,
+            "ease_comment": ease_comment,
+            "performance_score": performance_score,
+            "performance_comment": performance_comment,
+            "features_score": features_score,
+            "features_comment": features_comment,
+            "design_score": design_score,
+            "design_comment": design_comment,
+            "date": "",
+            "score": 0,
+            "storeId": storeId,
+            "source": theSource,
+            "notes": notes
+        }
+    }
+    console.log(data);
+	data = JSON.stringify(data);
+
+	axiosPost('./services/user/Questionaire.svc/saveNps', data).then(function () {
+		hideById("modal_questionnaire_container2");
+		showById("modal_questionnaire_container3");
+	});
+}
