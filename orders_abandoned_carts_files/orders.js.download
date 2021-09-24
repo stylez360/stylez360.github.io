@@ -1,0 +1,226 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "ORDERS", uuid: beaverGuid });
+
+function grabAbandoned(id) {
+
+    $(".busy_wait_abandonedGraph, .busy_wait_abandonedCustomers").show();
+    $("#customers_abandoned_carts").hide();
+    axiosGet("/services/Orders.svc/LoadOrders?sk=" + id).then(function (data) {
+        var abandonedGraph = data.d || data;
+        console.log(abandonedGraph);
+        runBuildGraph(abandonedGraph);
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        $(".busy_wait_abandonedGraph_container").hide();
+        $(".abandoned_carts_graph_container").show();
+        chart.render();
+        listAbandoned(id);
+    });
+}
+
+
+var chart;
+function runBuildGraph(abandonedGraph) {
+
+    var recentAbandonedCarts = new Array();
+    var recentAbandonedCompleted = new Array();
+
+    $.each(abandonedGraph, function () {
+        var recentAbandoned = { label: this.timestamp, y: this.total_Abandoned };
+        var recentCompleted = { label: this.timestamp, y: this.total_completed };
+
+        recentAbandonedCarts.push(recentAbandoned);
+        recentAbandonedCompleted.push(recentCompleted);
+
+    });
+
+    chart = new CanvasJS.Chart("abandoned_carts_graph", {
+        animationEnabled: true,
+        colorSet: getCanvasShades(),
+        title: {
+            text: "Abandoned Cart Data (last 30 days)"
+        },
+        axisY: {
+            includeZero: false,
+            lineColor: "rgba(221,221,221,.6)",
+            gridColor: "rgba(221,221,221,.8)"
+        },
+        axisX: {
+            valueFormatString: "DD-MMM",
+            labelAngle: -50
+        },
+        toolTip: {
+            shared: true
+        },
+        legend: {
+            fontSize: 13
+        },
+        data: [
+        {
+            type: "splineArea",
+            showInLegend: true,
+            name: "Completed Carts",
+            dataPoints: recentAbandonedCompleted
+            },
+            {
+                type: "splineArea",
+                showInLegend: true,
+                name: "Abandoned Carts",
+                dataPoints: recentAbandonedCarts
+            }
+        ]
+    });
+    chart.render();
+}
+
+
+var startpg = 0;
+var limit = 10;
+var baseLimit = 10;
+
+var paginationTotalItems;
+var paginationPageItems;
+var paginationPageStart;
+var paginationShowAll;
+
+var abandonedCustomers = new Array();
+function listAbandoned(id) {
+    axiosGet("/services/Orders.svc/ListAbanOrders?sk=" + id).then(function (data) {
+        abandonedCustomers = data.d;
+        abandonedCustomers = abandonedCustomers.orders;
+
+        if (abandonedCustomers.length > 0) {
+
+            buildAbandonedTable(startpg, limit)
+
+        } else {
+            hideByClass("pagination");
+            showById("customers_abandoned_carts_zero");
+        }
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        hideByClass("busy_wait_abandonedCustomers");
+    });
+}
+
+
+function buildAbandonedTable(startpg, limit) {
+
+    document.querySelector("#customers_abandoned_carts tbody").innerHTML = "";
+
+    var abandonedCustomersItems = abandonedCustomers.slice(startpg, limit);
+
+    $.each(abandonedCustomersItems, function (i) {
+        var status = "";
+        var progress = "";
+
+        if (this.paymentmethod === "PREPOST") {
+            status = "Before Checkout";
+            progress = "width: 50%;";
+        } else {
+            var paymentMethod = this.paymentmethod;
+            if (paymentMethod === "PPCP") paymentMethod = "PAYPAL";
+            if (paymentMethod === "PPCPCARD") paymentMethod = "Card";
+            status = "Lost at " + paymentMethod;
+            progress = "width: 75%;";
+        }
+
+        status = (this.checkout_error != null ? this.checkout_error.code === "3001" ? "Payment Not Accepted" : status : status);
+        var feedbackMsg = (this.checkout_error != null ? this.checkout_error.feedback != null ? this.checkout_error.feedback : "--" : "--");
+        
+        $("#customers_abandoned_carts tbody").append('<tr>' +
+            '<td><a class="button button_primary" onclick="uc_getIndividualOrder(\'' + this.id + '\', true);">View</a></td>' +
+            '<td>' + this.email + '</td>' +
+            '<td>' + this.created + '</td>' +
+            '<td>' + this.order_total_netvat + '</td>' +
+            '<td>' + this.order_total_postage + '</td>' +
+            '<td>' + feedbackMsg + '</td>' +
+            '<td>' + status + '</td>' +
+            '<td>' +
+            '<div class="progress_bar progress_bar_nomb">' +
+            '<div class="progress_bar_active progress_bar_noarrow" style="' + progress + '"></div>' +
+            '</div>' +
+            '</td>' +
+            '</tr>');
+
+    });
+
+    $("#customers_abandoned_carts").show();
+
+    UpdatePriceStrings();
+
+    paginationDataType = "order";
+    paginationTotalItems = abandonedCustomers.length;
+    paginationPageItems = baseLimit;
+    paginationPageStart = startpg / baseLimit;
+    paginationPageStart = Math.ceil(paginationPageStart);
+    paginationShowAll = true;
+
+    removeByQuerySelector(".pagination[data-type='order'] .pagination_number_results");
+    removeByQuerySelector(".pagination[data-type='order'] .pagination_text_results");
+
+    pagination(paginationTotalItems, paginationPageItems, paginationPageStart, paginationShowAll);
+
+}
+
+function rebuildPaginationorder(paginationRebuildNumber) {
+    var startpg = parseInt(paginationRebuildNumber.getAttribute("data-pagnum"));
+
+    var startpg = startpg * baseLimit;
+
+    limit = startpg + 10;
+
+    buildAbandonedTable(startpg, limit);
+}
+
+
+function UpdatePriceStrings() {
+    // data-currency='true'
+    var elements = jQuery('*').filter(function () { return jQuery(this).data('currency') !== undefined; });
+
+    jQuery(elements).each(function (index) {
+
+        //if (jQuery(this).attr("placeholder") !== undefined)
+        //    jQuery(this).attr("placeholder", accounting.formatMoney(jQuery(this).attr("placeholder")));
+
+        if (jQuery(this).is("input"))
+            jQuery(this).val(accounting.formatMoney(jQuery(this).val(), currency_options));
+        else
+            jQuery(this).html(accounting.formatMoney(jQuery(this).html(), currency_options));
+    });
+
+}
+
+function buildAbandonedGraph(data) {
+
+}
+
+function getAbandonedExport(id, sk) {
+    axiosGet("/services/Orders.svc/abandonedtest?id=" + id + '&storeId=' + sk).then(function (data) {
+        var abandonedCustomers = data.d || data;
+        console.log(abandonedCustomers);
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+
+    });
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});

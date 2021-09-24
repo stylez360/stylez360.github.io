@@ -1,0 +1,150 @@
+﻿var beaver = new Logger({ storeId: storeId, prefix: "ORDERS-ABANDONED", uuid: beaverGuid });
+
+function exportAbandonedCarts() {
+
+    $("#export_abandoned_carts_complete").hide();
+
+    $(".modal_overlay, .modal_export_abandoned_carts").fadeIn();
+    $("body").addClass("body_modal_is_open");
+
+    $(".busy_wait_export_abandoned_carts, #export_abandoned_carts_busy_wait").show();
+    $(".busy_wait_export_abandoned_carts span").text("Building Export List");
+
+    setTimeout(function () {
+        exportAbandonedCartsBuild();
+    }, 1500);
+}
+
+
+
+
+function convertToCSV(objArray) {
+    var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+    var str = '';
+
+    for (var i = 0; i < array.length; i++) {
+        var line = '';
+        for (var index in array[i]) {
+            if (line != '') line += ','
+
+            line += array[i][index];
+        }
+
+        str += line + '\r\n';
+    }
+
+    return str;
+}
+
+function exportCSVFile(headers, items, fileTitle) {
+    console.log("Started Export")
+    if (headers) {
+        items.unshift(headers);
+    }
+
+    // Convert Object to JSON
+    var jsonObject = JSON.stringify(items);
+
+    var csv = this.convertToCSV(jsonObject);
+
+    var exportedFilenmae = fileTitle + '.csv' || 'export.csv';
+
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, exportedFilenmae);
+    } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", exportedFilenmae);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
+    setTimeout(function () {
+        $("#export_abandoned_carts_busy_wait").hide();
+        $("#export_abandoned_carts_complete").show();
+    }, 1500);
+}
+
+function exportAbandonedCartsBuild() {
+
+    var headers = {
+        customer: "Name",
+        email: "Email Address",
+        date: "Date", 
+        total: "Order Total",
+        shipping: "Shipping Total"
+    };
+
+    var exportAbandonedCarts = [];
+
+    $.each(abandonedCustomers, function () {
+
+        var customerId = this.customerId;
+
+        var customerName = this.customer.replace(/,/g, '');
+        var orderTotal = this.order_total_netvat.replace(/,/g, '.');
+        var shippingTotal = this.order_total_postage.replace(/,/g, '.');
+
+        var emailaddress = "";
+        var item = {
+            name: this.customer,
+            email: this.email,
+            date: this.created,
+            total: orderTotal,
+            shipping: shippingTotal
+        };
+        exportAbandonedCarts.push(item);
+    });
+
+    var itemsFormatted = [];
+    // format the data
+    exportAbandonedCarts.forEach(function (item) {
+        itemsFormatted.push({
+            name: item.name,
+            email: item.email,
+            date: item.date,
+            total: item.total,
+            shipping: item.shipping
+        });
+    });
+
+    var fileTitle = 'Abandoned Carts'; // or 'my-unique-title'
+
+    $(".busy_wait_export_abandoned_carts span").text("Exporting Abandoned Carts");
+    exportCSVFile(headers, itemsFormatted, fileTitle); // call the exportCSVFile() function to process the JSON and trigger the download
+}
+
+function exportAdditionalDetails(orderId) {
+    axiosGet('../services/orders/CustomerOrder.svc/getOrder?storeId=' + storeId + '&orderId=' + orderId).then(function (data) {
+        var ucIndividualOrders = data.d || data;
+    }).catch(function (e) {
+        typeof e === "object" ? beaver.error(JSON.stringify(e)) : typeof e === "string" ? beaver.error(e) : beaver.error(JSON.stringify(e))
+    }).then(function () {
+        return typeof ucIndividualOrders !== "undefined" ? ucIndividualOrders.email : "";
+    });
+}
+
+ready(function () {
+    window.onerror = function (message, source, lineno, colno, error) {
+        var string = message.toLowerCase();
+        var substring = "script error";
+        if (string.indexOf(substring) === -1) {
+            var builtMsg = [
+                'Message: ' + message,
+                'URL: ' + source,
+                'Line: ' + lineno,
+                'Column: ' + colno,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            beaver.error("", builtMsg);
+        }
+        return false;
+    };
+});
