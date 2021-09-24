@@ -1,0 +1,349 @@
+﻿
+.busy_wait_settings_customer{
+    display: block;
+}
+
+#settings_customer_container, #wishlist_not_available, #customers_top_search_bar, #customers_filters_outer_panel{
+    display: none;
+}
+
+.guest_checkout{
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 20px;
+}
+
+#wishlist_container{
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 20px;
+}
+/* Top of Page */
+
+.manage_customers_list_top{
+    border-bottom: 5px solid #3bf10d;
+}
+
+.quicksearch_results_container{
+    float: left;
+}
+
+#btnAddNewCustomer{
+    float: right;
+}
+
+/* Right Side - Page Views */
+
+.busy_wait_customers_filters{
+    display: block;
+}
+
+#customers_filters_panel{
+    display: none;
+}
+
+.customer_lists_types .checkbox_container{
+    margin-bottom: 0;
+}
+
+.customer_lists_types input{
+    height: 30px !important;
+}
+
+
+/* Table */
+
+.zero_customers_found{
+    display: none;
+}
+
+.list_table_hidden{
+    display: none !important;
+}
+
+#customers_table{
+    display: none;
+}
+
+td.list_table_name, td.list_table_lname, td.list_table_cname{
+    max-width: 135px;
+    word-break: break-word;
+    text-transform: capitalize;
+}
+
+td.list_table_email {
+    max-width: 200px;
+    word-break: break-all;
+}
+
+.customer_list_item_customer div{
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+.customer_list_item_customer div:first-child{
+    margin-top: 0;
+}
+/* Customer Information Panels */
+
+.customers_information{
+    display: none;
+}
+
+.list_table_status span{
+    color: #FFF;
+    display: inline-block;
+    padding: 0px 5px;
+    line-height: 20px;
+    font-size: 0.7rem;
+    border-radius: 4px;
+}
+
+.list_table_status_open span{ background-color: #5DC548; }
+.list_table_status_closed span{ background-color: #404041; }
+.list_table_status_problem span{ background-color: #ea1636; }
+
+.list_table_paymentmethod img {
+    max-width: 40px;
+    max-height: 40px;
+}
+
+
+#customerV_addresses{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+
+.customers_information_address_item, .customers_information_address_item2{
+    float: left;
+    width: 100%;
+    max-width: 300px;
+    height: 250px;
+    margin-bottom: 10px;
+    padding: 10px;
+    overflow: hidden;
+    border: 1px solid #e4e4e4;
+}
+
+.customers_information_address_item2{
+    height: auto;
+    margin-right: 0;
+}
+
+.customers_information_address_item_company, .customers_information_address_item_name{
+    line-height: 20px;
+    font-weight: bold;
+    color: #20b7e6;
+    font-size: 1rem;
+}
+
+.customers_information_address_item_name{ 
+    color: #212121; 
+    font-size: 0.9rem;
+}
+
+.customers_information_address_item_location{
+    margin-top: 10px;
+    line-height: 20px;
+}
+
+.customer_list_icon_delete{
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.customer_list_icon_delete:hover{
+    background-color: #bb112b;
+}
+
+
+ /* Customer Individual View Page */
+
+ #customerV_details_container, #customerV_addresses_container, #customerV_orders_table_container, #customerV_abandoned_table_container, .customerV_orderCount, #orders_customers_view_zero{
+     display: none;
+ }
+
+ .busy_wait_customer_details, .busy_wait_customer_addresses, .busy_wait_customerV_orders, .busy_wait_customerV_abandoned, .busy_wait_customerV_orders_line{
+     display: block;
+ }
+ 
+ .busy_wait_customerV_orders_line{
+     margin-top: 10px;
+ }
+
+ #customerV_image{
+     border-radius: 50%;
+     width: 75px;
+     height: 75px;
+     margin-top: 10px;
+     margin-left: 10px;
+     float: right;
+ }
+
+ #customerV_name{
+     margin-top: 20px;
+ }
+
+ #customerV_email{
+     margin-top: 10px;
+     display: block;
+ }
+
+ .customerV_type{
+     margin-top: 10px;
+ }
+
+ .customerV_orderCount{
+     margin: 10px 0;
+ }
+
+ .customerV_address{
+     line-height: 20px;
+     margin-bottom: 10px;
+     border-bottom: 1px dashed #ddd;
+     padding-bottom: 10px;
+ }
+
+ .customerV_address:last-child{
+     margin-bottom: 0;
+     padding-bottom: 0;
+     border-bottom: none;
+
+ }
+
+ .customerV_address p{
+    -webkit-margin-before: 0em;
+    -webkit-margin-after: 0em;
+ }
+
+.customerV_address p::after{
+    content: ',';
+    display: inline-block;
+}
+
+.customerV_address p:last-child::after{
+    content: '.';
+
+}
+
+
+
+.orders_customers_view_info_anon .customers_allow_anon{
+    color: #FFF;
+    position: relative;
+}
+
+.orders_customers_view_info_anon .customers_allow_anon::before{
+    content: '#####';
+    display: inline-block;
+    color: #404041;
+    position: absolute;
+    left: 0;
+}
+
+
+
+/* Stock Requests */
+
+.busy_wait_customer_stock_requests{
+    display: block;
+}
+
+#customer_stock_requests_error, #customer_stock_requests_zero, #customer_stock_requests_list{
+    display: none;
+}
+
+.stock_requests_list_table_image{
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.stock_requests_list_table_button{
+    white-space: nowrap;
+}
+
+.stock_requests_item_delete{
+    background-color: #ea1636;
+    color: #FFF;
+    height: 20px;
+    line-height: 20px !important;
+    width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.stock_requests_item_delete:hover{
+    background-color: #bb112b;
+}
+
+.modal_stock_request_item_comment_container{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.modal_stock_request_item_comment_container_item{
+    display: flex;
+    flex-wrap: nowrap;
+    line-height: 25px;
+}
+
+.modal_stock_request_item_comment_container_item strong{
+    width: 100px;
+}
+
+#modal_stock_request_item_comment_comment{
+    background-color: #f5f5f7;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+
+/* Actions Panel */
+
+#customer_view_action_panel{
+    padding: 0;
+    display: none;
+}
+
+#customer_view_action_panel h2{
+    padding: 20px 20px 0px 20px;
+}
+
+.customer_view_action_item{
+    display: flex;
+    align-items: center;
+    padding: 0px 20px;
+    line-height: 35px;
+    color: #404041;
+    cursor: pointer;
+    position: relative;
+}
+
+.customer_view_action_item i{
+    width: 30px;
+    min-width: 30px;
+}
+
+.customer_view_action_item:hover{
+    background-color: #f5f5f7;
+}
+
+
+/* Wishlists */
+
+.busy_wait_customer_wishlist{
+    display: block;
+}
+
+#customer_wishlist_error, #customer_wishlist_zero, #customer_wishlist_list{
+    display: none;
+}

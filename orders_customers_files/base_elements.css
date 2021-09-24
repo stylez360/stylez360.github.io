@@ -1,0 +1,269 @@
+﻿
+
+.ridge_color{ 
+    color: var(--ridgePrimary) !important; 
+}
+
+.button_ridge_primary{ 
+    background-color: var(--ridgePrimary);
+    border: 1px solid var(--ridgePrimary);
+    color: #FFF; 
+}
+
+.button_ridge_primary:hover{ 
+    background-color: var(--ridgeSecondary);
+    border-color: var(--ridgeSecondary);
+    color: #FFF;
+}
+
+.button_ridge_white{ 
+    background-color: #FFF; 
+    border: 1px solid #ddd; 
+    color: var(--ridgePrimary); 
+}
+
+.button_ridge_white:hover{ 
+    background-color: var(--ridgePrimary);
+    border-color: var(--ridgePrimary);
+    color: #FFF; 
+}
+
+/* ============================== */
+/* Dropzone ===================== */
+/* ============================== */
+
+.image_empty, .image_container, #drop-target, #drop-target2 {
+    border: 3px dashed var(--primary) !important;
+}
+
+.dz-message{
+    color: var(--primary);
+}
+
+#drop-target.dragover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.image_empty:hover, #drop-target.dragover, #drop-target2.dragover{
+    border-color: var(--secondary) !important;
+}
+
+#dropzoneLimit{
+    display: none;
+}
+
+
+/* ============================== */
+/* Background Pink ============== */
+/* ============================== */
+.button_primary, .background_primary, header, .header_menu_button, .header_account_menu a:hover,
+.header_account_button_info.header_account_button_info_active, .nav_link_container_update,
+a.nav_link_container:hover, .nav_link_container_back:hover, .nav_footer_bottom, .ui-slider-range,
+.page_navigation_box_recent, .checkbox_container input:checked + label:after, .main_search_item:hover,
+.main_search_item_toggle, .panel_advanced_tag, .disabledVAT_item, #hp_new_orders_container.hp_new_active i,
+.support_info_nav .support_info_nav_item_selected, .dropdown_menu a:hover, .order_stages_item.order_stages_item_complete,
+.button_white:hover, .theme_editor_banners_key span.theme_editor_banners_key_active::before, .question_mark_tool_tip_span, .question_mark_tool_tip_span_bot,
+.question_mark_tool_tip, .background_primary_with_hover, .theme_editor_navigation_item:hover, .background_primary_with_hover_border,
+.pagination_number_results a:hover, .pagination_number_results a.pagination_number_active, .pagination_dropdown i:hover, .pagination_dropdown.pagination_dropdown_menu_active i, 
+.question_mark_tool_tip_span_middle, .shipping_label_example_item.shipping_label_example_item_selected::before, .shipping_label_example_item:hover::before, 
+.category_custom_menu a:hover, #panel_trial_new_features_list a i, .modal_featured_products_toggle_item_selected, .dashboard_quick_links_item.dashboard_quick_links_item_has_dropdown .dashboard_quick_links_item_dropdown_menu a:hover,
+.nav_item.active .nav_item_link, #welcome_header, .theme_editor_navigation_tabs_item.theme_editor_navigation_tabs_item_selected, 
+#theme_steps_modal_theme_editor_getting_started_theme_carousel .owl-nav .owl-prev, #theme_steps_modal_theme_editor_getting_started_theme_carousel .owl-nav .owl-next,
+.search_domain_results_tabs_item_selected, .search_domain_results_tabs_item:hover, .checkoutforms_filetype_item_selected{
+    background-color:  var(--primary);
+}
+
+.button_white:hover, .theme_editor_navigation_item:hover{
+    color: #FFF;
+}
+
+.button_is_active{
+    background-color: var(--primary) !important;
+    color: #FFF !important;
+    border-color: var(--primary) !important;
+}
+
+::selection {
+    background: var(--primary);
+}
+::-moz-selection {
+    background: var(--primary);
+}
+
+.orders_address_left_item_active, .background_primary_important, .category_item_selected,
+.tab_nav_item.selected, .category_tree_item_menu_checkbox_active, .nav_item.nav_parent_active::before,
+.iframe_browser_header_responsive_menu_item_active{
+    background-color: var(--primary) !important;
+}
+
+
+
+/* ============================== */
+/* Background Dark Pink ========= */
+/* ============================== */
+.button_primary:hover, .header_notification_item:hover, .header_account:hover .header_account_button,
+.header_account_active .header_account_button, .main_search_item:hover i, .main_search_item_toggle i, .background_secondary,
+.question_mark_tool_tip:hover, .background_primary_with_hover:hover, .background_primary_with_hover_border:hover, .welcome_header_info_menu_item:hover,
+#theme_steps_modal_theme_editor_getting_started_theme_carousel .owl-nav .owl-prev:hover, #theme_steps_modal_theme_editor_getting_started_theme_carousel .owl-nav .owl-next:hover{
+    background-color: var(--secondary);
+}
+
+/* ============================== */
+/* Color Pink =================== */
+/* ============================== */
+.color_primary{ 
+    color: var(--primary) !important; 
+}
+
+.link_color_primary, .nav_notification, .nav_logo span, 
+a.nav_link_container:hover .nav_link_container_update, .nav_footer_more_menu, .nav_footer_more_menu a:hover,
+#breadcrumbs li:last-of-type a, .page_navigation_box i, .hidden_section_title, #appstore_main_nav a:hover, 
+.full_width_icons_pink a i, .full_width_icons a i, .design_language_token_main_live, .your_language_packs_title,
+.order_view_products_breakdown_final, .activity_feed_item_header_left_type, .quicksearch_results_message_number strong, .quicksearch_results_item_text2,
+#welcome_header_info_button:hover, #welcome_header_info_button.welcome_header_info_button_active{ 
+    color: var(--primary); 
+}
+
+#freewebstore_logo1, #freewebstore_logo2, #freewebstore_logo3, #ridge_logo, #ridge_logo1, #ridge_logo2, .background_primary_fill, .welcome_createstore_icon_fill{ 
+    fill: var(--primary); 
+}
+
+.welcome_createstore_icon_stroke{
+    stroke: var(--primary); 
+}
+
+/* ============================== */
+/* Color Dark Pink ============== */
+/* ============================== */
+
+.design_language_token_translations_text_changed{
+    color: var(--secondary);
+}
+
+/* ============================== */
+/* Border Pink ================== */
+/* ============================== */
+
+/* All Border */
+.header_notification_item_pulse, .background_primary_with_hover_border{
+    border: 1px solid var(--primary);
+}
+/* Bottom Border */
+header, .header_menu_button, .dropdown_menu a:hover{
+    border-bottom: 1px solid var(--primary);
+}
+/* Border Color */
+.button_primary, .header_account_button_info.header_account_button_info_active, .input_container input:focus, .input_container select:focus, .input_container textarea:focus,
+.checkbox_container input:checked + label:after, .slides_item.slides_item_active, .theme_editor_banners_key span.theme_editor_banners_key_active::before, #theme_editor_menu,
+.theme_editor_navigation_item:hover, .pagination_number_results a:hover, .pagination_number_results a.pagination_number_active, .pagination_dropdown i:hover, .pagination_dropdown.pagination_dropdown_menu_active i,
+.add_apps_box_panel, .page_navigation_box.page_navigation_box_add_apps, .support_cp_updates_section .support_cp_updates_section_info_item, #prod_edit_add_more_apps,
+.shipping_label_example_item.shipping_label_example_item_selected, .shipping_label_example_item.shipping_label_example_item_selected::before, .main_category_container::before, 
+.main_category_container::after, .category_container::before, .category_container::after, .category_custom_menu a:hover,
+#printing_page_note.printing_page_note_highlight, .modal_featured_products_toggle_item_selected, .stock_request_template_layout_item.stock_request_template_layout_item_selected,
+.faqs_section_group_summary:focus, .faqs_section_group_qanda_answer:focus{
+    border-color: var(--primary);
+}
+
+.category_item_selected, .theme_editor_navigation_tabs_item_selected, .category_tree_item_menu_checkbox_active, .checkoutforms_filetype_item_selected{
+    border-color: var(--primary) !important;
+}
+
+.border_bottom_5{
+    border-bottom: 5px solid var(--primary);
+}
+
+.border_top_5{
+    border-top: 5px solid var(--primary);
+}
+
+.border_left_3{
+    border-left: 3px solid var(--primary) !important;
+}
+
+.editor_header_nav_item_dropdown_item.editor_header_nav_item_dropdown_item_selected{
+    border-left: 5px solid var(--primary) !important;
+}
+
+.question_mark_tool_tip_span::after, .question_mark_tool_tip_span_middle::after, .question_mark_tool_tip_span_left::after{
+    border-bottom: 10px solid var(--primary);
+}
+
+.question_mark_tool_tip_span_bot::after{
+    border-top: 10px solid var(--primary);
+}
+
+.order_stages_item.order_stages_item_complete::after{
+    border-top-color: var(--primary);
+}
+
+/* ============================== */
+/* Border Dark Pink ============= */
+/* ============================== */
+.button_primary:hover, .background_primary_with_hover_border:hover{
+    border-color: var(--secondary);
+}
+
+.background_yellow_with_hover {
+    background-color: #FFB432;
+}
+
+.background_yellow_with_hover:hover {
+    background-color: #db9a27;
+}
+
+.background_red_with_hover {
+    background-color: #ea1636;
+}
+
+.background_red_with_hover:hover {
+    background-color: #bb112b;
+}
+
+.action_disabled {
+    background-color: #d2d2d2;
+    pointer-events: none;
+}
+
+.design_language_token_translations {
+    border-left: 3px solid var(--secondary);
+}
+
+
+
+
+/* ============================== */
+/* Media Queries ================ */
+/* ============================== */
+
+@media only screen and (min-width:900px){ 
+
+    .order_stages_item.order_stages_item_complete::after{
+        border-left-color: var(--primary);
+        border-top-color: transparent;
+    }
+
+}
+
+
+/* IE Banner */
+#ie_banner {
+    background-color: var(--primary);
+    height: 25px;
+    padding: 20px;
+    display: none;
+}
+
+#ie_banner p {
+    margin-top: -10px;
+    color: #FFF;
+}
+
+.alternative_link {
+    display: inline-block;
+    background-color: #3a5eca;
+    color: #FFF;
+    text-align: center;
+    line-height: 25px;
+    padding: 0 20px;
+    border-radius: 4px;
+}
